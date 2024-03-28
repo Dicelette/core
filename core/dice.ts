@@ -95,7 +95,7 @@ export function roll(dice: string): Resultat | undefined{
  * @param {number} total 
  * @returns 
  */
-function calculator(sign: Sign, value: number, total: number): number {
+export function calculator(sign: Sign, value: number, total: number): number {
 	if (sign === "^") sign = "**";
 	return evaluate(`${total} ${sign} ${value}`);
 }
