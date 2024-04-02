@@ -14,7 +14,7 @@ The two are used in the bot and documentation.
   - **max**: `number` : The maximum value of the statistic
   - **min**: `number` : The minimum value of the statistic
 
-# Interface ([index.d.ts](core/index.d.ts))
+# Interface ([index.d.ts](core/@types/index.d.ts))
 ## Compare
 
 - **sign**: ``"<"`` \| ``">"`` \| ``">="`` \| ``"<="`` \| ``"="`` \| ``"!="`` \| ``"=="``
@@ -42,22 +42,16 @@ The two are used in the bot and documentation.
 ### Example
 
 ```ts
-diceType: 1d20+{{$}}>=20
-comparator: {
-	sign: ">="
-	value: 20
-	formula: +$
-}
-The dice throw will be 1d20 + statistique that must be >= 20
+diceType: "1d20+{{$}}>=20"
 ```
+The dice throw will be 1d20 + statistique that must be less than 20
 
 ```ts
-diceType: 1d20<=$
-The dice throw will be 1d20 that must be <= statistique
+diceType: "1d20<=$"
 ```
+The dice throw will be 1d20 that must be less than the statistic
 
 ### Properties
-
 - `Optional` **charName**: `boolean` 
 Allow to force the user to choose a name for them characters
 
