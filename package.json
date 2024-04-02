@@ -1,10 +1,10 @@
 {
   "name": "@dicelette/core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Core library for the Dicelette Discord bot",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dicelette/core.git"
+    "url": "git+https://github.com/Dicelette/core.git"
   },
   "type": "commonjs",
   "main": "./dist/index.js",
@@ -16,8 +16,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsup",
-    "prepublish": "npm run build",
-    "publish": "npm publish"
+    "prepublish": "npm run build"
   },
   "keywords": [
     "discord",
