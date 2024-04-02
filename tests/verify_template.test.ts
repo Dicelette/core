@@ -1,5 +1,5 @@
 // FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
-import * as core from "../core";
+import * as core from "..";
 
 
 describe("verify_template", () => {

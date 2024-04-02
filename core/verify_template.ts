@@ -3,7 +3,7 @@ import { evaluate } from "mathjs";
 import {Random } from "random-js";
 import removeAccents from "remove-accents";
 
-import { Statistic, StatisticalTemplate } from ".";
+import { Statistic, StatisticalTemplate } from "..";
 import { roll } from "./dice";
 import { escapeRegex, replaceFormulaInDice } from "./utils";
 

@@ -7,7 +7,7 @@
     "url": "https://github.com/Dicelette/core.git"
   },
   "types": "@types",
-  "main": "core/index.ts",
+  "main": "index.ts",
   "scripts": {
     "test": "jest"
   },
