@@ -2,7 +2,7 @@
 import { DiceRoller } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 
-import { Compare, Modifier, Resultat, Sign } from "..";
+import { Compare, Modifier, Resultat, Sign } from ".";
 
 export const COMMENT_REGEX = /\s+(#|\/{2}|\[|\/\*)(.*)/;
 const SIGN_REGEX =/[><=!]+/;
