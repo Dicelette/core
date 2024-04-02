@@ -3,7 +3,6 @@
         "target": "ESNext",
         "module": "commonjs",
         "rootDir": "./",
-        "outDir": "./dist/",
         "strict": true,
         "moduleResolution": "node",
         "importHelpers": true,
@@ -16,7 +15,6 @@
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "removeComments": true,
-        
         "typeRoots": [
             "node_modules/@types"
         ],
