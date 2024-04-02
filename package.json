@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/Dicelette/core.git"
   },
-  "type": "module",
+  "type": "commonjs",
   "main": "index.ts",
   "scripts": {
     "test": "jest"
