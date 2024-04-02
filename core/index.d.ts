@@ -29,18 +29,10 @@ export type Statistic = {
 
 /**
  * @example
- * diceType: 1d20
- * comparator: {
- * 	sign: ">="
- * 	value: 20
- * 	formula: +$
- * }
+ * diceType: 1d20+$>=20
  * The dice throw will be 1d20 + statistique that must be >= 20
  * @example
- * diceType: 1d20
- * comparator: {
- * 	sign: "<="
- * }
+ * diceType: 1d20<=$
  * The dice throw will be 1d20 that must be <= statistique
  */
 export interface StatisticalTemplate {

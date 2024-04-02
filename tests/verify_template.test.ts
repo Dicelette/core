@@ -1,5 +1,5 @@
 // FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
-import { StatisticalTemplate } from "../core/interface";
+import { StatisticalTemplate } from "../core/";
 import { generateStatsDice, replaceFormulaInDice } from "../core/utils";
 import { diceRandomParse,evalCombinaison, generateRandomStat,testCombinaison, testDamageRoll, verifyTemplateValue } from "../core/verify_template";
 
