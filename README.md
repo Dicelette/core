@@ -14,7 +14,7 @@ The two are used in the bot and documentation.
   - **max**: `number` : The maximum value of the statistic
   - **min**: `number` : The minimum value of the statistic
 
-# Interface ([index.d.ts](core/@types/index.d.ts))
+# Interface ([index.d.ts](@types/index.d.ts))
 ## Compare
 
 - **sign**: ``"<"`` \| ``">"`` \| ``">="`` \| ``"<="`` \| ``"="`` \| ``"!="`` \| ``"=="``
