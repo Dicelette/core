@@ -1,21 +1,20 @@
 // FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
-import { StatisticalTemplate } from "../core/";
-import { generateStatsDice, replaceFormulaInDice } from "../core/utils";
-import { diceRandomParse,evalCombinaison, generateRandomStat,testCombinaison, testDamageRoll, verifyTemplateValue } from "../core/verify_template";
+import * as core from "../core";
+
 
 describe("verify_template", () => {
 	describe("evalCombinaison", () => {
 		it("should evaluate the combination correctly", () => {
 			const combinaison = { stat1: "stat2 + 3" };
 			const stats = { stat2: 2 };
-			const result = evalCombinaison(combinaison, stats);
+			const result = core.evalCombinaison(combinaison, stats);
 			expect(result).toEqual({ stat1: 5 });
 		});
 
 		it("should throw an error for invalid formula", () => {
 			const combinaison = { stat1: "stat2 + " };
 			const stats = { stat2: 2 };
-			expect(() => evalCombinaison(combinaison, stats)).toThrow();
+			expect(() => core.evalCombinaison(combinaison, stats)).toThrow();
 		});
 	});
 
@@ -25,7 +24,7 @@ describe("verify_template", () => {
 			const total = 100;
 			const max = 50;
 			const min = 10;
-			const result = generateRandomStat(total, max, min);
+			const result = core.generateRandomStat(total, max, min);
 			expect(result).toBeGreaterThanOrEqual(min);
 			expect(result).toBeLessThanOrEqual(max);
 			expect(result).toBeLessThanOrEqual(total);
@@ -34,7 +33,7 @@ describe("verify_template", () => {
 		it ("should verify with no max", () => {
 			const total = 100;
 			const min = 1;
-			const result = generateRandomStat(total, undefined, min);
+			const result = core.generateRandomStat(total, undefined, min);
 			expect(result).toBeGreaterThanOrEqual(min);
 			expect(result).toBeLessThanOrEqual(total);
 		});
@@ -42,14 +41,14 @@ describe("verify_template", () => {
 		it ("should verify with no min", () => {
 			const total = 100;
 			const max = 99;
-			const result = generateRandomStat(total, max, undefined);
+			const result = core.generateRandomStat(total, max, undefined);
 			expect(result).toBeGreaterThanOrEqual(0);
 			expect(result).toBeLessThanOrEqual(max);
 		});
 
 		it ("should verify with no min and max", () => {
 			const total = 100;
-			const result = generateRandomStat(total, undefined, undefined);
+			const result = core.generateRandomStat(total, undefined, undefined);
 			expect(result).toBeGreaterThanOrEqual(0);
 			expect(result).toBeLessThanOrEqual(total);
 		});
@@ -57,13 +56,13 @@ describe("verify_template", () => {
 		it ("should verify with no total", () => {
 			const max = 99;
 			const min = 1;
-			const result = generateRandomStat(undefined, max, min);
+			const result = core.generateRandomStat(undefined, max, min);
 			expect(result).toBeGreaterThanOrEqual(min);
 			expect(result).toBeLessThanOrEqual(max);
 		});
 
 		it ("should verify with no total, min and max", () => {
-			const result = generateRandomStat(undefined, undefined, undefined);
+			const result = core.generateRandomStat(undefined, undefined, undefined);
 			expect(result).toBeGreaterThanOrEqual(0);
 			expect(result).toBeLessThanOrEqual(100);
 		});
@@ -79,7 +78,7 @@ describe("verify_template", () => {
 					"piercing": "1d6+2",
 				}
 			};
-			const result = verifyTemplateValue(template);
+			const result = core.verifyTemplateValue(template);
 			expect(result).toEqual(template);
 		});
 
@@ -90,7 +89,7 @@ describe("verify_template", () => {
 					"piercing": "1d6+2>20",
 				}
 			};
-			const result = verifyTemplateValue(template);
+			const result = core.verifyTemplateValue(template);
 			expect(result).toEqual(template);
 		});
 
@@ -99,74 +98,74 @@ describe("verify_template", () => {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "invalid",
 			};
-			expect(() => verifyTemplateValue(template)).toThrow();
+			expect(() => core.verifyTemplateValue(template)).toThrow();
 		});
 	});
 
 	describe("combinaison", () => {
 		// Add more tests for different scenarios
 		it("should throw an error because they are no stat2", () => {
-			const template: StatisticalTemplate = {
+			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6",
 			};
-			expect(() => testCombinaison(template)).toThrow();
+			expect(() => core.testCombinaison(template)).toThrow();
 		});
 		it("validate formula for dice", () => {
-			const template: StatisticalTemplate = {
+			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6+{{$}}>20",
 			};
-			expect(() => testCombinaison(template)).toThrow();
+			expect(() => core.testCombinaison(template)).toThrow();
 		});
 		it("validate formula for dice", () => {
-			const template: StatisticalTemplate = {
+			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6+5>{{$}}",
 			};
-			expect(() => testCombinaison(template)).toThrow();
+			expect(() => core.testCombinaison(template)).toThrow();
 		});
 		
 
 		
 		
 		it("create combinaison dice formula for skill dice with statistic", () => {
-			const testTemplate: StatisticalTemplate = {
+			const testTemplate: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1 } },
 				diceType: "1d20",
 				damage: {
 					"piercing": "1d6 + stat1>stat1",
 				}
 			};
-			const expectedFormula = diceRandomParse("1d20 + {{ceil((stat1-10)/2)}}>stat1", testTemplate);
+			const expectedFormula = core.diceRandomParse("1d20 + {{ceil((stat1-10)/2)}}>stat1", testTemplate);
 			expect(expectedFormula).toEqual(expectedFormula);
 		});
 		it("Test a roll with a combinaison on the dice", () => {
-			const template: StatisticalTemplate = {
+			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "1d20",
 				damage: {
 					"piercing": "1d20stat1*2>stat1",
 				}
 			};
-			expect(() => testDamageRoll(template)).not.toThrow();
+			expect(() => core.testDamageRoll(template)).not.toThrow();
 		});
 		it("Test a roll with a combinaison on the dice and accents", () => {
-			const template: StatisticalTemplate = {
+			const template: core.StatisticalTemplate = {
 				statistics: { éducation: { max: 10, min: 1 } },
 				diceType: "1d20",
 				damage: {
 					"piercing": "1déducation>20",
 				}
 			};
-			expect(() => testDamageRoll(template)).not.toThrow();
+			expect(() => core.testDamageRoll(template)).not.toThrow();
 		});
 	});
 	describe("roll_string_creation", () => {
 		it("creating roll dice with formula", () => {
 			const dice = "1d20+$>20";
 			const userStat = 10;
-			const calculation = replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
+			const calculation = core.replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
 			const formula = `${calculation} coucou`;
 			const expectedFormula = "1d20+10>20 coucou";
 			expect(formula).toEqual(expectedFormula);
@@ -174,7 +173,7 @@ describe("verify_template", () => {
 		it("creating roll dice with success formula", () => {
 			const dice = "1d20+5>{{$*2}}";
 			const userStat = 10;
-			const calculation = replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
+			const calculation = core.replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
 			const formula = `${calculation} coucou`;
 			const expectedFormula = "1d20+5>20 coucou";
 			expect(formula).toEqual(expectedFormula);
@@ -182,7 +181,7 @@ describe("verify_template", () => {
 		it("creating roll dice with complicated formula", () => {
 			const dice = "1d20+{{ceil((10-$)/2)}}>20";
 			const userStat = 5;
-			const calculation = replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
+			const calculation = core.replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
 			const formula = `${calculation} coucou`;
 			const expectedFormula = "1d20+3>20 coucou";
 			expect(formula).toEqual(expectedFormula);
@@ -190,7 +189,7 @@ describe("verify_template", () => {
 		it("creating roll dice with negative formula", () => {
 			const dice = "1d20+{{ceil(($-10)/2)}}>20";
 			const userStat = 5;
-			const calculation = replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
+			const calculation = core.replaceFormulaInDice(dice.replaceAll("$", userStat.toString()));
 			const expectedFormula = "1d20-2>20";
 			expect(calculation).toEqual(expectedFormula);
 		});
@@ -202,7 +201,7 @@ describe("verify_template", () => {
 				stat1: 5,
 				stat2: 10
 			};
-			dice = generateStatsDice(dice, userStat);
+			dice = core.generateStatsDice(dice, userStat);
 			const formula = `${dice} cc`;
 			const expectedFormula = "1d5>20 cc";
 			expect(formula).toEqual(expectedFormula);
@@ -213,7 +212,7 @@ describe("verify_template", () => {
 				stat1: 10,
 				stat2: 10
 			};
-			dice = generateStatsDice(dice, userStat);
+			dice = core.generateStatsDice(dice, userStat);
 			const formula = `${dice} cc`;
 			const expectedFormula = "1d20+0>20 cc";
 			expect(formula).toEqual(expectedFormula);
@@ -224,7 +223,7 @@ describe("verify_template", () => {
 				stat1: 5,
 				stat2: 10
 			};
-			dice = generateStatsDice(dice, userStat);
+			dice = core.generateStatsDice(dice, userStat);
 			const formula = `${dice} cc`;
 			const expectedFormula = "1d20+5>5 cc";
 			expect(formula).toEqual(expectedFormula);
@@ -235,7 +234,7 @@ describe("verify_template", () => {
 				stat1: 5,
 				stat2: 10
 			};
-			dice = generateStatsDice(dice, userStat);
+			dice = core.generateStatsDice(dice, userStat);
 			const formula = `${dice} cc`;
 			const expectedFormula = "1d20+5>3 cc";
 			expect(formula).toEqual(expectedFormula);
