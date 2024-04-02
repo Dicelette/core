@@ -22,9 +22,6 @@
         "sourceMap": false,
         "baseUrl": "./"
     },
-    "files": [
-        "src/index.ts"
-    ],
     "include": [
         "./**/*.ts"
     ],

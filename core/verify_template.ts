@@ -3,8 +3,8 @@ import { evaluate } from "mathjs";
 import {Random } from "random-js";
 import removeAccents from "remove-accents";
 
+import { Statistic, StatisticalTemplate } from ".";
 import { roll } from "./dice";
-import { Statistic, StatisticalTemplate } from "./interface";
 import { escapeRegex, replaceFormulaInDice } from "./utils";
 
 /**

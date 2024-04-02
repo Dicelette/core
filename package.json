@@ -1,14 +1,24 @@
 {
   "name": "@dicelette/core",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Core library for the Dicelette Discord bot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dicelette/core.git"
+  },
+  "types": "index.d.ts",
   "scripts": {
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "discord",
+    "roll",
+    "library",
+    "bot",
+    "typescript"
+  ],
+  "author": "Mara-Li",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.5.0",
     "@lisandra-dev/eslint-config": "^1.1.4",
