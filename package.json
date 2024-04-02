@@ -8,8 +8,7 @@
   },
   "types": "index.d.ts",
   "scripts": {
-    "test": "jest",
-    "doc": "typedoc --plugin typedoc-plugin-markdown --out docs core/**/*.ts --hideInPageTOC true --hideBreadcrumbs true"
+    "test": "jest"
   },
   "keywords": [
     "discord",
@@ -31,8 +30,5 @@
     "remove-accents": "^0.5.0",
     "ts-dedent": "^2.2.0"
   },
-  "devDependencies": {
-    "typedoc": "^0.25.12",
-    "typedoc-plugin-markdown": "^3.17.1"
-  }
+  "devDependencies": {}
 }
