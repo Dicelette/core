@@ -198,7 +198,8 @@ export function testDamageRoll(template: StatisticalTemplate) {
 		if (!dice) continue;
 		const randomDiceParsed = diceRandomParse(dice, template);
 		try {
-			roll(randomDiceParsed);
+			const rolled = roll(randomDiceParsed);
+			if (!rolled) throw new Error(`[error.invalidDice, common.space] ${name}`);
 		} catch (error) {
 			throw new Error(`[error.invalidDice, common.space] ${name}`);
 		}
