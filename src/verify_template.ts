@@ -178,8 +178,8 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 	if (template.charName) statistiqueTemplate.charName = template.charName;
 	if (template.damage) statistiqueTemplate.damage = template.damage;
 	try {
-		testDamageRoll(statistiqueTemplate);
-		testCombinaison(statistiqueTemplate);
+		testDiceRegistered(statistiqueTemplate);
+		testStatCombinaison(statistiqueTemplate);
 	} catch (error) {
 		throw new Error((error as Error).message);
 	}
@@ -190,7 +190,7 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
  * Test each damage roll from the template.damage
  * @param {StatisticalTemplate} template 
  */
-export function testDamageRoll(template: StatisticalTemplate) {
+export function testDiceRegistered(template: StatisticalTemplate) {
 	if (!template.damage) return;
 	if (Object.keys(template.damage).length === 0) throw new Error("[error.emptyObject]");
 	if (Object.keys(template.damage).length > 25) throw new Error("[error.tooManyDice]");
@@ -212,7 +212,7 @@ export function testDamageRoll(template: StatisticalTemplate) {
  * Test all combinaison with generated random value
  * @param {StatisticalTemplate} template 
  */
-export function testCombinaison(template: StatisticalTemplate) {
+export function testStatCombinaison(template: StatisticalTemplate) {
 	if (!template.statistics) return;
 	const onlyCombinaisonStats = Object.fromEntries(Object.entries(template.statistics).filter(([_, value]) => value.combinaison !== undefined));
 	const allOtherStats = Object.fromEntries(Object.entries(template.statistics).filter(([_, value]) => !value.combinaison));	

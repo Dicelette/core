@@ -109,21 +109,21 @@ describe("verify_template", () => {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6",
 			};
-			expect(() => core.testCombinaison(template)).toThrow();
+			expect(() => core.testStatCombinaison(template)).toThrow();
 		});
 		it("validate formula for dice", () => {
 			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6+{{$}}>20",
 			};
-			expect(() => core.testCombinaison(template)).toThrow();
+			expect(() => core.testStatCombinaison(template)).toThrow();
 		});
 		it("validate formula for dice", () => {
 			const template: core.StatisticalTemplate = {
 				statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
 				diceType: "d6+5>{{$}}",
 			};
-			expect(() => core.testCombinaison(template)).toThrow();
+			expect(() => core.testStatCombinaison(template)).toThrow();
 		});
 		
 
@@ -148,7 +148,7 @@ describe("verify_template", () => {
 					"piercing": "1d20stat1*2>stat1",
 				}
 			};
-			expect(() => core.testDamageRoll(template)).not.toThrow();
+			expect(() => core.testDiceRegistered(template)).not.toThrow();
 		});
 		it("Test a roll with a combinaison on the dice and accents", () => {
 			const template: core.StatisticalTemplate = {
@@ -158,7 +158,7 @@ describe("verify_template", () => {
 					"piercing": "1déducation>20",
 				}
 			};
-			expect(() => core.testDamageRoll(template)).not.toThrow();
+			expect(() => core.testDiceRegistered(template)).not.toThrow();
 		});
 	});
 	describe("roll_string_creation", () => {
