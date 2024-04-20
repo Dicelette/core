@@ -240,4 +240,14 @@ describe("verify_template", () => {
 			expect(formula).toEqual(expectedFormula);
 		});
 	});
+	describe("template form stupid", () => {
+		it("should throw an error for invalid dice type", () => {
+			const template = {  "diceType": "invalid",
+				"critical": {
+					"failure": 1,
+					"success": 20
+				}};
+			expect(() => core.verifyTemplateValue(template)).toThrow();
+		});
+	});
 });

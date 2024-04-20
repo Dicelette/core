@@ -154,7 +154,9 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 	if (template.diceType) {
 		try {
 			statistiqueTemplate.diceType = template.diceType;
-			diceTypeRandomParse(template.diceType, statistiqueTemplate);
+			const cleanedDice = diceTypeRandomParse(template.diceType, statistiqueTemplate);
+			const rolled = roll(cleanedDice);
+			if (!rolled) throw new Error("[error.invalidDice.withoutDice]");
 		} catch (e) {
 			throw new Error((e as Error).message);
 		}
