@@ -65,7 +65,11 @@ export function roll(dice: string): Resultat | undefined{
 		const roller = new DiceRoller();
 		//remove comments if any
 		for (let i = 0; i < numberOfDice; i++) {
-			roller.roll(diceToRoll);
+			try {
+				roller.roll(diceToRoll);
+			} catch (error) {
+				throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceToRoll}`);
+			}
 		}
 		return {
 			dice: diceToRoll,
@@ -77,7 +81,11 @@ export function roll(dice: string): Resultat | undefined{
 	}
 	const roller = new DiceRoller();
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "");
-	roller.roll(diceWithoutComment);
+	try {	
+		roller.roll(diceWithoutComment);
+	} catch (error) {
+		throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceWithoutComment}`);
+	}
 	const commentMatch = dice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
 	return {
