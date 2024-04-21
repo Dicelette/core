@@ -68,6 +68,7 @@ export function roll(dice: string): Resultat | undefined{
 			try {
 				roller.roll(diceToRoll);
 			} catch (error) {
+				console.error(`[error.invalidDice.withoutDice, common.space]: ${diceToRoll}`);
 				throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceToRoll}`);
 			}
 		}
@@ -84,6 +85,7 @@ export function roll(dice: string): Resultat | undefined{
 	try {	
 		roller.roll(diceWithoutComment);
 	} catch (error) {
+		console.error(`[error.invalidDice.withoutDice, common.space]: ${diceWithoutComment}`);
 		throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceWithoutComment}`);
 	}
 	const commentMatch = dice.match(COMMENT_REGEX);
