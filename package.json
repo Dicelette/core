@@ -30,7 +30,6 @@
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.5.0",
     "@lisandra-dev/eslint-config": "^1.1.4",
-    "dicelette-docs": "link:E:/Documents/Github/dicelette/dicelette-docs",
     "eslint": "^8.57.0",
     "mathjs": "^12.4.1",
     "moment": "^2.30.1",
