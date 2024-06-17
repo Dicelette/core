@@ -2,22 +2,24 @@
 import { DiceRoller } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 
-import { Compare, Modifier, Resultat, Sign } from ".";
+import type { Compare, Modifier, Resultat, Sign } from ".";
+import { DiceTypeError } from "./errors";
 
 export const COMMENT_REGEX = /\s+(#|\/{2}|\[|\/\*)(.*)/;
-const SIGN_REGEX =/[><=!]+/;
+const SIGN_REGEX = /[><=!]+/;
 const SIGN_REGEX_SPACE = /[><=!]+(\S+)/;
 
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
  * @param dice {string}
  */
-export function roll(dice: string): Resultat | undefined{
+export function roll(dice: string): Resultat | undefined {
 	//parse dice string
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
-	let compare : Compare | undefined;
+	let compare: Compare | undefined;
 	if (compareRegex) {
+		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 		dice = dice.replace(SIGN_REGEX_SPACE, "");
 		const calc = compareRegex[1];
 		const sign = calc.match(/[+-\/\*\^]/)?.[0];
@@ -25,25 +27,26 @@ export function roll(dice: string): Resultat | undefined{
 		if (sign) {
 			const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "");
 			const total = evaluate(toCalc);
+			//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 			dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 			compare = {
 				sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
 				value: total,
 			};
-		} else compare = {
-			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
-			value: parseInt(calc, 10),
-		};
+		} else
+			compare = {
+				sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
+				value: Number.parseInt(calc, 10),
+			};
 	}
 	const modifier = dice.matchAll(/(\+|\-|%|\/|\^|\*|\*{2})(\d+)/gi);
-	let modificator : Modifier | undefined;
+	let modificator: Modifier | undefined;
 	for (const mod of modifier) {
 		//calculate the modifier if multiple
 		if (modificator) {
 			const sign = modificator.sign;
 			let value = modificator.value;
-			if (sign)
-				value = calculator(sign, value, parseInt(mod[2], 10));
+			if (sign) value = calculator(sign, value, Number.parseInt(mod[2], 10));
 			modificator = {
 				sign: mod[1] as Sign,
 				value,
@@ -51,14 +54,14 @@ export function roll(dice: string): Resultat | undefined{
 		} else {
 			modificator = {
 				sign: mod[1] as Sign,
-				value: parseInt(mod[2], 10),
+				value: Number.parseInt(mod[2], 10),
 			};
 		}
-	} 
-	
+	}
+
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
-		const numberOfDice = parseInt(diceArray[0], 10);
+		const numberOfDice = Number.parseInt(diceArray[0], 10);
 		const diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
 		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
@@ -68,7 +71,7 @@ export function roll(dice: string): Resultat | undefined{
 			try {
 				roller.roll(diceToRoll);
 			} catch (error) {
-				throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceToRoll}`);
+				throw new DiceTypeError(diceToRoll, "roll", error);
 			}
 		}
 		return {
@@ -81,10 +84,10 @@ export function roll(dice: string): Resultat | undefined{
 	}
 	const roller = new DiceRoller();
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "");
-	try {	
+	try {
 		roller.roll(diceWithoutComment);
 	} catch (error) {
-		throw new Error(`[error.invalidDice.withoutDice, common.space]: ${diceWithoutComment}`);
+		throw new DiceTypeError(diceWithoutComment, "roll", error);
 	}
 	const commentMatch = dice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
@@ -99,14 +102,12 @@ export function roll(dice: string): Resultat | undefined{
 /**
  * Evaluate a formula and replace "^" by "**" if any
  * @param {Sign} sign
- * @param {number} value 
- * @param {number} total 
- * @returns 
+ * @param {number} value
+ * @param {number} total
+ * @returns
  */
 export function calculator(sign: Sign, value: number, total: number): number {
+	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	if (sign === "^") sign = "**";
 	return evaluate(`${total} ${sign} ${value}`);
 }
-
-
-

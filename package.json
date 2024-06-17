@@ -14,9 +14,10 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "vitest",
     "build": "tsup",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "lint": "biome format --write src"
   },
   "keywords": [
     "discord",
