@@ -17,7 +17,8 @@
     "test": "vitest",
     "build": "tsup",
     "prepublish": "npm run build",
-    "lint": "biome format --write src"
+    "lint": "biome format --write src",
+    "tsc": "tsc --noEmit --skipLibCheck"
   },
   "keywords": [
     "discord",

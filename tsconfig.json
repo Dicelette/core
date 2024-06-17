@@ -14,7 +14,7 @@
     "checkJs": false,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
-    "removeComments": true,
+    "removeComments": false,
     "typeRoots": ["node_modules/@types", "src/@types"],
     "sourceMap": false,
     "baseUrl": "./"
