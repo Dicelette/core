@@ -57,6 +57,15 @@ export class TooManyDice extends Error {
 	}
 }
 
+export class TooManyStats extends Error {
+	public readonly name: string;
+
+	constructor() {
+		super();
+		this.name = "Too_Many_Stats";
+	}
+}
+
 export class NoStatisticsError extends Error {
 	public readonly name: string;
 

@@ -13,6 +13,7 @@ import {
 	MaxGreater,
 	NoStatisticsError,
 	TooManyDice,
+	TooManyStats,
 } from "./errors";
 
 /**
@@ -153,6 +154,7 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 	};
 	if (!template.statistics) statistiqueTemplate.statistics = undefined;
 	else if (template.statistics && Object.keys(template.statistics).length > 0) {
+		if (Object.keys(template.statistics).length > 25) throw new TooManyStats();
 		for (const [key, value] of Object.entries(template.statistics)) {
 			const dataValue = value as { max?: number; min?: number; combinaison?: string };
 			if (dataValue.max && dataValue.min && dataValue.max <= dataValue.min)
