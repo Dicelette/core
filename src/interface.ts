@@ -6,7 +6,6 @@ export interface Resultat {
 	modifier?: Modifier;
 }
 
-
 export interface Compare {
 	sign: "<" | ">" | ">=" | "<=" | "=" | "!=" | "==";
 	value: number;
@@ -20,12 +19,12 @@ export interface Modifier {
 }
 
 export type Statistic = {
-	[name: string] : {
+	[name: string]: {
 		max?: number;
 		min?: number;
 		combinaison?: string;
-	}
-}
+	};
+};
 
 /**
  * @example
@@ -37,27 +36,27 @@ export type Statistic = {
  */
 export interface StatisticalTemplate {
 	/** Allow to force the user to choose a name for them characters */
-	charName?: boolean 
-	statistics?: Statistic
+	charName?: boolean;
+	statistics?: Statistic;
 	/**
 	 * A total can be set, it allows to calculate the total value of a future register member
 	 * If the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown
 	 * @note statistique that have a formula will be ignored from the total
 	 */
-	total?: number
+	total?: number;
 	/** A dice type in the notation supported by the bot */
 	diceType?: string;
 	/**
-	 * How the success/echec will be done 
+	 * How the success/echec will be done
 	 */
 	critical?: Critical;
 	/** Special dice for damage */
 	damage?: {
 		[name: string]: string;
-	}
+	};
 }
 
 export interface Critical {
-		success?: number,
-		failure?: number,
+	success?: number;
+	failure?: number;
 }

@@ -1,5 +1,6 @@
 import { evaluate } from "mathjs";
 import removeAccents from "remove-accents";
+import { FormulaError } from "./errors";
 
 /**
  * Escape regex string
@@ -9,18 +10,20 @@ export function escapeRegex(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-
 /**
  * Replace the stat name by their value using stat and after evaluate any formula using `replaceFormulaInDice`
  * @param originalDice {dice}
  * @param stats {[name: string]: number}
  */
-export function generateStatsDice(originalDice: string, stats?: {[name: string]: number}) {
+export function generateStatsDice(
+	originalDice: string,
+	stats?: { [name: string]: number }
+) {
 	let dice = originalDice;
 	if (stats && Object.keys(stats).length > 0) {
 		//damage field support adding statistic, like : 1d6 + strength
 		//check if the value contains a statistic & calculate if it's okay
-		//the dice will be converted before roll 
+		//the dice will be converted before roll
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
 			const regex = new RegExp(escapeRegex(removeAccents(stat)), "gi");
@@ -31,7 +34,6 @@ export function generateStatsDice(originalDice: string, stats?: {[name: string]:
 		}
 	}
 	return replaceFormulaInDice(dice);
-	
 }
 
 /**
@@ -39,7 +41,7 @@ export function generateStatsDice(originalDice: string, stats?: {[name: string]:
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)\}{2})/gmi;
+	const formula = /(?<formula>\{{2}(.+?)\}{2})/gim;
 	const formulaMatch = formula.exec(dice);
 	if (formulaMatch?.groups?.formula) {
 		const formula = formulaMatch.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
@@ -47,7 +49,7 @@ export function replaceFormulaInDice(dice: string) {
 			const result = evaluate(formula);
 			return cleanedDice(dice.replace(formulaMatch.groups.formula, result.toString()));
 		} catch (error) {
-			throw new Error(`[error.invalidFormula, common.space]: ${formulaMatch.groups.formula}`);
+			throw new FormulaError(formulaMatch.groups.formula, "replaceFormulaInDice", error);
 		}
 	}
 	return cleanedDice(dice);
