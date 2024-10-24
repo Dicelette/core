@@ -2,7 +2,6 @@
 import * as core from "../src";
 import { describe, expect, it } from "vitest";
 
-describe("verify_template", () => {
 	describe("evalCombinaison", () => {
 		it("should evaluate the combination correctly", () => {
 			const combinaison = { stat1: "stat2 + 3" };
@@ -260,4 +259,3 @@ describe("verify_template", () => {
 			expect(() => core.verifyTemplateValue(template)).toThrow();
 		});
 	});
-});
