@@ -120,7 +120,7 @@ export function multipleFunction(dice: string): Resultat | undefined {
 	const split = dice.split(";");
 	const diceResult = roll(split[0]);
 	if (!diceResult || !diceResult.total) return undefined;
-	results.push(diceResult.result);
+	results.push(`${diceResult.result}`);
 	let total = diceResult.total;
 	let comments = diceResult.comment ?? "";
 	if (!total) return diceResult;
@@ -129,12 +129,12 @@ export function multipleFunction(dice: string): Resultat | undefined {
 		const commentMatch = element.match(COMMENT_REGEX);
 		element = element.replace(COMMENT_REGEX, "");
 		const comment = commentMatch ? commentMatch[2] : undefined;
-		if (comment) comments += comment;
+		if (comment) comments += ` ${comment}`;
 		const toRoll = element.replace("µ", `${diceResult.total}`);
-		const formule = element.replace("µ", "");
-		const diceAll = element.replace("µ", diceResult.dice);
+		const formule = element.replace("µ", `[${diceResult.total}]`);
+		const diceAll = element.replace("µ", diceResult.dice.replace(COMMENT_REGEX, ""));
 		const resultat = evaluate(toRoll);
-		results.push(`${diceAll}: [${diceResult.total}]${formule} = ${resultat}`);
+		results.push(`✓ ${diceAll}: ${formule} = ${resultat}`);
 		total += resultat;
 	}
 
