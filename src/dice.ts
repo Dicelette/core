@@ -25,7 +25,7 @@ export function roll(dice: string): Resultat | undefined {
 		const sign = calc.match(/[+-\/\*\^]/)?.[0];
 		const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
 		if (sign) {
-			const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "");
+			const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
 			const total = evaluate(toCalc);
 			//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 			dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
@@ -58,6 +58,8 @@ export function roll(dice: string): Resultat | undefined {
 			};
 		}
 	}
+	throw new Error("Function not implemented.");
+	if (dice.includes(";") && dice.includes("µ")) return multipleFunction(dice);
 
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
@@ -80,6 +82,7 @@ export function roll(dice: string): Resultat | undefined {
 			comment: comments,
 			compare: compare ? compare : undefined,
 			modifier: modificator,
+			total: roller.total,
 		};
 	}
 	const roller = new DiceRoller();
@@ -97,6 +100,7 @@ export function roll(dice: string): Resultat | undefined {
 		comment,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
+		total: roller.total,
 	};
 }
 /**
@@ -110,4 +114,38 @@ export function calculator(sign: Sign, value: number, total: number): number {
 	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	if (sign === "^") sign = "**";
 	return evaluate(`${total} ${sign} ${value}`);
+}
+
+export function multipleFunction(dice: string): Resultat | undefined {
+	const results = [];
+	const split = dice.split(";");
+	const diceResult = roll(split[0]);
+	if (!diceResult || !diceResult.total) return undefined;
+	results.push(diceResult.result);
+	let total = diceResult.total;
+	let comments = diceResult.comment ?? "";
+	if (!total) return diceResult;
+	for (let element of split.slice(1)) {
+		//remove comments & keep it
+		const commentMatch = element.match(COMMENT_REGEX);
+		element = element.replace(COMMENT_REGEX, "");
+		const comment = commentMatch ? commentMatch[2] : undefined;
+		if (comment) comments += comment;
+		const toRoll = element.replace("µ", `${diceResult.total}`);
+		const formule = element.replace("µ", "");
+		const diceAll = element.replace("µ", diceResult.dice);
+		const resultat = evaluate(toRoll);
+		results.push(`${diceAll}: [${diceResult.total}]${formule} = ${resultat}`);
+		total += resultat;
+	}
+
+	return {
+			dice: split[0],
+			result: results.join("\n"),
+			comment: comments,
+			compare: diceResult.compare,
+			modifier: diceResult.modifier,
+			total
+		}
+	
 }

@@ -19,6 +19,10 @@ export interface Resultat {
 	 * If any value was added to the dice throw
 	 */
 	modifier?: Modifier;
+	/**
+	 * Total of the roll
+	 */
+	total?: number;
 }
 
 export interface Compare {
