@@ -91,6 +91,17 @@ import { describe, expect, it } from "vitest";
 			const result = core.verifyTemplateValue(template);
 			expect(result).toEqual(template);
 		});
+		
+		it("testing with formula dices", ()=>{
+			const template = {
+				diceType: "1d20",
+				damage: {
+					regeneration: "1d6;round(µ/2)",
+				}
+			}
+			const result = core.verifyTemplateValue(template);
+			expect(result).toEqual(template);
+		})
 
 		it("should throw an error for invalid dice type", () => {
 			const template = {
