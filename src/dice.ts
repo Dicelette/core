@@ -58,7 +58,6 @@ export function roll(dice: string): Resultat | undefined {
 			};
 		}
 	}
-	throw new Error("Function not implemented.");
 	if (dice.includes(";") && dice.includes("µ")) return multipleFunction(dice);
 
 	if (dice.match(/\d+?#(.*)/)) {
