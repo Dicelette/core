@@ -36,4 +36,9 @@ describe("roll", () => {
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
 	});
+	it("should allow to keep the result in a dice with µ and comparison", () => {
+		const result = core.roll("2d6;µ+2>5");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("2d6");
+	});
 });
