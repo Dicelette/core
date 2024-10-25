@@ -224,8 +224,10 @@ function compareSignFormule(
 			const invertedSign = toEvaluate
 				? result.compare.sign
 				: inverseSign(result.compare.sign);
-			const dice = element.replace("µ", diceResult.dice.replace(COMMENT_REGEX, ""));
-			results = `${sign} ${dice}:${result.result.split(":").splice(1).join(":").trim()}${invertedSign}${result.compare.value}`;
+			const dice = element
+				.replace("µ", `[${diceResult.dice.replace(COMMENT_REGEX, "")}]`)
+				.trim();
+			results = `${sign} ${dice}: ${result.result.split(":").splice(1).join(":").trim()}${invertedSign}${result.compare.value}`;
 		}
 	}
 	return { dice: compareResult.dice, results };
