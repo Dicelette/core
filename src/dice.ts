@@ -179,7 +179,7 @@ function replaceInFormula(
 	res: boolean
 ) {
 	const formule = element.replace("µ", `[${diceResult.total}]`);
-	const diceAll = element.replace("µ", diceResult.dice.replace(COMMENT_REGEX, ""));
+	const diceAll = element.replace("µ", `[${diceResult.dice.replace(COMMENT_REGEX, "")}]`);
 	const validSign = res ? "✓" : "✕";
 	const invertedSign = res
 		? compareResult.compare!.sign
@@ -225,7 +225,7 @@ function compareSignFormule(
 				? result.compare.sign
 				: inverseSign(result.compare.sign);
 			const dice = element.replace("µ", diceResult.dice.replace(COMMENT_REGEX, ""));
-			results = `${sign} ${dice}: ${result.result.split(":").splice(1).join(":").trim()}${invertedSign}${result.compare.value}`;
+			results = `${sign} ${dice}:${result.result.split(":").splice(1).join(":").trim()}${invertedSign}${result.compare.value}`;
 		}
 	}
 	return { dice: compareResult.dice, results };
@@ -261,7 +261,10 @@ export function multipleFunction(dice: string): Resultat | undefined {
 			results.push(compareResult.results);
 		} else {
 			const formule = element.replace("µ", `[${diceResult.total}]`).trim();
-			const diceAll = element.replace("µ", diceResult.dice.replace(COMMENT_REGEX, ""));
+			const diceAll = element.replace(
+				"µ",
+				`[${diceResult.dice.replace(COMMENT_REGEX, "")}]`
+			);
 			try {
 				const evaluated = evaluate(toRoll);
 				results.push(`◈ ${diceAll}: ${formule} = ${evaluated}`);
@@ -269,10 +272,8 @@ export function multipleFunction(dice: string): Resultat | undefined {
 			} catch (error) {
 				const evaluated = roll(toRoll);
 				if (evaluated)
-					results.push(
-						`◈ ${diceAll}: ${evaluated.result.split(":").slice(1).join(":").trim()}`
-					);
-				else results.push(`◈ ${diceAll}: ${formule} = ${evaluated}`);
+					results.push(`◈ ${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`);
+				else results.push(`◈ ${diceAll}:${formule} = ${evaluated}`);
 				total += evaluated?.total ?? 0;
 			}
 		}
