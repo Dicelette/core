@@ -1,6 +1,6 @@
 {
 	"name": "@dicelette/core",
-	"version": "1.4.2",
+	"version": "1.4.3",
 	"description": "Core library for the Dicelette Discord bot",
 	"repository": {
 		"type": "git",
@@ -10,7 +10,9 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"test": "vitest",
 		"build": "tsup",
@@ -20,7 +22,13 @@
 		"release": "commit-and-tag-version",
 		"postrelease": "git push --follow-tags origin main && pnpm publish"
 	},
-	"keywords": ["discord", "roll", "library", "bot", "typescript"],
+	"keywords": [
+		"discord",
+		"roll",
+		"library",
+		"bot",
+		"typescript"
+	],
 	"author": "Mara-Li",
 	"license": "GPL-3.0-only",
 	"dependencies": {
