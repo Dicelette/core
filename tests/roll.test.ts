@@ -1,5 +1,5 @@
-import * as core from "../src";
 import { describe, expect, it } from "vitest";
+import * as core from "../src";
 
 describe("roll", () => {
 	it("should roll the dice correctly", () => {
@@ -31,13 +31,13 @@ describe("roll", () => {
 		expect(result!.total).toBeLessThanOrEqual(24);
 	});
 
-	it("should allow to keep the result in a dice with µ", () => {
-		const result = core.roll("2d6;µ+2");
+	it("should allow to keep the result in a dice with &", () => {
+		const result = core.roll("2d6;&+2");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
 	});
-	it("should allow to keep the result in a dice with µ and comparison", () => {
-		const result = core.roll("2d6;µ+2>5");
+	it("should allow to keep the result in a dice with & and comparison", () => {
+		const result = core.roll("2d6;&+2>5");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
 	});
