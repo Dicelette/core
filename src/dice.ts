@@ -4,10 +4,12 @@ import { evaluate } from "mathjs";
 
 import type { Compare, Modifier, Resultat, Sign } from ".";
 import { DiceTypeError } from "./errors";
-
-export const COMMENT_REGEX = /\s+(#|\/{2}|\[|\/\*)(.*)/;
-const SIGN_REGEX = /[><=!]+/;
-const SIGN_REGEX_SPACE = /[><=!]+(\S+)/;
+import {
+	COMMENT_REGEX,
+	SIGN_REGEX,
+	SIGN_REGEX_SPACE,
+	SYMBOL_DICE,
+} from "./interfaces/constant";
 
 function getCompare(
 	dice: string,
@@ -17,7 +19,7 @@ function getCompare(
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: Compare;
 	const calc = compareRegex[1];
-	const sign = calc.match(/[+-\/\*\^]/)?.[0];
+	const sign = calc.match(/[+-\/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
@@ -37,7 +39,7 @@ function getCompare(
 }
 
 function getModifier(dice: string) {
-	const modifier = dice.matchAll(/(\+|\-|%|\/|\^|\*|\*{2})(\d+)/gi);
+	const modifier = dice.matchAll(/(\+|-|%|\/|\^|\*|\*{2})(\d+)/gi);
 	let modificator: Modifier | undefined;
 	for (const mod of modifier) {
 		//calculate the modifier if multiple
@@ -68,7 +70,7 @@ export function roll(dice: string): Resultat | undefined {
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: Compare | undefined;
-	if (dice.includes(";") && dice.includes("µ")) return multipleFunction(dice);
+	if (dice.includes(";") && dice.includes("&")) return multipleFunction(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);
 		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
@@ -132,25 +134,6 @@ export function calculator(sign: Sign, value: number, total: number): number {
 	return evaluate(`${total} ${sign} ${value}`);
 }
 
-function compareResult(result: number, compare: Compare): boolean {
-	switch (compare.sign) {
-		case "<":
-			return result < compare.value;
-		case ">":
-			return result > compare.value;
-		case "<=":
-			return result <= compare.value;
-		case ">=":
-			return result >= compare.value;
-		case "=":
-			return result === compare.value;
-		case "==":
-			return result === compare.value;
-		case "!=":
-			return result !== compare.value;
-	}
-}
-
 function inverseSign(
 	sign: "<" | ">" | ">=" | "<=" | "=" | "!=" | "=="
 ): "<" | ">" | ">=" | "<=" | "=" | "!=" | "==" {
@@ -178,8 +161,11 @@ function replaceInFormula(
 	compareResult: { dice: string; compare: Compare | undefined },
 	res: boolean
 ) {
-	const formule = element.replace("µ", `[${diceResult.total}]`);
-	const diceAll = element.replace("µ", `[${diceResult.dice.replace(COMMENT_REGEX, "")}]`);
+	const { formule, diceAll } = replaceText(
+		element,
+		diceResult.total ?? 0,
+		diceResult.dice
+	);
 	const validSign = res ? "✓" : "✕";
 	const invertedSign = res
 		? compareResult.compare!.sign
@@ -215,25 +201,32 @@ function compareSignFormule(
 	if (typeof res === "boolean") {
 		results = replaceInFormula(element, diceResult, compareResult, res);
 	} else if (res instanceof Object) {
-		const result = res as Resultat;
-		if (result.compare) {
+		const diceResult = res as Resultat;
+		if (diceResult.compare) {
 			const toEvaluate = evaluate(
-				`${result.total}${result.compare.sign}${result.compare.value}`
+				`${diceResult.total}${diceResult.compare.sign}${diceResult.compare.value}`
 			);
 			const sign = toEvaluate ? "✓" : "✕";
 			const invertedSign = toEvaluate
-				? result.compare.sign
-				: inverseSign(result.compare.sign);
-			const dice = element
-				.replace("µ", `[${diceResult.dice.replace(COMMENT_REGEX, "")}]`)
-				.trim();
-			results = `${sign} ${dice}: ${result.result.split(":").splice(1).join(":").trim()}${invertedSign}${result.compare.value}`;
+				? diceResult.compare.sign
+				: inverseSign(diceResult.compare.sign);
+			const dice = replaceText(element, 0, diceResult.dice).diceAll;
+
+			results = `${sign} ${dice}: ${diceResult.result.split(":").splice(1).join(":").trim()}${invertedSign}${diceResult.compare.value}`;
 		}
 	}
 	return { dice: compareResult.dice, results };
 }
 
+function replaceText(element: string, total: number, dice: string) {
+	return {
+		formule: element.replace(SYMBOL_DICE, `[${total}]`).trim(),
+		diceAll: element.replace(SYMBOL_DICE, `[${dice.replace(COMMENT_REGEX, "")}]`).trim(),
+	};
+}
+
 export function multipleFunction(dice: string): Resultat | undefined {
+	if (dice.includes("#")) throw new DiceTypeError(dice, "multipleFunction");
 	const results = [];
 	const split = dice.split(";");
 	const diceResult = roll(split[0]);
@@ -244,7 +237,7 @@ export function multipleFunction(dice: string): Resultat | undefined {
 	let comments = diceResult.comment ?? "";
 	if (!total) return diceResult;
 	for (let element of split.slice(1)) {
-		if (!element.includes("µ")) {
+		if (!element.includes(SYMBOL_DICE)) {
 			const result = roll(element);
 			if (!result) continue;
 			results.push(result.result);
@@ -255,18 +248,19 @@ export function multipleFunction(dice: string): Resultat | undefined {
 		element = element.replace(COMMENT_REGEX, "");
 		const comment = commentMatch ? commentMatch[2] : undefined;
 		if (comment) comments += ` ${comment}`;
-		let toRoll = element.replace("µ", `${diceResult.total}`);
+		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
 			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
 		} else {
-			const formule = element.replace("µ", `[${diceResult.total}]`).trim();
-			const diceAll = element.replace(
-				"µ",
-				`[${diceResult.dice.replace(COMMENT_REGEX, "")}]`
+			const { formule, diceAll } = replaceText(
+				element,
+				diceResult.total,
+				diceResult.dice
 			);
+
 			try {
 				const evaluated = evaluate(toRoll);
 				results.push(`◈ ${diceAll}: ${formule} = ${evaluated}`);
@@ -275,7 +269,7 @@ export function multipleFunction(dice: string): Resultat | undefined {
 				const evaluated = roll(toRoll);
 				if (evaluated)
 					results.push(`◈ ${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`);
-				else results.push(`◈ ${diceAll}:${formule} = ${evaluated}`);
+				else results.push(`◈ ${diceAll}: ${formule} = ${evaluated}`);
 				total += evaluated?.total ?? 0;
 			}
 		}
