@@ -70,7 +70,7 @@ export function roll(dice: string): Resultat | undefined {
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: Compare | undefined;
-	if (dice.includes(";") && dice.includes("&")) return multipleFunction(dice);
+	if (dice.includes(";") && dice.includes("&")) return sharedRolls(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);
 		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
@@ -225,8 +225,14 @@ function replaceText(element: string, total: number, dice: string) {
 	};
 }
 
-export function multipleFunction(dice: string): Resultat | undefined {
-	if (dice.includes("#")) throw new DiceTypeError(dice, "multipleFunction");
+function sharedRolls(dice: string): Resultat | undefined {
+	/* bulk roll are not allowed in shared rolls */
+	if (dice.includes("#"))
+		throw new DiceTypeError(
+			dice,
+			"noBulkRoll",
+			"bulk roll are not allowed in shared rolls"
+		);
 	const results = [];
 	const split = dice.split(";");
 	const diceResult = roll(split[0]);
