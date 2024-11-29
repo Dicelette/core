@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest";
 // FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
 import * as core from "../src";
 
-describe("evalCombinaison", () => {
+describe("eval combination", () => {
 	it("should evaluate the combination correctly", () => {
-		const combinaison = { stat1: "stat2 + 3" };
+		const combination = { stat1: "stat2 + 3" };
 		const stats = { stat2: 2 };
-		const result = core.evalCombinaison(combinaison, stats);
+		const result = core.evalCombination(combination, stats);
 		expect(result).toEqual({ stat1: 5 });
 	});
 
 	it("should throw an error for invalid formula", () => {
-		const combinaison = { stat1: "stat2 + " };
+		const combination = { stat1: "stat2 + " };
 		const stats = { stat2: 2 };
-		expect(() => core.evalCombinaison(combinaison, stats)).toThrow();
+		expect(() => core.evalCombination(combination, stats)).toThrow();
 	});
 });
 
@@ -105,38 +105,38 @@ describe("verifyTemplateValue", () => {
 
 	it("should throw an error for invalid dice type", () => {
 		const template = {
-			statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
+			statistics: { stat1: { max: 10, min: 1, combination: "stat2 + 3" } },
 			diceType: "invalid",
 		};
 		expect(() => core.verifyTemplateValue(template)).toThrow();
 	});
 });
 
-describe("combinaison", () => {
+describe("combination", () => {
 	// Add more tests for different scenarios
 	it("should throw an error because they are no stat2", () => {
 		const template: core.StatisticalTemplate = {
-			statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
+			statistics: { stat1: { max: 10, min: 1, combination: "stat2 + 3" } },
 			diceType: "d6",
 		};
-		expect(() => core.testStatCombinaison(template)).toThrow();
+		expect(() => core.testStatCombination(template)).toThrow();
 	});
 	it("validate formula for dice", () => {
 		const template: core.StatisticalTemplate = {
-			statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
+			statistics: { stat1: { max: 10, min: 1, combination: "stat2 + 3" } },
 			diceType: "d6+{{$}}>20",
 		};
-		expect(() => core.testStatCombinaison(template)).toThrow();
+		expect(() => core.testStatCombination(template)).toThrow();
 	});
 	it("validate formula for dice", () => {
 		const template: core.StatisticalTemplate = {
-			statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
+			statistics: { stat1: { max: 10, min: 1, combination: "stat2 + 3" } },
 			diceType: "d6+5>{{$}}",
 		};
-		expect(() => core.testStatCombinaison(template)).toThrow();
+		expect(() => core.testStatCombination(template)).toThrow();
 	});
 
-	it("create combinaison dice formula for skill dice with statistic", () => {
+	it("create combination dice formula for skill dice with statistic", () => {
 		const testTemplate: core.StatisticalTemplate = {
 			statistics: { stat1: { max: 10, min: 1 } },
 			diceType: "1d20",
@@ -150,9 +150,9 @@ describe("combinaison", () => {
 		);
 		expect(expectedFormula).toEqual(expectedFormula);
 	});
-	it("Test a roll with a combinaison on the dice", () => {
+	it("Test a roll with a combination on the dice", () => {
 		const template: core.StatisticalTemplate = {
-			statistics: { stat1: { max: 10, min: 1, combinaison: "stat2 + 3" } },
+			statistics: { stat1: { max: 10, min: 1, combination: "stat2 + 3" } },
 			diceType: "1d20",
 			damage: {
 				piercing: "1d20stat1*2>stat1",
@@ -160,7 +160,7 @@ describe("combinaison", () => {
 		};
 		expect(() => core.testDiceRegistered(template)).not.toThrow();
 	});
-	it("Test a roll with a combinaison on the dice and accents", () => {
+	it("Test a roll with a combination on the dice and accents", () => {
 		const template: core.StatisticalTemplate = {
 			statistics: { éducation: { max: 10, min: 1 } },
 			diceType: "1d20",

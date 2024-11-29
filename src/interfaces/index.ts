@@ -66,10 +66,10 @@ export type Statistic = {
 		 */
 		min?: number;
 		/**
-		 * The combinaison that can be made with ANOTHER statistic
+		 * The combination that can be made with ANOTHER statistic
 		 * Automatically disable the max/min value
 		 */
-		combinaison?: string;
+		combination?: string;
 	};
 };
 

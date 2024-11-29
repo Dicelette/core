@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { evaluate } from "mathjs";
 import { Random } from "random-js";
-import removeAccents from "remove-accents";
+import "uniformize";
 
 import type { Statistic, StatisticalTemplate } from ".";
 import { roll } from "./dice";
-import { escapeRegex, replaceFormulaInDice } from "./utils";
 import {
 	DiceTypeError,
 	EmptyObjectError,
@@ -15,6 +14,7 @@ import {
 	TooManyDice,
 	TooManyStats,
 } from "./errors";
+import { escapeRegex, replaceFormulaInDice } from "./utils";
 
 /**
  * Verify if the provided dice work with random value
@@ -26,7 +26,7 @@ export function evalStatsDice(testDice: string, stats?: { [name: string]: number
 	if (stats && Object.keys(stats).length > 0) {
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
-			const regex = new RegExp(escapeRegex(removeAccents(stat)), "gi");
+			const regex = new RegExp(escapeRegex(stat.standardize()), "gi");
 			if (testDice.match(regex)) {
 				const statValue = stats[stat];
 				dice = testDice.replace(regex, statValue.toString());
@@ -52,10 +52,8 @@ export function evalStatsDice(testDice: string, stats?: { [name: string]: number
 export function diceRandomParse(value: string, template: StatisticalTemplate) {
 	if (!template.statistics) return value;
 	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
-	value = removeAccents(value);
-	const allStats = Object.keys(template.statistics).map((stat) =>
-		removeAccents(stat).toLowerCase()
-	);
+	value = value.standardize();
+	const allStats = Object.keys(template.statistics).map((stat) => stat.standardize());
 	let newDice = value;
 	for (const stat of allStats) {
 		const regex = new RegExp(escapeRegex(stat), "gi");
@@ -64,8 +62,8 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
 			let min: undefined | number = undefined;
 			const stats = template.statistics?.[stat];
 			if (stats) {
-				max = template.statistics[removeAccents(stat).toLowerCase()].max;
-				min = template.statistics[removeAccents(stat).toLowerCase()].min;
+				max = template.statistics[stat.standardize()].max;
+				min = template.statistics[stat.standardize()].min;
 			}
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min);
@@ -82,11 +80,11 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
  */
 export function diceTypeRandomParse(dice: string, template: StatisticalTemplate) {
 	if (!template.statistics) return dice;
-	const firstStatNotCombinaison = Object.keys(template.statistics).find(
-		(stat) => !template.statistics?.[stat].combinaison
+	const firstStatNotcombination = Object.keys(template.statistics).find(
+		(stat) => !template.statistics?.[stat].combination
 	);
-	if (!firstStatNotCombinaison) return dice;
-	const stats = template.statistics[firstStatNotCombinaison];
+	if (!firstStatNotcombination) return dice;
+	const stats = template.statistics[firstStatNotcombination];
 	const { min, max } = stats;
 	const total = template.total || 100;
 	const randomStatValue = generateRandomStat(total, max, min);
@@ -94,50 +92,49 @@ export function diceTypeRandomParse(dice: string, template: StatisticalTemplate)
 }
 
 /**
- * Random the combinaison and evaluate it to check if everything is valid
- * @param combinaison {[name: string]: string}
+ * Random the combination and evaluate it to check if everything is valid
+ * @param combination {[name: string]: string}
  * @param stats {[name: string]: string|number}
  */
-export function evalCombinaison(
-	combinaison: { [name: string]: string },
+export function evalCombination(
+	combination: { [name: string]: string },
 	stats: { [name: string]: string | number }
 ) {
 	const newStats: { [name: string]: number } = {};
-	for (const [stat, combin] of Object.entries(combinaison)) {
+	for (const [stat, combin] of Object.entries(combination)) {
 		//replace the stats in formula
-		let formula = removeAccents(combin);
+		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
-			const regex = new RegExp(removeAccents(statName), "gi");
+			const regex = new RegExp(statName.standardize(), "gi");
 			formula = formula.replace(regex, value.toString());
 		}
 		try {
-			const result = evaluate(formula);
-			newStats[stat] = result;
+			newStats[stat] = evaluate(formula);
 		} catch (error) {
-			throw new FormulaError(stat, "evalCombinaison", error);
+			throw new FormulaError(stat, "evalCombination", error);
 		}
 	}
 	return newStats;
 }
 
 /**
- * Evaluate one selected combinaison
- * @param combinaison {string}
+ * Evaluate one selected combination
+ * @param combination {string}
  * @param stats {[name: string]: string|number}
  */
-export function evalOneCombinaison(
-	combinaison: string,
+export function evalOneCombination(
+	combination: string,
 	stats: { [name: string]: string | number }
 ) {
-	let formula = removeAccents(combinaison);
+	let formula = combination.standardize();
 	for (const [statName, value] of Object.entries(stats)) {
-		const regex = new RegExp(removeAccents(statName), "gi");
+		const regex = new RegExp(statName.standardize(), "gi");
 		formula = formula.replace(regex, value.toString());
 	}
 	try {
 		return evaluate(formula);
 	} catch (error) {
-		throw new FormulaError(combinaison, "evalOneCombinaison", error);
+		throw new FormulaError(combination, "evalOneCombination", error);
 	}
 }
 
@@ -156,13 +153,13 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 	else if (template.statistics && Object.keys(template.statistics).length > 0) {
 		if (Object.keys(template.statistics).length > 25) throw new TooManyStats();
 		for (const [key, value] of Object.entries(template.statistics)) {
-			const dataValue = value as { max?: number; min?: number; combinaison?: string };
+			const dataValue = value as { max?: number; min?: number; combination?: string };
 			if (dataValue.max && dataValue.min && dataValue.max <= dataValue.min)
 				throw new MaxGreater(dataValue.min, dataValue.max);
 			if (dataValue.max && dataValue.max <= 0) dataValue.max = undefined;
 			if (dataValue.min && dataValue.min <= 0) dataValue.min = undefined;
-			let formula = dataValue.combinaison
-				? removeAccents(dataValue.combinaison).toLowerCase()
+			let formula = dataValue.combination
+				? dataValue.combination.standardize()
 				: undefined;
 			formula = formula && formula.trim().length > 0 ? formula : undefined;
 			if (!statistiqueTemplate.statistics) {
@@ -171,20 +168,16 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 			statistiqueTemplate.statistics[key] = {
 				max: dataValue.max,
 				min: dataValue.min,
-				combinaison: formula || undefined,
+				combination: formula || undefined,
 			};
 		}
 	}
 	if (template.diceType) {
-		try {
-			statistiqueTemplate.diceType = template.diceType;
-			const cleanedDice = diceTypeRandomParse(template.diceType, statistiqueTemplate);
-			const rolled = roll(cleanedDice);
-			if (!rolled)
-				throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
-		} catch (e) {
-			throw new Error((e as Error).message);
-		}
+		statistiqueTemplate.diceType = template.diceType;
+		const cleanedDice = diceTypeRandomParse(template.diceType, statistiqueTemplate);
+		const rolled = roll(cleanedDice);
+		if (!rolled)
+			throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
 	}
 
 	if (template.critical && Object.keys(template.critical).length > 0) {
@@ -199,12 +192,8 @@ export function verifyTemplateValue(template: any): StatisticalTemplate {
 	}
 	if (template.charName) statistiqueTemplate.charName = template.charName;
 	if (template.damage) statistiqueTemplate.damage = template.damage;
-	try {
-		testDiceRegistered(statistiqueTemplate);
-		testStatCombinaison(statistiqueTemplate);
-	} catch (error) {
-		throw new Error((error as Error).message);
-	}
+	testDiceRegistered(statistiqueTemplate);
+	testStatCombination(statistiqueTemplate);
 	return statistiqueTemplate;
 }
 
@@ -229,27 +218,27 @@ export function testDiceRegistered(template: StatisticalTemplate) {
 }
 
 /**
- * Test all combinaison with generated random value
+ * Test all combination with generated random value
  * @param {StatisticalTemplate} template
  */
-export function testStatCombinaison(template: StatisticalTemplate) {
+export function testStatCombination(template: StatisticalTemplate) {
 	if (!template.statistics) return;
-	const onlyCombinaisonStats = Object.fromEntries(
+	const onlycombinationStats = Object.fromEntries(
 		Object.entries(template.statistics).filter(
-			([_, value]) => value.combinaison !== undefined
+			([_, value]) => value.combination !== undefined
 		)
 	);
 	const allOtherStats = Object.fromEntries(
-		Object.entries(template.statistics).filter(([_, value]) => !value.combinaison)
+		Object.entries(template.statistics).filter(([_, value]) => !value.combination)
 	);
-	if (Object.keys(onlyCombinaisonStats).length === 0) return;
+	if (Object.keys(onlycombinationStats).length === 0) return;
 	const allStats = Object.keys(template.statistics).filter(
-		(stat) => !template.statistics![stat].combinaison
+		(stat) => !template.statistics![stat].combination
 	);
 	if (allStats.length === 0) throw new NoStatisticsError();
 	const error = [];
-	for (const [stat, value] of Object.entries(onlyCombinaisonStats)) {
-		let formula = value.combinaison as string;
+	for (const [stat, value] of Object.entries(onlycombinationStats)) {
+		let formula = value.combination as string;
 		for (const [other, data] of Object.entries(allOtherStats)) {
 			const { max, min } = data;
 			const total = template.total || 100;
@@ -263,7 +252,7 @@ export function testStatCombinaison(template: StatisticalTemplate) {
 			error.push(stat);
 		}
 	}
-	if (error.length > 0) throw new FormulaError(error.join(", "), "testStatCombinaison");
+	if (error.length > 0) throw new FormulaError(error.join(", "), "testStatCombination");
 	return;
 }
 

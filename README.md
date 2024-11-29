@@ -8,9 +8,9 @@ The two are used in the bot and documentation.
 
 # Type alias
 - **Sign**: `"+" | "-" | "*" | "/" | "%" | "^" | "**";`
-- **Statistic** : `{ [name: string]: { combinaison?: string; max?: number; min?: number; } }` :
+- **Statistic** : `{ [name: string]: { combination?: string; max?: number; min?: number; } }` :
   - **name**: `string` : The name of the statistic
-  - **combinaison**: `string` : A combinaison between multiple/other statistic, formula... (ex: `constitution+2`). Can't coexist with min & max.
+  - **combination**: `string` : A combination between multiple/other statistic, formula... (ex: `constitution+2`). Can't coexist with min & max.
   - **max**: `number` : The maximum value of the statistic
   - **min**: `number` : The minimum value of the statistic
 
@@ -149,21 +149,21 @@ Used for diceDamage only
 | `dice` | `string` | {string} |
 | `template` | [`StatisticalTemplate`](#statistical-template) | {StatisticalTemplate} |
 
-### **evalCombinaison**(`combinaison`, `stats`): `Object`
-Random the combinaison and evaluate it to check if everything is valid
+### **evalCombination**(`combination`, `stats`): `Object`
+Random the combination and evaluate it to check if everything is valid
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `combinaison` | `Object` | {[name: string]: string} |
+| `combination` | `Object` | {[name: string]: string} |
 | `stats` | `Object` | {[name: string]: string\|number} |
 
-### **evalOneCombinaison**(`combinaison`, `stats`): `any`
+### **evalOneCombination**(`combination`, `stats`): `any`
 
-Evaluate one selected combinaison
+Evaluate one selected combination
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `combinaison` | `string` | {string} |
+| `combination` | `string` | {string} |
 | `stats` | `Object` | {[name: string]: string\|number} |
 
 ### **evalStatsDice**(`testDice`, `stats?`): `string`
@@ -183,9 +183,9 @@ Verify if the provided dice work with random value
 | `max?` | `number` | `undefined` |
 | `min?` | `number` | `undefined` |
 
-### **testCombinaison**(`template`): `void`
+### **testCombination**(`template`): `void`
 
-Test all combinaison with generated random value
+Test all combination with generated random value
 
 | Name | Type |
 | :------ | :------ |
