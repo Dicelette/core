@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 // FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
 import * as core from "../src";
 
-describe("evalCombinaison", () => {
-	it("should evaluate the combination correctly", () => {
+describe("eval combinaison", () => {
+	it("should evaluate the combinaison correctly", () => {
 		const combinaison = { stat1: "stat2 + 3" };
 		const stats = { stat2: 2 };
 		const result = core.evalCombinaison(combinaison, stats);

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://github.com/Dicelette/core/compare/v1.4.3...v2.0.0) (2024-11-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* Fix typo in combinaison ⇒ combinaison
+
+### Bug Fixes
+
+* switch to uniformize lib ([51852e4](https://github.com/Dicelette/core/commit/51852e428f0ff518141dea6ba8ee2ab4f6583514))
+
 ## [1.4.3](https://github.com/Dicelette/core/compare/v1.4.2...v1.4.3) (2024-10-26)
 
 ## [1.4.2](https://github.com/Dicelette/core/compare/v1.4.1...v1.4.2) (2024-10-25)
