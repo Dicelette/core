@@ -1,6 +1,6 @@
 {
 	"name": "@dicelette/core",
-	"version": "1.4.3",
+	"version": "2.0.0",
 	"description": "Core library for the Dicelette Discord bot",
 	"repository": {
 		"type": "git",
