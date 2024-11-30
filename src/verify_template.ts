@@ -27,9 +27,9 @@ export function evalStatsDice(testDice: string, stats?: { [name: string]: number
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
 			const regex = new RegExp(escapeRegex(stat.standardize()), "gi");
-			if (testDice.match(regex)) {
+			if (testDice.standardize().match(regex)) {
 				const statValue = stats[stat];
-				dice = testDice.replace(regex, statValue.toString());
+				dice = testDice.standardize().replace(regex, statValue.toString()).trim();
 			}
 		}
 	}
@@ -55,8 +55,8 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
 	value = value.standardize();
 	const allStats = Object.keys(template.statistics).map((stat) => stat.standardize());
 	let newDice = value;
-	for (const stat of allStats) {
-		const regex = new RegExp(escapeRegex(stat), "gi");
+	for (const name of statNames) {
+		const regex = new RegExp(escapeRegex(name.standardize()), "gi");
 		if (value.match(regex)) {
 			let max: undefined | number = undefined;
 			let min: undefined | number = undefined;

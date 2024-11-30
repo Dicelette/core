@@ -1,5 +1,5 @@
 import { evaluate } from "mathjs";
-import removeAccents from "remove-accents";
+import "uniformize";
 import { FormulaError } from "./errors";
 
 /**
@@ -26,7 +26,7 @@ export function generateStatsDice(
 		//the dice will be converted before roll
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
-			const regex = new RegExp(escapeRegex(removeAccents(stat)), "gi");
+			const regex = new RegExp(escapeRegex(stat.standardize()), "gi");
 			if (dice.match(regex)) {
 				const statValue = stats[stat];
 				dice = dice.replace(regex, statValue.toString());
