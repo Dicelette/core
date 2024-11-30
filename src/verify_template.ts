@@ -19,17 +19,17 @@ import { escapeRegex, replaceFormulaInDice } from "./utils";
 /**
  * Verify if the provided dice work with random value
  * @param testDice {string}
- * @param stats {[name: string]: number}
+ * @param allStats {[name: string]: number}
  */
-export function evalStatsDice(testDice: string, stats?: { [name: string]: number }) {
+export function evalStatsDice(testDice: string, allStats?: { [name: string]: number }) {
 	let dice = testDice.trimEnd();
-	if (stats && Object.keys(stats).length > 0) {
-		const allStats = Object.keys(stats);
-		for (const stat of allStats) {
-			const regex = new RegExp(escapeRegex(stat.standardize()), "gi");
-			if (testDice.standardize().match(regex)) {
-				const statValue = stats[stat];
-				dice = testDice.standardize().replace(regex, statValue.toString()).trimEnd();
+	if (allStats && Object.keys(allStats).length > 0) {
+		const names = Object.keys(allStats);
+		for (const name of names) {
+			const regex = new RegExp(escapeRegex(name.standardize()), "gi");
+			if (dice.standardize().match(regex)) {
+				const statValue = allStats[name];
+				dice = dice.standardize().replace(regex, statValue.toString()).trimEnd();
 			}
 		}
 	}
