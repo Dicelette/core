@@ -269,12 +269,12 @@ export function generateRandomStat(
 	min?: number
 ) {
 	let randomStatValue = total + 1;
-	while (randomStatValue >= total) {
+	while (randomStatValue >= total && randomStatValue <= 0) {
 		const random = new Random();
 		if (max && min) randomStatValue = random.integer(min, max);
-		else if (max) randomStatValue = random.integer(0, max);
+		else if (max) randomStatValue = random.integer(1, max);
 		else if (min) randomStatValue = random.integer(min, total);
-		else randomStatValue = random.integer(0, total);
+		else randomStatValue = random.integer(1, total);
 	}
 	return randomStatValue;
 }
