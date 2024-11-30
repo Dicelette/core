@@ -53,7 +53,7 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
 	if (!template.statistics) return value;
 	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	value = value.standardize();
-	const allStats = Object.keys(template.statistics).map((stat) => stat.standardize());
+	const statNames = Object.keys(template.statistics);
 	let newDice = value;
 	for (const name of statNames) {
 		const regex = new RegExp(escapeRegex(name.standardize()), "gi");
