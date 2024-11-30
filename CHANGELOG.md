@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.6](https://github.com/Dicelette/core/compare/v1.4.5...v1.4.6) (2024-11-30)
+
+
+### Bug Fixes
+
+* **evalStatsDice:** only kept the last value when multiple stats are used in skill ([6bc4776](https://github.com/Dicelette/core/commit/6bc4776296934fe264aa85b861300c75a0ec3e76))
+
 ## [1.4.5](https://github.com/Dicelette/core/compare/v1.4.4...v1.4.5) (2024-11-30)
 
 
