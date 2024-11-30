@@ -60,10 +60,10 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
 		if (value.match(regex)) {
 			let max: undefined | number = undefined;
 			let min: undefined | number = undefined;
-			const stats = template.statistics?.[stat];
-			if (stats) {
-				max = template.statistics[stat.standardize()].max;
-				min = template.statistics[stat.standardize()].min;
+			const foundStat = template.statistics?.[name];
+			if (foundStat) {
+				max = foundStat.max;
+				min = foundStat.min;
 			}
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min);
