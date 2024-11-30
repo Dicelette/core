@@ -22,14 +22,14 @@ import { escapeRegex, replaceFormulaInDice } from "./utils";
  * @param stats {[name: string]: number}
  */
 export function evalStatsDice(testDice: string, stats?: { [name: string]: number }) {
-	let dice = testDice;
+	let dice = testDice.trimEnd();
 	if (stats && Object.keys(stats).length > 0) {
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
 			const regex = new RegExp(escapeRegex(stat.standardize()), "gi");
 			if (testDice.standardize().match(regex)) {
 				const statValue = stats[stat];
-				dice = testDice.standardize().replace(regex, statValue.toString()).trim();
+				dice = testDice.standardize().replace(regex, statValue.toString()).trimEnd();
 			}
 		}
 	}

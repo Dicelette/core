@@ -63,5 +63,5 @@ export function replaceFormulaInDice(dice: string) {
  * @param dice {string}
  */
 export function cleanedDice(dice: string) {
-	return dice.replaceAll("+-", "-").replaceAll("--", "+").replaceAll("++", "+");
+	return dice.replaceAll("+-", "-").replaceAll("--", "+").replaceAll("++", "+").trimEnd();
 }

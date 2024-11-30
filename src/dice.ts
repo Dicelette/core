@@ -104,7 +104,7 @@ export function roll(dice: string): Resultat | undefined {
 		};
 	}
 	const roller = new DiceRoller();
-	const diceWithoutComment = dice.replace(COMMENT_REGEX, "");
+	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 	try {
 		roller.roll(diceWithoutComment);
 	} catch (error) {
