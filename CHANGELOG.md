@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.5](https://github.com/Dicelette/core/compare/v1.4.4...v1.4.5) (2024-11-30)
+
+
+### Bug Fixes
+
+* in some condition, doesn't found the max/min of a stat ([4119a35](https://github.com/Dicelette/core/commit/4119a35dbe84804197a4b83a4f6601758b778b9f))
+* rolling 0 if no min is set ([68c5857](https://github.com/Dicelette/core/commit/68c58570babcbc83b5774accf25fdbcc91e0a461))
+* **standardize:** standardize issue when parsing dice skill ([a84613a](https://github.com/Dicelette/core/commit/a84613aa5ae46f133e9e8d0b22116169b0009eb6))
+* when doing roll with some replacement, trimEnd() to prevent error during roll. ([bc169c6](https://github.com/Dicelette/core/commit/bc169c6d4ec61bcf689aa1ffbcb00c578346657f))
+
 ## [1.4.4](https://github.com/Dicelette/core/compare/v1.4.3...v1.4.4) (2024-11-29)
 
 
