@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.5.0](https://github.com/Dicelette/core/compare/v1.4.7...v1.5.0) (2024-12-01)
+
+
+### Features
+
+* parse the template using zod ([69bdd3b](https://github.com/Dicelette/core/commit/69bdd3bfb1caa29211dbd7117a4b088f7ca23fe3))
+
 ## [1.4.7](https://github.com/Dicelette/core/compare/v1.4.6...v1.4.7) (2024-12-01)
 
 
