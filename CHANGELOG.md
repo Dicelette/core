@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.5.1](https://github.com/Dicelette/core/compare/v1.5.0...v1.5.1) (2024-12-01)
+
+
+### Bug Fixes
+
+* multiple formula not parsed correctly ([d28eaca](https://github.com/Dicelette/core/commit/d28eaca96d934f31e8fdeb4336f0146bc6e92d1f))
+
 ## [1.5.0](https://github.com/Dicelette/core/compare/v1.4.7...v1.5.0) (2024-12-01)
 
 
