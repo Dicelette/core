@@ -1,5 +1,4 @@
-import { describe, expect, it } from "vitest";
-// FILEPATH: /c:/Users/simonettili/Documents/Github/discord-dicelette/src/utils/verify_template.test.ts
+import { describe, expect, it } from "bun:test";
 import * as core from "../src";
 
 describe("eval combinaison", () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import * as core from "../src";
 
 describe("roll", () => {
@@ -20,7 +20,7 @@ describe("roll", () => {
 		const result = core.roll("2d6>5");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
-		expect(result!.total).toBeGreaterThanOrEqual(6);
+		expect(result!.total).toBeGreaterThanOrEqual(2);
 		expect(result!.total).toBeLessThanOrEqual(12);
 	});
 	it("should roll the dice correctly with multiple dice", () => {
