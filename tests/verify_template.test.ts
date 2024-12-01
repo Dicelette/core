@@ -266,6 +266,17 @@ describe("skill_dice_creation", () => {
 		const expectedFormula = "1d10 + 1d40 + 20 >=40 cc";
 		expect(formula).toEqual(expectedFormula);
 	});
+	it("creating complicated roll with multiple stats", () => {
+		let dice = "1d{{round(technique/4)}}+5d{{round(endurance/4)}}";
+		const userStat = {
+			technique: 40,
+			endurance: 25,
+		};
+		dice = core.generateStatsDice(dice, userStat);
+		const formula = dice;
+		const expectedFormula = "1d10+5d6";
+		expect(formula).toEqual(expectedFormula);
+	});
 });
 describe("template form stupid", () => {
 	it("should throw an error for invalid dice type", () => {

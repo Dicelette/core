@@ -203,7 +203,6 @@ export function testStatCombinaison(template: StatisticalTemplate) {
 	);
 	if (Object.keys(onlycombinaisonStats).length === 0) return;
 	const allStats = Object.keys(template.statistics).filter(
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		(stat) => !template.statistics![stat].combinaison
 	);
 	if (allStats.length === 0) throw new NoStatisticsError();

@@ -41,18 +41,24 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)\}{2})/gim;
-	const formulaMatch = formula.exec(dice);
-	if (formulaMatch?.groups?.formula) {
-		const formula = formulaMatch.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
-		try {
-			const result = evaluate(formula);
-			return cleanedDice(dice.replace(formulaMatch.groups.formula, result.toString()));
-		} catch (error) {
-			throw new FormulaError(formulaMatch.groups.formula, "replaceFormulaInDice", error);
+	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
+	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+	let match;
+	let modifiedDice = dice;
+	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+	while ((match = formula.exec(dice)) !== null) {
+		if (match.groups?.formula) {
+			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
+			try {
+				const result = evaluate(formulae);
+				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
+			} catch (error) {
+				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
+			}
 		}
 	}
-	return cleanedDice(dice);
+
+	return cleanedDice(modifiedDice);
 }
 
 /**
