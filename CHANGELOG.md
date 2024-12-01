@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.7](https://github.com/Dicelette/core/compare/v1.4.6...v1.4.7) (2024-12-01)
+
+
+### Bug Fixes
+
+* prevent 0 when generating a random stats ([c858d8f](https://github.com/Dicelette/core/commit/c858d8f9489fd63e5f9aa203ad95784fc99d2421))
+
 ## [1.4.6](https://github.com/Dicelette/core/compare/v1.4.5...v1.4.6) (2024-11-30)
 
 
