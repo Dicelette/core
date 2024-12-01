@@ -3,17 +3,16 @@ import { evaluate } from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
-import type { Statistic, StatisticalTemplate } from ".";
+import type { StatisticalTemplate } from ".";
 import { roll } from "./dice";
 import {
 	DiceTypeError,
 	EmptyObjectError,
 	FormulaError,
-	MaxGreater,
 	NoStatisticsError,
 	TooManyDice,
-	TooManyStats,
 } from "./errors";
+import { templateSchema } from "./interfaces/zod";
 import { escapeRegex, replaceFormulaInDice } from "./utils";
 
 /**
@@ -143,55 +142,26 @@ export function evalOneCombinaison(
  * @param {any} template
  * @returns {StatisticalTemplate}
  */
-//biome-ignore lint/suspicious/noExplicitAny: I need to use any to allow any type
-export function verifyTemplateValue(template: any): StatisticalTemplate {
+export function verifyTemplateValue(template: unknown): StatisticalTemplate {
+	const parsedTemplate = templateSchema.parse(template);
 	const statistiqueTemplate: StatisticalTemplate = {
-		diceType: "",
-		statistics: {} as Statistic,
+		diceType: parsedTemplate.diceType || undefined,
+		statistics: parsedTemplate.statistics || undefined,
+		critical: parsedTemplate.critical,
+		total: parsedTemplate.total,
+		charName: parsedTemplate.charName,
+		damage: parsedTemplate.damage,
 	};
-	if (!template.statistics) statistiqueTemplate.statistics = undefined;
-	else if (template.statistics && Object.keys(template.statistics).length > 0) {
-		if (Object.keys(template.statistics).length > 25) throw new TooManyStats();
-		for (const [key, value] of Object.entries(template.statistics)) {
-			const dataValue = value as { max?: number; min?: number; combinaison?: string };
-			if (dataValue.max && dataValue.min && dataValue.max <= dataValue.min)
-				throw new MaxGreater(dataValue.min, dataValue.max);
-			if (dataValue.max && dataValue.max <= 0) dataValue.max = undefined;
-			if (dataValue.min && dataValue.min <= 0) dataValue.min = undefined;
-			let formula = dataValue.combinaison
-				? dataValue.combinaison.standardize()
-				: undefined;
-			formula = formula && formula.trim().length > 0 ? formula : undefined;
-			if (!statistiqueTemplate.statistics) {
-				statistiqueTemplate.statistics = {} as Statistic;
-			}
-			statistiqueTemplate.statistics[key] = {
-				max: dataValue.max,
-				min: dataValue.min,
-				combinaison: formula || undefined,
-			};
+	if (statistiqueTemplate.diceType) {
+		const cleanedDice = diceTypeRandomParse(
+			statistiqueTemplate.diceType,
+			statistiqueTemplate
+		);
+		const rolled = roll(cleanedDice);
+		if (!rolled) {
+			throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
 		}
 	}
-	if (template.diceType) {
-		statistiqueTemplate.diceType = template.diceType;
-		const cleanedDice = diceTypeRandomParse(template.diceType, statistiqueTemplate);
-		const rolled = roll(cleanedDice);
-		if (!rolled)
-			throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
-	}
-
-	if (template.critical && Object.keys(template.critical).length > 0) {
-		statistiqueTemplate.critical = {
-			failure: template.critical.failure ?? undefined,
-			success: template.critical.success ?? undefined,
-		};
-	}
-	if (template.total) {
-		if (template.total <= 0) template.total = undefined;
-		statistiqueTemplate.total = template.total;
-	}
-	if (template.charName) statistiqueTemplate.charName = template.charName;
-	if (template.damage) statistiqueTemplate.damage = template.damage;
 	testDiceRegistered(statistiqueTemplate);
 	testStatCombinaison(statistiqueTemplate);
 	return statistiqueTemplate;
@@ -233,6 +203,7 @@ export function testStatCombinaison(template: StatisticalTemplate) {
 	);
 	if (Object.keys(onlycombinaisonStats).length === 0) return;
 	const allStats = Object.keys(template.statistics).filter(
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		(stat) => !template.statistics![stat].combinaison
 	);
 	if (allStats.length === 0) throw new NoStatisticsError();
