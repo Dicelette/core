@@ -34,8 +34,20 @@ const criticalSchema = z.object({
 	failure: z.number().positive().optional(),
 });
 
+const criticalValueSchema = z.object({
+	sign: z.enum(["<", ">", "<=", ">=", "=", "!=", "=="]),
+	value: z.string(),
+});
+
 const damageSchema = z
 	.record(z.string())
+	.optional()
+	.refine((stats) => !stats || Object.keys(stats).length <= 25, {
+		message: "TooManyDice",
+	});
+
+const customCriticalSchema = z
+	.record(criticalValueSchema)
 	.optional()
 	.refine((stats) => !stats || Object.keys(stats).length <= 25, {
 		message: "TooManyDice",
@@ -47,7 +59,8 @@ export const templateSchema = z.object({
 	total: z.number().positive().optional(),
 	diceType: z.string().optional(),
 	critical: criticalSchema.optional(),
+	customCritical: customCriticalSchema,
 	damage: damageSchema,
 });
 
-export type StatisticalTemplateFromSchema = z.infer<typeof templateSchema>;
+export type CustomCritical = z.infer<typeof criticalValueSchema>;

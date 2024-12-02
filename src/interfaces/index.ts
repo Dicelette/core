@@ -97,6 +97,15 @@ export interface StatisticalTemplate {
 	 * How the success/echec will be done
 	 */
 	critical?: Critical;
+	/**
+	 * Custom critical, allow to adjust the critical on a statistic, and set multiple critical value
+	 */
+	customCritical?: {
+		[name: string]: {
+			sign: "<" | ">" | ">=" | "<=" | "=" | "!=" | "==";
+			value: string;
+		};
+	};
 	/** Special dice for damage */
 	damage?: {
 		[name: string]: string;

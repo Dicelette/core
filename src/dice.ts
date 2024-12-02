@@ -1,8 +1,15 @@
-/* eslint-disable no-useless-escape */
 import { DiceRoller } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 
-import type { Compare, Modifier, Resultat, Sign } from ".";
+import {
+	type Compare,
+	type CustomCritical,
+	type Modifier,
+	type Resultat,
+	type Sign,
+	type StatisticalTemplate,
+	diceTypeRandomParse,
+} from ".";
 import { DiceTypeError } from "./errors";
 import {
 	COMMENT_REGEX,
@@ -36,6 +43,28 @@ function getCompare(
 			value: Number.parseInt(calc, 10),
 		};
 	return { dice, compare };
+}
+
+/**
+ * Allow to replace the compare part of a dice and use the critical customized one
+ * @example
+ * dice = "1d20=20";
+ * custom critical {sign: ">", value: "$/2"}
+ * Random stats = 6
+ * result = "1d20>3"
+ */
+export function createCriticalCustom(
+	dice: string,
+	customCritical: CustomCritical,
+	template: StatisticalTemplate
+) {
+	const compareRegex = dice.match(SIGN_REGEX_SPACE);
+	let customDice = dice;
+	const compareValue = diceTypeRandomParse(customCritical.value, template);
+	const comparaison = `${customCritical.sign}${compareValue}`;
+	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
+	else customDice += comparaison;
+	return diceTypeRandomParse(customDice, template);
 }
 
 function getModifier(dice: string) {
