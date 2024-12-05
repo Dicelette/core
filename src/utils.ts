@@ -19,7 +19,7 @@ export function generateStatsDice(
 	originalDice: string,
 	stats?: { [name: string]: number }
 ) {
-	let dice = originalDice;
+	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
 		//damage field support adding statistic, like : 1d6 + strength
 		//check if the value contains a statistic & calculate if it's okay
@@ -44,8 +44,7 @@ export function replaceFormulaInDice(dice: string) {
 	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
-	let modifiedDice = dice;
-	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+	let modifiedDice = dice.standardize();
 	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
 			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
