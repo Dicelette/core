@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.6.0](https://github.com/Dicelette/core/compare/v1.5.2...v1.6.0) (2024-12-07)
+
+
+### Features
+
+* add schema for people that use the template in VSCode ([bedfe4a](https://github.com/Dicelette/core/commit/bedfe4a57242cc65076cada0cddd855b93eb5ced))
+* **custom-critical:** introduce custom critical value in template. ([d57d968](https://github.com/Dicelette/core/commit/d57d96861d92a81cb096b73f4473ad0718c2c147))
+
 ## [1.5.2](https://github.com/Dicelette/core/compare/v1.5.1...v1.5.2) (2024-12-06)
 
 
