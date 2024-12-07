@@ -1,0 +1,53 @@
+{
+	"$schema": "./template.schema.json",
+	"diceType": "1d40+$>40",
+	"statistics": {
+		"Force": {
+			"max": 40,
+			"min": 5
+		},
+		"Endurance": {
+			"max": 40,
+			"min": 5
+		},
+		"Dextérité": {
+			"max": 40,
+			"min": 5
+		},
+		"Intelligence": {
+			"max": 40,
+			"min": 5
+		},
+		"Charisme": {
+			"max": 40,
+			"min": 5
+		},
+		"Technique": {
+			"max": 40,
+			"min": 5
+		},
+		"Point de vie": {
+			"combinaison": "(force+endurance)*2"
+		}
+	},
+	"critical": {
+		"failure": 1,
+		"success": 40
+	},
+	"total": 130,
+	"damage": {
+		"Force": "1d{{round(force/4)}}",
+		"Endurance": "1d{{round(endurance/4)}}",
+		"Dextérité": "1d{{round(dextérité/4)}}",
+		"Intelligence": "1d{{round(intelligence/4)}}",
+		"Charisme": "1d{{round(charisme/4)}}",
+		"Technique": "1d{{round(technique/4)}}"
+	},
+	"customCritical": {
+		"Hard success": {
+			"sign": "<=",
+			"value": "round($/5)",
+			"onNaturalDice": false
+		}
+	}
+}

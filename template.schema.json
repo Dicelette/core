@@ -1,0 +1,111 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Critical": {
+            "description": "If the result can be considered as a critical\nCritical is compared to the \"natural\" dice result, so any modifier doesn't count",
+            "properties": {
+                "failure": {
+                    "description": "The value that will be considered as a failure",
+                    "type": "integer"
+                },
+                "success": {
+                    "description": "The value that will be considered as a success",
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "CustomCritical": {
+            "properties": {
+                "onNaturalDice": {
+                    "description": "If \"true\", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.",
+                    "type": "boolean"
+                },
+                "sign": {
+                    "description": "Sign of the comparison",
+                    "enum": [
+                        "!=",
+                        "<",
+                        "<=",
+                        "=",
+                        "==",
+                        ">",
+                        ">="
+                    ],
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Can be a simple value, or a formula, including the statistics with $",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "sign",
+                "value"
+            ],
+            "type": "object"
+        }
+    },
+    "properties": {
+        "$schema": {
+            "description": "Specifies the URL for the schema definition\nThis property is optional and should contain a valid URI.",
+            "type": "string"
+        },
+        "charName": {
+            "description": "Allow to force the user to choose a name for them characters",
+            "type": "boolean"
+        },
+        "critical": {
+            "$ref": "#/definitions/Critical",
+            "description": "How the success/echec will be done"
+        },
+        "customCritical": {
+            "additionalProperties": {
+                "$ref": "#/definitions/CustomCritical"
+            },
+            "description": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
+            "maximum": 22,
+            "type": "object"
+        },
+        "damage": {
+            "additionalProperties": {
+                "type": "string"
+            },
+            "description": "Special dice for damage",
+            "maximum": 25,
+            "type": "object"
+        },
+        "diceType": {
+            "description": "A dice type in the notation supported by the bot",
+            "type": "string"
+        },
+        "statistics": {
+            "additionalProperties": {
+                "properties": {
+                    "combinaison": {
+                        "description": "The combinaison that can be made with ANOTHER statistic\nAutomatically disable the max/min value",
+                        "type": "string"
+                    },
+                    "max": {
+                        "description": "The value of the statistic that can take the stats",
+                        "type": "integer"
+                    },
+                    "min": {
+                        "description": "The minimal value of the statistic that can take the stats",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "description": "The statistics that can be used in the dice throw",
+            "maximum": 25,
+            "type": "object"
+        },
+        "total": {
+            "description": "A total can be set, it allows to calculate the total value of a future register member\nIf the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown",
+            "type": "integer"
+        }
+    },
+    "type": "object"
+}
+

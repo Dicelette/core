@@ -37,6 +37,7 @@ const criticalSchema = z.object({
 const criticalValueSchema = z.object({
 	sign: z.enum(["<", ">", "<=", ">=", "=", "!=", "=="]),
 	value: z.string(),
+	onNaturalDice: z.boolean().optional(),
 });
 
 const damageSchema = z
@@ -49,7 +50,7 @@ const damageSchema = z
 const customCriticalSchema = z
 	.record(criticalValueSchema)
 	.optional()
-	.refine((stats) => !stats || Object.keys(stats).length <= 25, {
+	.refine((stats) => !stats || Object.keys(stats).length <= 22, {
 		message: "TooManyDice",
 	});
 
@@ -62,5 +63,3 @@ export const templateSchema = z.object({
 	customCritical: customCriticalSchema,
 	damage: damageSchema,
 });
-
-export type CustomCritical = z.infer<typeof criticalValueSchema>;

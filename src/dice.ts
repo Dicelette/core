@@ -22,7 +22,6 @@ function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray
 ): { dice: string; compare: Compare | undefined } {
-	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: Compare;
 	const calc = compareRegex[1];
@@ -31,7 +30,6 @@ function getCompare(
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
 		const total = evaluate(toCalc);
-		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 		dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
@@ -102,7 +100,6 @@ export function roll(dice: string): Resultat | undefined {
 	if (dice.includes(";") && dice.includes("&")) return sharedRolls(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);
-		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
