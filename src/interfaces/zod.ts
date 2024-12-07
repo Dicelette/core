@@ -57,7 +57,7 @@ const customCriticalSchema = z
 export const templateSchema = z.object({
 	charName: z.boolean().optional(),
 	statistics: statisticSchema,
-	total: z.number().positive().min(0).optional(),
+	total: z.number().min(0).optional(),
 	diceType: z.string().optional(),
 	critical: criticalSchema.optional(),
 	customCritical: customCriticalSchema,
