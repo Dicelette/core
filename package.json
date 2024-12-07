@@ -10,25 +10,18 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"scripts": {
 		"test": "vitest",
-		"build": "tsup",
-		"prepublish": "npm run build",
+		"build": "tsup && bun run schema",
+		"schema": "typescript-json-schema tsconfig.json \"StatisticalSchema\" --required --includeComments -o template.schema.json",
+		"prerelease": "npm run build",
 		"lint": "biome format --write src",
 		"tsc": "tsc --noEmit --skipLibCheck",
 		"release": "commit-and-tag-version",
 		"postrelease": "git push --follow-tags origin main && pnpm publish"
 	},
-	"keywords": [
-		"discord",
-		"roll",
-		"library",
-		"bot",
-		"typescript"
-	],
+	"keywords": ["discord", "roll", "library", "bot", "typescript"],
 	"author": "Mara-Li",
 	"license": "GPL-3.0-only",
 	"dependencies": {
