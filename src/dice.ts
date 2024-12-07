@@ -59,6 +59,8 @@ export function createCriticalCustom(
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let customDice = dice;
 	const compareValue = diceTypeRandomParse(customCritical.value, template);
+	if (compareValue.includes("$"))
+		throw new DiceTypeError(compareValue, "createCriticalCustom");
 	const comparaison = `${customCritical.sign}${compareValue}`;
 	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
 	else customDice += comparaison;
