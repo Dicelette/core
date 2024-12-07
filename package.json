@@ -15,7 +15,6 @@
 		"test": "vitest",
 		"build": "tsup && bun run schema",
 		"schema": "typescript-json-schema tsconfig.json \"StatisticalSchema\" --required --includeComments -o dicelette.schema.json",
-		"postschema": "git commit -am \"chore: Update schema\"",
 		"prerelease": "npm run build",
 		"lint": "biome format --write src",
 		"tsc": "tsc --noEmit --skipLibCheck",
