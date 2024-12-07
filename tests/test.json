@@ -1,0 +1,8 @@
+{
+	"$schema": "../dicelette.schema.json",
+	"charName": true,
+	"critical": {
+		"failure": 1,
+		"success": 20
+	}
+}
