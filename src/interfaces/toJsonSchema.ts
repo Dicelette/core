@@ -1,6 +1,6 @@
 import type { StatisticalTemplate } from "./index";
 
-interface StatisticalSchema extends StatisticalTemplate {
+export interface StatisticalSchema extends StatisticalTemplate {
 	/**
 	 * Specifies the URL for the schema definition
 	 * This property is optional and should contain a valid URI.
