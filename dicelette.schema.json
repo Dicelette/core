@@ -5,11 +5,11 @@
             "description": "If the result can be considered as a critical\nCritical is compared to the \"natural\" dice result, so any modifier doesn't count",
             "properties": {
                 "failure": {
-                    "description": "The value that will be considered as a failure",
+                    "description": "The value that will be considered as a failure.\nCan only be compared strictly with the natural dice result",
                     "type": "integer"
                 },
                 "success": {
-                    "description": "The value that will be considered as a success",
+                    "description": "The value that will be considered as a success\nCan only be compared strictly with the natural dice result",
                     "type": "integer"
                 }
             },

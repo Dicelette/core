@@ -127,11 +127,13 @@ export interface StatisticalTemplate {
 export interface Critical {
 	/**
 	 * The value that will be considered as a success
+	 * Can only be compared strictly with the natural dice result
 	 * @TJS-type integer
 	 */
 	success?: number;
 	/**
-	 * The value that will be considered as a failure
+	 * The value that will be considered as a failure.
+	 * Can only be compared strictly with the natural dice result
 	 * @TJS-type integer
 	 */
 	failure?: number;
