@@ -143,7 +143,7 @@ export interface CustomCritical {
 	/**
 	 * Sign of the comparison
 	 */
-	sign: "<" | ">" | "<=" | ">=" | "=" | "!=" | "==";
+	sign: "<" | ">" | "<=" | ">=" | "!=" | "==";
 	/**
 	 * Can be a simple value, or a formula, including the statistics with $
 	 * @example round($/2)

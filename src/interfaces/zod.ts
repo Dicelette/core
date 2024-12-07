@@ -35,7 +35,7 @@ const criticalSchema = z.object({
 });
 
 const criticalValueSchema = z.object({
-	sign: z.enum(["<", ">", "<=", ">=", "=", "!=", "=="]),
+	sign: z.enum(["<", ">", "<=", ">=", "!=", "=="]),
 	value: z.string(),
 	onNaturalDice: z.boolean().optional(),
 });
