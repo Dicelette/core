@@ -4,7 +4,7 @@ import { Random } from "random-js";
 import "uniformize";
 
 import type { StatisticalTemplate } from ".";
-import { roll } from "./dice";
+import { createCriticalCustom, roll } from "./dice";
 import {
 	DiceTypeError,
 	EmptyObjectError,
@@ -50,7 +50,6 @@ export function evalStatsDice(testDice: string, allStats?: { [name: string]: num
  */
 export function diceRandomParse(value: string, template: StatisticalTemplate) {
 	if (!template.statistics) return value;
-	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	value = value.standardize();
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
@@ -87,7 +86,7 @@ export function diceTypeRandomParse(dice: string, template: StatisticalTemplate)
 	const { min, max } = stats;
 	const total = template.total || 100;
 	const randomStatValue = generateRandomStat(total, max, min);
-	return replaceFormulaInDice(dice.replace("$", randomStatValue.toString()));
+	return replaceFormulaInDice(dice.replaceAll("$", randomStatValue.toString()));
 }
 
 /**
@@ -145,12 +144,13 @@ export function evalOneCombinaison(
 export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
 	const statistiqueTemplate: StatisticalTemplate = {
-		diceType: parsedTemplate.diceType || undefined,
-		statistics: parsedTemplate.statistics || undefined,
+		diceType: parsedTemplate.diceType,
+		statistics: parsedTemplate.statistics,
 		critical: parsedTemplate.critical,
 		total: parsedTemplate.total,
 		charName: parsedTemplate.charName,
 		damage: parsedTemplate.damage,
+		customCritical: parsedTemplate.customCritical,
 	};
 	if (statistiqueTemplate.diceType) {
 		const cleanedDice = diceTypeRandomParse(
@@ -160,6 +160,22 @@ export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 		const rolled = roll(cleanedDice);
 		if (!rolled) {
 			throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
+		}
+	}
+	if (statistiqueTemplate.customCritical) {
+		if (!statistiqueTemplate.diceType) {
+			throw new DiceTypeError("no_dice_type", "verifyTemplateValue", "no dice type");
+		}
+		const customCritical = statistiqueTemplate.customCritical;
+		for (const [, custom] of Object.entries(customCritical)) {
+			const cleanedDice = createCriticalCustom(
+				statistiqueTemplate.diceType!,
+				custom,
+				statistiqueTemplate
+			);
+			const rolled = roll(cleanedDice);
+			if (!rolled)
+				throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
 		}
 	}
 	testDiceRegistered(statistiqueTemplate);

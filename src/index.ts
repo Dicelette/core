@@ -5,3 +5,4 @@ export * from "./verify_template";
 export * from "./errors";
 export * from "./interfaces/constant";
 export * from "./interfaces/zod";
+export * from "./interfaces/toJsonSchema";

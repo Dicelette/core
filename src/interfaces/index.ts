@@ -59,10 +59,12 @@ export type Statistic = {
 	[name: string]: {
 		/**
 		 * The value of the statistic that can take the stats
+		 * @TJS-type integer
 		 */
 		max?: number;
 		/**
 		 * The minimal value of the statistic that can take the stats
+		 * @TJS-type integer
 		 */
 		min?: number;
 		/**
@@ -84,11 +86,16 @@ export type Statistic = {
 export interface StatisticalTemplate {
 	/** Allow to force the user to choose a name for them characters */
 	charName?: boolean;
+	/**
+	 * The statistics that can be used in the dice throw
+	 * @maximum 25
+	 */
 	statistics?: Statistic;
 	/**
 	 * A total can be set, it allows to calculate the total value of a future register member
 	 * If the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown
 	 * @note statistique that have a formula will be ignored from the total
+	 * @TJS-type integer
 	 */
 	total?: number;
 	/** A dice type in the notation supported by the bot */
@@ -97,7 +104,17 @@ export interface StatisticalTemplate {
 	 * How the success/echec will be done
 	 */
 	critical?: Critical;
-	/** Special dice for damage */
+	/**
+	 * Custom critical, allow to adjust the critical on a statistic, and set multiple critical value
+	 * @maximum 22
+	 */
+	customCritical?: {
+		[name: string]: CustomCritical;
+	};
+
+	/** Special dice for damage
+	 * @maximum 25
+	 * */
 	damage?: {
 		[name: string]: string;
 	};
@@ -110,10 +127,28 @@ export interface StatisticalTemplate {
 export interface Critical {
 	/**
 	 * The value that will be considered as a success
+	 * @TJS-type integer
 	 */
 	success?: number;
 	/**
 	 * The value that will be considered as a failure
+	 * @TJS-type integer
 	 */
 	failure?: number;
+}
+
+export interface CustomCritical {
+	/**
+	 * Sign of the comparison
+	 */
+	sign: "<" | ">" | "<=" | ">=" | "=" | "!=" | "==";
+	/**
+	 * Can be a simple value, or a formula, including the statistics with $
+	 * @example round($/2)
+	 */
+	value: string;
+	/**
+	 * If "true", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.
+	 */
+	onNaturalDice?: boolean;
 }

@@ -1,5 +1,6 @@
 import { expect, it } from "bun:test";
 import * as core from "../src";
+import type { StatisticalTemplate } from "../src";
 
 // Add more tests for different scenarios
 it("should verify the template correctly", () => {
@@ -8,6 +9,28 @@ it("should verify the template correctly", () => {
 		diceType: "1d20+{{ceil(($-10)/2)}}>20",
 		damage: {
 			piercing: "1d6+2",
+		},
+	};
+	const result = core.verifyTemplateValue(template);
+	expect(result).toEqual(template);
+});
+
+it("template validated with customCritical value", () => {
+	const template: StatisticalTemplate = {
+		statistics: { stat1: { max: 10, min: 1 } },
+		diceType: "1d20+{{ceil(($-10)/2)}}>20",
+		damage: {
+			piercing: "1d6+2",
+		},
+		customCritical: {
+			hardSuccess: {
+				sign: ">",
+				value: "{{round($/5)}}",
+			},
+			hardFailure: {
+				sign: "<",
+				value: "{{round($/5)}}",
+			},
 		},
 	};
 	const result = core.verifyTemplateValue(template);

@@ -1,8 +1,15 @@
-/* eslint-disable no-useless-escape */
 import { DiceRoller } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 
-import type { Compare, Modifier, Resultat, Sign } from ".";
+import {
+	type Compare,
+	type CustomCritical,
+	type Modifier,
+	type Resultat,
+	type Sign,
+	type StatisticalTemplate,
+	diceTypeRandomParse,
+} from ".";
 import { DiceTypeError } from "./errors";
 import {
 	COMMENT_REGEX,
@@ -15,7 +22,6 @@ function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray
 ): { dice: string; compare: Compare | undefined } {
-	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: Compare;
 	const calc = compareRegex[1];
@@ -24,7 +30,6 @@ function getCompare(
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
 		const total = evaluate(toCalc);
-		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 		dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
@@ -36,6 +41,30 @@ function getCompare(
 			value: Number.parseInt(calc, 10),
 		};
 	return { dice, compare };
+}
+
+/**
+ * Allow to replace the compare part of a dice and use the critical customized one
+ * @example
+ * dice = "1d20=20";
+ * custom critical {sign: ">", value: "$/2"}
+ * Random stats = 6
+ * result = "1d20>3"
+ */
+export function createCriticalCustom(
+	dice: string,
+	customCritical: CustomCritical,
+	template: StatisticalTemplate
+) {
+	const compareRegex = dice.match(SIGN_REGEX_SPACE);
+	let customDice = dice;
+	const compareValue = diceTypeRandomParse(customCritical.value, template);
+	if (compareValue.includes("$"))
+		throw new DiceTypeError(compareValue, "createCriticalCustom");
+	const comparaison = `${customCritical.sign}${compareValue}`;
+	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
+	else customDice += comparaison;
+	return diceTypeRandomParse(customDice, template);
 }
 
 function getModifier(dice: string) {
@@ -73,7 +102,6 @@ export function roll(dice: string): Resultat | undefined {
 	if (dice.includes(";") && dice.includes("&")) return sharedRolls(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);
-		//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
