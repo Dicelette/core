@@ -1,4 +1,5 @@
 {
+    "$id": "Dicelette",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
         "Critical": {
@@ -6,19 +7,23 @@
             "properties": {
                 "failure": {
                     "description": "The value that will be considered as a failure",
+                    "title": "failure",
                     "type": "integer"
                 },
                 "success": {
                     "description": "The value that will be considered as a success",
+                    "title": "success",
                     "type": "integer"
                 }
             },
+            "title": "Critical",
             "type": "object"
         },
         "CustomCritical": {
             "properties": {
                 "onNaturalDice": {
                     "description": "If \"true\", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.",
+                    "title": "onNaturalDice",
                     "type": "boolean"
                 },
                 "sign": {
@@ -32,10 +37,12 @@
                         ">",
                         ">="
                     ],
+                    "title": "sign",
                     "type": "string"
                 },
                 "value": {
                     "description": "Can be a simple value, or a formula, including the statistics with $",
+                    "title": "value",
                     "type": "string"
                 }
             },
@@ -43,28 +50,33 @@
                 "sign",
                 "value"
             ],
+            "title": "CustomCritical",
             "type": "object"
         }
     },
     "properties": {
         "$schema": {
             "description": "Specifies the URL for the schema definition\nThis property is optional and should contain a valid URI.",
+            "title": "$schema",
             "type": "string"
         },
         "charName": {
             "description": "Allow to force the user to choose a name for them characters",
+            "title": "charName",
             "type": "boolean"
         },
         "critical": {
-            "$ref": "#/definitions/Critical",
-            "description": "How the success/echec will be done"
+            "$ref": "Dicelette#/definitions/Critical",
+            "description": "How the success/echec will be done",
+            "title": "critical"
         },
         "customCritical": {
             "additionalProperties": {
-                "$ref": "#/definitions/CustomCritical"
+                "$ref": "Dicelette#/definitions/CustomCritical"
             },
             "description": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
             "maximum": 22,
+            "title": "customCritical",
             "type": "object"
         },
         "damage": {
@@ -73,10 +85,12 @@
             },
             "description": "Special dice for damage",
             "maximum": 25,
+            "title": "damage",
             "type": "object"
         },
         "diceType": {
             "description": "A dice type in the notation supported by the bot",
+            "title": "diceType",
             "type": "string"
         },
         "statistics": {
@@ -84,14 +98,17 @@
                 "properties": {
                     "combinaison": {
                         "description": "The combinaison that can be made with ANOTHER statistic\nAutomatically disable the max/min value",
+                        "title": "combinaison",
                         "type": "string"
                     },
                     "max": {
                         "description": "The value of the statistic that can take the stats",
+                        "title": "max",
                         "type": "integer"
                     },
                     "min": {
                         "description": "The minimal value of the statistic that can take the stats",
+                        "title": "min",
                         "type": "integer"
                     }
                 },
@@ -99,10 +116,12 @@
             },
             "description": "The statistics that can be used in the dice throw",
             "maximum": 25,
+            "title": "statistics",
             "type": "object"
         },
         "total": {
             "description": "A total can be set, it allows to calculate the total value of a future register member\nIf the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown",
+            "title": "total",
             "type": "integer"
         }
     },
