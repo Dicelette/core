@@ -163,6 +163,9 @@ export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 		}
 	}
 	if (statistiqueTemplate.customCritical) {
+		if (!statistiqueTemplate.diceType) {
+			throw new DiceTypeError("no_dice_type", "verifyTemplateValue", "no dice type");
+		}
 		const customCritical = statistiqueTemplate.customCritical;
 		for (const [, custom] of Object.entries(customCritical)) {
 			const cleanedDice = createCriticalCustom(
