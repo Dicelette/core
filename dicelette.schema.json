@@ -15,33 +15,10 @@
             },
             "type": "object"
         },
-        "CustomCritical": {
-            "properties": {
-                "onNaturalDice": {
-                    "description": "If \"true\", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.",
-                    "type": "boolean"
-                },
-                "sign": {
-                    "description": "Sign of the comparison",
-                    "enum": [
-                        "!=",
-                        "<",
-                        "<=",
-                        "==",
-                        ">",
-                        ">="
-                    ],
-                    "type": "string"
-                },
-                "value": {
-                    "description": "Can be a simple value, or a formula, including the statistics with $",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "sign",
-                "value"
-            ],
+        "Record<string,CustomCritical>": {
+            "type": "object"
+        },
+        "Record<string,string>": {
             "type": "object"
         }
     },
@@ -59,20 +36,14 @@
             "description": "How the success/echec will be done"
         },
         "customCritical": {
-            "additionalProperties": {
-                "$ref": "#/definitions/CustomCritical"
-            },
+            "$ref": "#/definitions/Record<string,CustomCritical>",
             "description": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
-            "maximum": 22,
-            "type": "object"
+            "maximum": 22
         },
         "damage": {
-            "additionalProperties": {
-                "type": "string"
-            },
+            "$ref": "#/definitions/Record<string,string>",
             "description": "Special dice for damage",
-            "maximum": 25,
-            "type": "object"
+            "maximum": 25
         },
         "diceType": {
             "description": "A dice type in the notation supported by the bot",
