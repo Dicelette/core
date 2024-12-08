@@ -18,9 +18,9 @@ import { escapeRegex, replaceFormulaInDice } from "./utils";
 /**
  * Verify if the provided dice work with random value
  * @param testDice {string}
- * @param allStats {[name: string]: number}
+ * @param allStats {Record<string,number>}
  */
-export function evalStatsDice(testDice: string, allStats?: { [name: string]: number }) {
+export function evalStatsDice(testDice: string, allStats?: Record<string, number>) {
 	let dice = testDice.trimEnd();
 	if (allStats && Object.keys(allStats).length > 0) {
 		const names = Object.keys(allStats);
@@ -91,14 +91,14 @@ export function diceTypeRandomParse(dice: string, template: StatisticalTemplate)
 
 /**
  * Random the combinaison and evaluate it to check if everything is valid
- * @param combinaison {[name: string]: string}
- * @param stats {[name: string]: string|number}
+ * @param combinaison {Record<string,string>}
+ * @param stats {Record<string,number|number>}
  */
 export function evalCombinaison(
-	combinaison: { [name: string]: string },
-	stats: { [name: string]: string | number }
+	combinaison: Record<string, string>,
+	stats: Record<string, number | string>
 ) {
-	const newStats: { [name: string]: number } = {};
+	const newStats: Record<string, number> = {};
 	for (const [stat, combin] of Object.entries(combinaison)) {
 		//replace the stats in formula
 		let formula = combin.standardize();
@@ -122,7 +122,7 @@ export function evalCombinaison(
  */
 export function evalOneCombinaison(
 	combinaison: string,
-	stats: { [name: string]: string | number }
+	stats: Record<string, number | string>
 ) {
 	let formula = combinaison.standardize();
 	for (const [statName, value] of Object.entries(stats)) {

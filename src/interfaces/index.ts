@@ -108,16 +108,12 @@ export interface StatisticalTemplate {
 	 * Custom critical, allow to adjust the critical on a statistic, and set multiple critical value
 	 * @maximum 22
 	 */
-	customCritical?: {
-		[name: string]: CustomCritical;
-	};
+	customCritical?: Record<string, CustomCritical>;
 
 	/** Special dice for damage
 	 * @maximum 25
 	 * */
-	damage?: {
-		[name: string]: string;
-	};
+	damage?: Record<string, string>;
 }
 
 /**
