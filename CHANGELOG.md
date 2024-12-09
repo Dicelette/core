@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.7.0](https://github.com/Dicelette/core/compare/v1.6.0...v1.7.0) (2024-12-09)
+
+
+### Features
+
+* **dice:** enhance dice comparison with roll detail ([d9ec47e](https://github.com/Dicelette/core/commit/d9ec47ef113f900ae4a5f1d0cdbe4ade68c364ec))
+
 ## [1.6.1](https://github.com/Dicelette/core/compare/v1.6.0...v1.6.1) (2024-12-08)
 
 ## [1.6.0](https://github.com/Dicelette/core/compare/v1.5.2...v1.6.0) (2024-12-07)
