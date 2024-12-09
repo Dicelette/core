@@ -34,6 +34,14 @@ export interface Compare {
 	 * Value of the comparison
 	 */
 	value: number;
+	/**
+	 * Original dice if the comparaison is made with a dice throw
+	 */
+	originalDice?: string;
+	/**
+	 * Output of the dice throw
+	 */
+	rollValue?: string;
 }
 
 /**

@@ -29,18 +29,39 @@ function getCompare(
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
-		const total = evaluate(toCalc);
+		const rCompare = rollCompare(toCalc);
+		const total = evaluate(rCompare.value.toString());
 		dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
 			value: total,
+			originalDice: rCompare.dice,
+			rollValue: rCompare.diceResult,
 		};
-	} else
+	} else {
+		const rcompare = rollCompare(calc);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
-			value: Number.parseInt(calc, 10),
+			value: rcompare.value,
+			originalDice: rcompare.dice,
+			rollValue: rcompare.diceResult,
 		};
+	}
 	return { dice, compare };
+}
+
+function rollCompare(value: unknown) {
+	const isNumber = (value: unknown): boolean =>
+		typeof value === "number" ||
+		(!Number.isNaN(Number(value)) && typeof value === "string");
+	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
+	const rollComp = roll(value as string);
+	console.log(rollComp);
+	return {
+		dice: value as string,
+		value: rollComp?.total ?? 0,
+		diceResult: rollComp?.result,
+	};
 }
 
 /**
@@ -157,7 +178,6 @@ export function roll(dice: string): Resultat | undefined {
  * @returns
  */
 export function calculator(sign: Sign, value: number, total: number): number {
-	//biome-ignore lint/style/noParameterAssign: I need to assign the value to the variable
 	if (sign === "^") sign = "**";
 	return evaluate(`${total} ${sign} ${value}`);
 }
