@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.0](https://github.com/Dicelette/core/compare/v1.7.0...v1.8.0) (2024-12-10)
+
+
+### Features
+
+* add affectSkill option to custom critical on dbD command ([39d6fa8](https://github.com/Dicelette/core/commit/39d6fa8b28f84fda172b423e2e49f889b627ef6e))
+
 ## [1.7.0](https://github.com/Dicelette/core/compare/v1.6.0...v1.7.0) (2024-12-09)
 
 

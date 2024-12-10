@@ -1,6 +1,6 @@
 {
 	"name": "@dicelette/core",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"description": "Core library for the Dicelette Discord bot",
 	"repository": {
 		"type": "git",
@@ -15,8 +15,7 @@
 	],
 	"scripts": {
 		"test": "vitest",
-		"build": "tsup && bun run schema",
-		"schema": "typescript-json-schema tsconfig.json \"StatisticalSchema\" --required --includeComments -o dicelette.schema.json",
+		"build": "tsup",
 		"prerelease": "npm run build",
 		"lint": "biome format --write src",
 		"tsc": "tsc --noEmit --skipLibCheck",
