@@ -157,4 +157,9 @@ export interface CustomCritical {
 	 * If "true", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.
 	 */
 	onNaturalDice?: boolean;
+	/**
+	 * Allow to use the custom critical on dbD command (damage)
+	 * @default false
+	 */
+	affectSkill?: boolean;
 }
