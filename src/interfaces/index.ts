@@ -56,6 +56,7 @@ export interface Modifier {
 	sign?: Sign;
 	/**
 	 * Value of the modifier
+	 * @TJS-type integer
 	 */
 	value: number;
 }
@@ -63,8 +64,13 @@ export interface Modifier {
 /**
  * Statistic object template
  */
-export type Statistic = {
-	[name: string]: {
+export type Statistic = Record<
+	/**
+	 * The name of the statistic
+	 * @TJS-type string
+	 */
+	string,
+	{
 		/**
 		 * The value of the statistic that can take the stats
 		 * @TJS-type integer
@@ -80,8 +86,8 @@ export type Statistic = {
 		 * Automatically disable the max/min value
 		 */
 		combinaison?: string;
-	};
-};
+	}
+>;
 
 /**
  * @example

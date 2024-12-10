@@ -136,6 +136,16 @@ export function evalOneCombinaison(
 	}
 }
 
+function convertNumber(number: string | number | undefined) {
+	if (!number) return undefined;
+	const isNumber = (value: unknown): boolean =>
+		typeof value === "number" ||
+		(!Number.isNaN(Number(value)) && typeof value === "string");
+	if (number.toString().length === 0) return undefined;
+	if (isNumber(number)) return Number.parseInt(number.toString(), 10);
+	return undefined;
+}
+
 /**
  * Parse the provided JSON and verify each field to check if everything could work when rolling
  * @param {any} template
@@ -143,10 +153,15 @@ export function evalOneCombinaison(
  */
 export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
+	const { success, failure } = parsedTemplate.critical ?? {};
+	const criticicalVal = {
+		success: convertNumber(success),
+		failure: convertNumber(failure),
+	};
 	const statistiqueTemplate: StatisticalTemplate = {
 		diceType: parsedTemplate.diceType,
 		statistics: parsedTemplate.statistics,
-		critical: parsedTemplate.critical,
+		critical: criticicalVal,
 		total: parsedTemplate.total,
 		charName: parsedTemplate.charName,
 		damage: parsedTemplate.damage,
@@ -169,6 +184,7 @@ export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 		const customCritical = statistiqueTemplate.customCritical;
 		for (const [, custom] of Object.entries(customCritical)) {
 			const cleanedDice = createCriticalCustom(
+				// biome-ignore lint/style/noNonNullAssertion: <explanation>
 				statistiqueTemplate.diceType!,
 				custom,
 				statistiqueTemplate

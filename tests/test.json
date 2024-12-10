@@ -1,8 +1,27 @@
 {
 	"$schema": "../dicelette.schema.json",
-	"charName": true,
+	"charName": false,
+	"statistics": {
+		"name": {
+			"min": 1,
+			"max": 20
+		},
+		"combinaison": {
+			"combinaison": "2d6"
+		}
+	},
+	"diceType": "1d20",
 	"critical": {
 		"failure": 1,
 		"success": 20
+	},
+	"total": 80,
+	"customCritical": {
+		"name": {
+			"sign": "=",
+			"value": "15",
+			"onNaturalDice": true,
+			"affectSkill": true
+		}
 	}
 }

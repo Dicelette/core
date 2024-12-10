@@ -29,10 +29,20 @@ const statisticSchema = z
 		message: "TooManyStats",
 	});
 
-const criticalSchema = z.object({
-	success: z.number().positive().optional(),
-	failure: z.number().positive().optional(),
-});
+const criticalSchema = z
+	.object({
+		success: z.string().or(z.number().positive()).optional(),
+		failure: z.string().or(z.number().positive()).optional(),
+	})
+	.transform((values) => {
+		if (values.success === "") values.success = undefined;
+		if (values.failure === "") values.failure = undefined;
+		if (values.failure === 0) values.failure = undefined;
+		if (values.success === 0) values.success = undefined;
+		values.success = Number.parseInt(values.success as string, 10);
+		values.failure = Number.parseInt(values.failure as string, 10);
+		return values;
+	});
 
 const criticalValueSchema = z.object({
 	sign: z.enum(["<", ">", "<=", ">=", "!=", "=="]),
