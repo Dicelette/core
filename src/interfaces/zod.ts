@@ -48,6 +48,7 @@ const criticalValueSchema = z.object({
 	sign: z.enum(["<", ">", "<=", ">=", "!=", "=="]),
 	value: z.string(),
 	onNaturalDice: z.boolean().optional(),
+	affectSkill: z.boolean().optional(),
 });
 
 const damageSchema = z
