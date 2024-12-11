@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.4](https://github.com/Dicelette/core/compare/v1.8.3...v1.8.4) (2024-12-11)
+
+
+### Bug Fixes
+
+* **custom-critical:** forgot to  update zod to add "affectSkill" boolean ([023535d](https://github.com/Dicelette/core/commit/023535d804d78c9a06d742d16ed3cde5022d65fa))
+
 ## [1.8.3](https://github.com/Dicelette/core/compare/v1.8.2...v1.8.3) (2024-12-11)
 
 ## [1.8.2](https://github.com/Dicelette/core/compare/v1.8.1...v1.8.2) (2024-12-11)
