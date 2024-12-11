@@ -214,6 +214,7 @@ export function testDiceRegistered(template: StatisticalTemplate) {
 			const rolled = roll(randomDiceParsed);
 			if (!rolled) throw new DiceTypeError(name, "testDiceRegistered", "no roll result");
 		} catch (error) {
+			console.error(error);
 			throw new DiceTypeError(name, "testDiceRegistered", error);
 		}
 	}
