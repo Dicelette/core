@@ -56,7 +56,6 @@ function rollCompare(value: unknown) {
 		(!Number.isNaN(Number(value)) && typeof value === "string");
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
 	const rollComp = roll(value as string);
-	console.log(rollComp);
 	return {
 		dice: value as string,
 		value: rollComp?.total ?? 0,
