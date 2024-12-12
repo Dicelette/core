@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.7](https://github.com/Dicelette/core/compare/v1.8.6...v1.8.7) (2024-12-12)
+
+
+### Bug Fixes
+
+* **dice:** handle non-dice throw evaluation in parseDice function ([2eb2846](https://github.com/Dicelette/core/commit/2eb2846bf9129feec58904bf8d861053fe2e8277))
+
 ## [1.8.6](https://github.com/Dicelette/core/compare/v1.8.5...v1.8.6) (2024-12-12)
 
 ## [1.8.5](https://github.com/Dicelette/core/compare/v1.8.4...v1.8.5) (2024-12-11)
