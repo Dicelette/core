@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.9.0](https://github.com/Dicelette/core/compare/v1.8.7...v1.9.0) (2024-12-13)
+
+
+### Features
+
+* **interfaces:** add optional exclude field to schema ([df6d0a1](https://github.com/Dicelette/core/commit/df6d0a1cacec2bcee1bb8375e97a98232b9bb2ec))
+* **utils:** add dollarValue parameter to generateStatsDice function ([e17e528](https://github.com/Dicelette/core/commit/e17e528e18cc6146c8dc69f8442d2e93b13ba492))
+
 ## [1.8.7](https://github.com/Dicelette/core/compare/v1.8.6...v1.8.7) (2024-12-12)
 
 
