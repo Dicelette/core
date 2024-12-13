@@ -14,8 +14,13 @@ export function escapeRegex(string: string) {
  * Replace the stat name by their value using stat and after evaluate any formula using `replaceFormulaInDice`
  * @param originalDice {dice}
  * @param stats {Record<string,number>}
+ * @param dollarValue
  */
-export function generateStatsDice(originalDice: string, stats?: Record<string, number>) {
+export function generateStatsDice(
+	originalDice: string,
+	stats?: Record<string, number>,
+	dollarValue?: string
+) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
 		//damage field support adding statistic, like : 1d6 + strength
@@ -30,6 +35,7 @@ export function generateStatsDice(originalDice: string, stats?: Record<string, n
 			}
 		}
 	}
+	if (dollarValue) dice = dice.replaceAll("$", dollarValue);
 	return replaceFormulaInDice(dice);
 }
 
