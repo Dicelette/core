@@ -130,3 +130,4 @@ dist
 .pnp.*
 .idea
 scratchPad.ts
+/pnpm-lock.yaml
