@@ -86,6 +86,10 @@ export type Statistic = Record<
 		 * Automatically disable the max/min value
 		 */
 		combinaison?: string;
+		/**
+		 * Allow to exclude from roll selection in /dbroll!
+		 */
+		exclude?: boolean;
 	}
 >;
 

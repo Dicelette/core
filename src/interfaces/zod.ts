@@ -11,6 +11,7 @@ const statisticValueSchema = z
 			.string()
 			.transform((str) => str.trim() || undefined)
 			.optional(),
+		exclude: z.boolean().optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (data.max !== undefined && data.min !== undefined && data.max <= data.min) {
