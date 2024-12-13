@@ -29,7 +29,13 @@
 					},
 					"sign": {
 						"description": "The sign of the comparaison",
-						"enum": ["=", "<", ">", "<=", ">="],
+						"enum": [
+							"=",
+							"<",
+							">",
+							"<=",
+							">="
+						],
 						"type": "string"
 					},
 					"value": {
@@ -85,6 +91,10 @@
 					"min": {
 						"description": "The minimal value of the statistic that can take the stats",
 						"type": "integer"
+					},
+					"exclude": {
+						"description": "Allow to exclude from the command dbroll",
+						"type": "boolean"
 					}
 				},
 				"type": "object"
