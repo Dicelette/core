@@ -48,6 +48,7 @@ export function replaceFormulaInDice(dice: string) {
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice.standardize();
+	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
 			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");

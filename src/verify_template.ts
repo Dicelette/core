@@ -184,7 +184,6 @@ export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 		const customCritical = statistiqueTemplate.customCritical;
 		for (const [, custom] of Object.entries(customCritical)) {
 			const cleanedDice = createCriticalCustom(
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
 				statistiqueTemplate.diceType!,
 				custom,
 				statistiqueTemplate

@@ -3,6 +3,7 @@ import { evaluate } from "mathjs";
 
 import {
 	type Compare,
+	type ComparedValue,
 	type CustomCritical,
 	type Modifier,
 	type Resultat,
@@ -21,9 +22,9 @@ import {
 function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray
-): { dice: string; compare: Compare | undefined } {
+): { dice: string; compare: ComparedValue | undefined } {
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
-	let compare: Compare;
+	let compare: ComparedValue;
 	const calc = compareRegex[1];
 	const sign = calc.match(/[+-\/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
@@ -120,7 +121,7 @@ export function roll(dice: string): Resultat | undefined {
 	//parse dice string
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
-	let compare: Compare | undefined;
+	let compare: ComparedValue | undefined;
 	if (dice.includes(";") && dice.includes("&")) return sharedRolls(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);

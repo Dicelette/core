@@ -14,7 +14,7 @@ export interface Resultat {
 	/**
 	 * The comparison made on the dice
 	 */
-	compare?: Compare | undefined;
+	compare?: ComparedValue;
 	/**
 	 * If any value was added to the dice throw
 	 */
@@ -34,6 +34,14 @@ export interface Compare {
 	 * Value of the comparison
 	 */
 	value: number;
+}
+
+/**
+ * Sign format for calculation of modifier
+ */
+export type Sign = "+" | "-" | "*" | "/" | "%" | "^" | "**";
+
+export type ComparedValue = Compare & {
 	/**
 	 * Original dice if the comparaison is made with a dice throw
 	 */
@@ -42,12 +50,7 @@ export interface Compare {
 	 * Output of the dice throw
 	 */
 	rollValue?: string;
-}
-
-/**
- * Sign format for calculation of modifier
- */
-export type Sign = "+" | "-" | "*" | "/" | "%" | "^" | "**";
+};
 
 export interface Modifier {
 	/**
