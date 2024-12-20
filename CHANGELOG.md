@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.0](https://github.com/Dicelette/core/compare/v1.10.1...v1.11.0) (2024-12-20)
+
+
+### Features
+
+* **sharedRoll:** allow comment per roll ([6d5965b](https://github.com/Dicelette/core/commit/6d5965bed0efa31592334348b3267a1b33c95ad0))
+
+
+### Bug Fixes
+
+* **roll:** use named group for comments ([040f7f9](https://github.com/Dicelette/core/commit/040f7f9985da21f33c791ba001489271d541697d))
+
 ## [1.10.1](https://github.com/Dicelette/core/compare/v1.10.0...v1.10.1) (2024-12-20)
 
 
