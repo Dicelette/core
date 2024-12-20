@@ -285,7 +285,15 @@ function sharedRolls(dice: string): Resultat | undefined {
 		);
 	const results = [];
 	const split = dice.split(";");
-	const diceResult = roll(split[0]);
+	let diceMain = split[0];
+	const toHideRegex = /\((?<dice>.*)\)/
+	const toHide = diceMain.match(toHideRegex);
+	let hidden = false;
+	if (toHide?.groups?.dice) {
+		diceMain = toHide.groups.dice;
+		hidden = true;
+	}
+	const diceResult = roll(diceMain);
 	if (!diceResult || !diceResult.total) return undefined;
 	results.push(`${diceResult.result}`);
 
@@ -330,9 +338,10 @@ function sharedRolls(dice: string): Resultat | undefined {
 			}
 		}
 	}
-
+	if (hidden) //remove the first in result
+		results.shift();
 	return {
-		dice: split[0],
+		dice: diceMain,
 		result: results.join(";"),
 		comment: comments,
 		compare: diceResult.compare,
