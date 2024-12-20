@@ -277,13 +277,14 @@ function replaceText(element: string, total: number, dice: string) {
 
 function sharedRolls(dice: string): Resultat | undefined {
 	/* bulk roll are not allowed in shared rolls */
-	if (dice.includes("#"))
+	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
 			dice,
 			"noBulkRoll",
 			"bulk roll are not allowed in shared rolls"
 		);
 	const results = [];
+	const mainComment = COMMENT_REGEX.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
 	let diceMain = split[0];
 	const toHideRegex = /\((?<dice>.*)\)/
@@ -302,6 +303,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 	results.push(`${comments}${diceResult.result}`);
 
 	let total = diceResult.total;
+	diceResult.comment = mainComment;
 	if (!total) return diceResult;
 	for (let element of split.slice(1)) {
 		const commentsMatch = commentsRegex.exec(element);
@@ -345,7 +347,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 	return {
 		dice: diceMain,
 		result: results.join(";"),
-		comment: "",
+		comment:mainComment,
 		compare: diceResult.compare,
 		modifier: diceResult.modifier,
 		total,
