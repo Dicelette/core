@@ -308,15 +308,8 @@ function sharedRolls(dice: string): Resultat | undefined {
 	for (let element of split.slice(1)) {
 		const commentsMatch = commentsRegex.exec(element);
 		const comment = commentsMatch?.groups?.comments ? `${commentsMatch.groups.comments} - ` : "";
-		element = element.replace(commentsRegex, "").trim();
-		if (!element.includes(SYMBOL_DICE)) {
-			const result = roll(element);
-			if (!result) continue;
-			results.push(`◈ ${comment}${result.result}`);
-			continue;
-		}
-		element = element.replace(COMMENT_REGEX, "");
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
+		element = element.replace(commentsRegex, "").trim();
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
 			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult);
