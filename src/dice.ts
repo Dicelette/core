@@ -122,7 +122,7 @@ export function roll(dice: string): Resultat | undefined {
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
-	if (dice.includes(";") && dice.includes("&")) return sharedRolls(dice);
+	if (dice.includes(";")) return sharedRolls(dice);
 	if (compareRegex) {
 		const compareResult = getCompare(dice, compareRegex);
 		dice = compareResult.dice;
