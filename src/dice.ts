@@ -290,10 +290,13 @@ function sharedRolls(dice: string): Resultat | undefined {
 	const split = dice.split(";");
 	let diceMain = split[0];
 	const toHideRegex = /\((?<dice>.*)\)/
-	const toHide = diceMain.match(toHideRegex);
+	const toHide = toHideRegex.exec(diceMain)?.groups;
 	let hidden = false;
-	if (toHide?.groups?.dice) {
-		diceMain = toHide.groups.dice;
+	if (toHide?.dice) {
+		diceMain = toHide.dice;
+		hidden = true;
+	} else if (toHide) {
+		diceMain = "1d1"
 		hidden = true;
 	}
 	const commentsRegex = /\[(?<comments>.*)\]/gi;
