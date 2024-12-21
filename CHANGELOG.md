@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.2](https://github.com/Dicelette/core/compare/v1.11.1...v1.11.2) (2024-12-21)
+
+
+### Bug Fixes
+
+* **utils:** improve stat replacement ([b00563c](https://github.com/Dicelette/core/commit/b00563c97e95ae525ffaec6167fbeb35bf9979a2))
+
 ## [1.11.1](https://github.com/Dicelette/core/compare/v1.11.0...v1.11.1) (2024-12-20)
 
 
