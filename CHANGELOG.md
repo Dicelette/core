@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.4](https://github.com/Dicelette/core/compare/v1.11.3...v1.11.4) (2024-12-21)
+
+
+### Bug Fixes
+
+* **sharedRoll:** add a specific icon for the dice main, allowing a better replacement for the success text ([2763c5a](https://github.com/Dicelette/core/commit/2763c5aa727f6fa987cfa6524253320ab94499b7))
+
 ## [1.11.3](https://github.com/Dicelette/core/compare/v1.11.2...v1.11.3) (2024-12-21)
 
 ## [1.11.2](https://github.com/Dicelette/core/compare/v1.11.1...v1.11.2) (2024-12-21)
