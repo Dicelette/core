@@ -1,23 +1,18 @@
-import { DiceRoller } from "@dice-roller/rpg-dice-roller";
-import { evaluate } from "mathjs";
+import {DiceRoller} from "@dice-roller/rpg-dice-roller";
+import {evaluate} from "mathjs";
 
 import {
 	type Compare,
 	type ComparedValue,
 	type CustomCritical,
+	diceTypeRandomParse,
 	type Modifier,
 	type Resultat,
-	type Sign,
+	type Sign, standardizeDice,
 	type StatisticalTemplate,
-	diceTypeRandomParse,
 } from ".";
-import { DiceTypeError } from "./errors";
-import {
-	COMMENT_REGEX,
-	SIGN_REGEX,
-	SIGN_REGEX_SPACE,
-	SYMBOL_DICE,
-} from "./interfaces/constant";
+import {DiceTypeError} from "./errors";
+import {COMMENT_REGEX, SIGN_REGEX, SIGN_REGEX_SPACE, SYMBOL_DICE,} from "./interfaces/constant";
 
 function getCompare(
 	dice: string,
@@ -119,6 +114,7 @@ function getModifier(dice: string) {
  */
 export function roll(dice: string): Resultat | undefined {
 	//parse dice string
+	dice = standardizeDice(dice);
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
@@ -275,6 +271,12 @@ function replaceText(element: string, total: number, dice: string) {
 	};
 }
 
+function formatComment(dice: string) {
+	const commentsRegex = /\[(?<comments>.*)\]/;
+	const commentsMatch = commentsRegex.exec(dice);
+	return commentsMatch?.groups?.comments ? `__${commentsMatch.groups.comments}__ — ` : "";
+}
+
 function sharedRolls(dice: string): Resultat | undefined {
 	/* bulk roll are not allowed in shared rolls */
 	if (dice.match(/\d+?#(.*?)/))
@@ -295,8 +297,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 		hidden = true;
 	}
 	const commentsRegex = /\[(?<comments>.*)\]/gi;
-	const commentsMatch = commentsRegex.exec(diceMain);
-	const comments = commentsMatch?.groups?.comments ? `${commentsMatch.groups.comments} - ` : "";
+	const comments = formatComment(diceMain);
 	diceMain = diceMain.replaceAll(commentsRegex, "").trim()
 	const diceResult = roll(diceMain);
 	if (!diceResult || !diceResult.total) return undefined;
@@ -306,10 +307,9 @@ function sharedRolls(dice: string): Resultat | undefined {
 	diceResult.comment = mainComment;
 	if (!total) return diceResult;
 	for (let element of split.slice(1)) {
-		const commentsMatch = commentsRegex.exec(element);
-		const comment = commentsMatch?.groups?.comments ? `${commentsMatch.groups.comments} - ` : "";
-		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
+		const comment = formatComment(element);
 		element = element.replace(commentsRegex, "").trim();
+		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
 			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult);
