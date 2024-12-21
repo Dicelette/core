@@ -304,8 +304,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 	diceMain = diceMain.replaceAll(commentsRegex, "").trim()
 	const diceResult = roll(diceMain);
 	if (!diceResult || !diceResult.total) return undefined;
-	results.push(`${comments}${diceResult.result}`);
-
+	results.push(`※ ${comments}${diceResult.result}`);
 	let total = diceResult.total;
 	diceResult.comment = mainComment;
 	if (!total) return diceResult;
