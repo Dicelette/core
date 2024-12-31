@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.5](https://github.com/Dicelette/core/compare/v1.11.4...v1.11.5) (2024-12-31)
+
+
+### Bug Fixes
+
+* **utils:** should standardize dice when using generateStats ([3a56ec8](https://github.com/Dicelette/core/commit/3a56ec804d73e25527d488eba7b1b67a3e8044f7))
+
 ## [1.11.4](https://github.com/Dicelette/core/compare/v1.11.3...v1.11.4) (2024-12-21)
 
 
