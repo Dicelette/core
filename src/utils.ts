@@ -34,7 +34,7 @@ export function generateStatsDice(
 	stats?: Record<string, number>,
 	dollarValue?: string
 ) {
-	let dice = originalDice;
+	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
 		//damage field support adding statistic, like : 1d6 + strength
 		//check if the value contains a statistic & calculate if it's okay
