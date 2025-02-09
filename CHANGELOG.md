@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.7](https://github.com/Dicelette/core/compare/v1.11.6...v1.11.7) (2025-02-09)
+
+
+### Bug Fixes
+
+* **sharedRoll:** comments with parenthesis collide with hidden main dice ([db82c33](https://github.com/Dicelette/core/commit/db82c33789374148bc3105acb2fc7af603c27879))
+
 ## [1.11.6](https://github.com/Dicelette/core/compare/v1.11.5...v1.11.6) (2025-02-09)
 
 
