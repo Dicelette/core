@@ -16,11 +16,9 @@ export function escapeRegex(string: string) {
  * @return {string} the dice with the text in brackets as if, but the dice (not in brackets) is standardized
  */
 export function standardizeDice(dice: string): string {
-	return dice.replace(
-			/(\[[^\]]+\])|([^[]+)/g,
-			(match, insideBrackets, outsideText) =>
-				insideBrackets ? insideBrackets : outsideText.standardize()
-		);
+	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (match, insideBrackets, outsideText) =>
+		insideBrackets ? insideBrackets : outsideText.standardize()
+	);
 }
 
 /**
@@ -61,6 +59,7 @@ export function replaceFormulaInDice(dice: string) {
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice;
+	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
 			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
