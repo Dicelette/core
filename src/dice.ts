@@ -299,7 +299,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 		/\s+#(?<comment>.*)/.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
 	let diceMain = split[0];
-	const toHideRegex = /\((?<dice>.*)\)/;
+	const toHideRegex = /(?<!\[[^\]]*)\((?<dice>[^)]+)\)/;
 	const toHide = toHideRegex.exec(diceMain)?.groups;
 	let hidden = false;
 	if (toHide?.dice) {
