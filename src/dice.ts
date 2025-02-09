@@ -1,18 +1,24 @@
-import {DiceRoller} from "@dice-roller/rpg-dice-roller";
-import {evaluate} from "mathjs";
+import { DiceRoller } from "@dice-roller/rpg-dice-roller";
+import { evaluate } from "mathjs";
 
 import {
 	type Compare,
 	type ComparedValue,
 	type CustomCritical,
-	diceTypeRandomParse,
 	type Modifier,
 	type Resultat,
-	type Sign, standardizeDice,
+	type Sign,
 	type StatisticalTemplate,
+	diceTypeRandomParse,
+	standardizeDice,
 } from ".";
-import {DiceTypeError} from "./errors";
-import {COMMENT_REGEX, SIGN_REGEX, SIGN_REGEX_SPACE, SYMBOL_DICE,} from "./interfaces/constant";
+import { DiceTypeError } from "./errors";
+import {
+	COMMENT_REGEX,
+	SIGN_REGEX,
+	SIGN_REGEX_SPACE,
+	SYMBOL_DICE,
+} from "./interfaces/constant";
 
 function getCompare(
 	dice: string,
@@ -52,7 +58,8 @@ function rollCompare(value: unknown) {
 		(!Number.isNaN(Number(value)) && typeof value === "string");
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
 	const rollComp = roll(value as string);
-	if (!rollComp?.total) //not a dice throw
+	if (!rollComp?.total)
+		//not a dice throw
 		return { value: evaluate(value as string), diceResult: value as string };
 	return {
 		dice: value as string,
@@ -267,18 +274,20 @@ function compareSignFormule(
 function replaceText(element: string, total: number, dice: string) {
 	return {
 		formule: element.replace(SYMBOL_DICE, `[${total}]`).replace(/%.*%/g, "").trim(),
-		diceAll: element.replace(SYMBOL_DICE, `[${dice.replace(COMMENT_REGEX, "")}]`).replace(/%.*%/g, "").trim(),
+		diceAll: element
+			.replace(SYMBOL_DICE, `[${dice.replace(COMMENT_REGEX, "")}]`)
+			.replace(/%.*%/g, "")
+			.trim(),
 	};
 }
 
 function formatComment(dice: string) {
-	const commentsRegex = /\[(?<comments>.*)\]/;
+	const commentsRegex = /\[(?<comments>.*?)\]/;
 	const commentsMatch = commentsRegex.exec(dice);
 	return commentsMatch?.groups?.comments ? `__${commentsMatch.groups.comments}__ — ` : "";
 }
 
 function sharedRolls(dice: string): Resultat | undefined {
-	/* bulk roll are not allowed in shared rolls */
 	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
 			dice,
@@ -286,22 +295,23 @@ function sharedRolls(dice: string): Resultat | undefined {
 			"bulk roll are not allowed in shared rolls"
 		);
 	const results = [];
-	const mainComment = COMMENT_REGEX.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
+	const mainComment =
+		/\s+#(?<comment>.*)/.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
 	let diceMain = split[0];
-	const toHideRegex = /\((?<dice>.*)\)/
+	const toHideRegex = /\((?<dice>.*)\)/;
 	const toHide = toHideRegex.exec(diceMain)?.groups;
 	let hidden = false;
 	if (toHide?.dice) {
 		diceMain = toHide.dice;
 		hidden = true;
 	} else if (toHide) {
-		diceMain = "1d1"
+		diceMain = "1d1";
 		hidden = true;
 	}
-	const commentsRegex = /\[(?<comments>.*)\]/gi;
+	const commentsRegex = /\[(?<comments>.*?)\]/gi;
 	const comments = formatComment(diceMain);
-	diceMain = diceMain.replaceAll(commentsRegex, "").trim()
+	diceMain = diceMain.replaceAll(commentsRegex, "").trim();
 	const diceResult = roll(diceMain);
 	if (!diceResult || !diceResult.total) return undefined;
 	results.push(`※ ${comments}${diceResult.result}`);
@@ -331,18 +341,21 @@ function sharedRolls(dice: string): Resultat | undefined {
 			} catch (error) {
 				const evaluated = roll(toRoll);
 				if (evaluated)
-					results.push(`◈ ${comment}${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`);
+					results.push(
+						`◈ ${comment}${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`
+					);
 				else results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
 				total += evaluated?.total ?? 0;
 			}
 		}
 	}
-	if (hidden) //remove the first in result
+	if (hidden)
+		//remove the first in result
 		results.shift();
 	return {
 		dice: diceMain,
 		result: results.join(";"),
-		comment:mainComment,
+		comment: mainComment,
 		compare: diceResult.compare,
 		modifier: diceResult.modifier,
 		total,
