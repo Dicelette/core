@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.6](https://github.com/Dicelette/core/compare/v1.11.5...v1.11.6) (2025-02-09)
+
+
+### Bug Fixes
+
+* **sharedRoll:** comments for roll shouldn't be used as global command ([e65fbab](https://github.com/Dicelette/core/commit/e65fbab04c8c1f255a6ce5b1732b9ecbaaa07634))
+
 ## [1.11.5](https://github.com/Dicelette/core/compare/v1.11.4...v1.11.5) (2024-12-31)
 
 
