@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.0](https://github.com/Dicelette/core/compare/v1.11.7...v1.12.0) (2025-02-11)
+
+
+### Features
+
+* **verify:template:** replace {{exp}} placeholder with default value in dice evaluation ([6e33ab3](https://github.com/Dicelette/core/commit/6e33ab3acce0c96f801c850b9d7906c688a77c93))
+
 ## [1.11.7](https://github.com/Dicelette/core/compare/v1.11.6...v1.11.7) (2025-02-09)
 
 
