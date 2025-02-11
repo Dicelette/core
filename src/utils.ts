@@ -59,12 +59,12 @@ export function replaceFormulaInDice(dice: string) {
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice;
-	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
 			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
 				const result = evaluate(formulae);
+				if (result instanceof Object || typeof result === "function") continue;
 				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
 				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
