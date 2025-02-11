@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.1](https://github.com/Dicelette/core/compare/v1.12.0...v1.12.1) (2025-02-11)
+
+
+### Bug Fixes
+
+* **dice:** use {exp} to prevent colliding with {{exp}} stats name ([05fab86](https://github.com/Dicelette/core/commit/05fab86ed7d8e6a89f434bbf23b2c76ff95b158a))
+
 ## [1.12.0](https://github.com/Dicelette/core/compare/v1.11.7...v1.12.0) (2025-02-11)
 
 
