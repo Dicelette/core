@@ -121,7 +121,7 @@ function getModifier(dice: string) {
  */
 export function roll(dice: string): Resultat | undefined {
 	//parse dice string
-	dice = standardizeDice(dice);
+	dice = standardizeDice(dice).replace(/^\+/, "").trimStart();
 	if (!dice.includes("d")) return undefined;
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
