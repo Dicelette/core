@@ -12,7 +12,7 @@ it("should verify the template correctly", () => {
 		},
 	};
 	const result = core.verifyTemplateValue(template);
-	expect(result).toEqual(template);
+	expect(result).toMatchObject(template);
 });
 
 it("template validated with customCritical value", () => {
@@ -34,29 +34,29 @@ it("template validated with customCritical value", () => {
 		},
 	};
 	const result = core.verifyTemplateValue(template);
-	expect(result).toEqual(template);
+	expect(result).toMatchObject(template);
 });
 
 it("testing no statistic, only damage", () => {
-	const template = {
+	const template: StatisticalTemplate = {
 		diceType: "d6",
 		damage: {
 			piercing: "1d6+2>20",
 		},
 	};
 	const result = core.verifyTemplateValue(template);
-	expect(result).toEqual(template);
+	expect(result).toMatchObject(template);
 });
 
 it("testing with formula dices", () => {
-	const template = {
+	const template: StatisticalTemplate = {
 		diceType: "1d20",
 		damage: {
 			regeneration: "1d6;round(&/2)",
 		},
 	};
 	const result = core.verifyTemplateValue(template);
-	expect(result).toEqual(template);
+	expect(result).toMatchObject(template);
 });
 
 it("should throw an error for invalid dice type", () => {

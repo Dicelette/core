@@ -38,6 +38,11 @@ describe("Shared results", () => {
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
 	});
+	it("should be valid when starting with +", () => {
+		const result = core.roll("+2d6;&+2");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("2d6");
+	});
 	it("comparison", () => {
 		const result = core.roll("2d6;&+2>5");
 		expect(result).not.toBeUndefined();
