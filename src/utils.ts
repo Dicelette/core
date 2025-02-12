@@ -55,15 +55,15 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
+	const regExp = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice;
-	while ((match = formula.exec(dice)) !== null) {
+	while ((match = regExp.exec(dice)) !== null) {
 		if (match.groups?.formula) {
-			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
+			const formula = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
-				const result = evaluate(formulae);
+				const result = evaluate(formula);
 				if (result instanceof Object || typeof result === "function") continue;
 				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
