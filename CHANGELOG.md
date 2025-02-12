@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.2](https://github.com/Dicelette/core/compare/v1.12.1...v1.12.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* **dice:** remove leading '+' from dice string in roll function ([9e2aee9](https://github.com/Dicelette/core/commit/9e2aee9e70283e1fe0d6bca41a97120e917911d8))
+* **utils:** rename variable for clarity in replaceFormulaInDice function ([40b619b](https://github.com/Dicelette/core/commit/40b619bc03f9405aa119612b7a4e0448512b43ee))
+
 ## [1.12.1](https://github.com/Dicelette/core/compare/v1.12.0...v1.12.1) (2025-02-11)
 
 
