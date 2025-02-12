@@ -9,6 +9,13 @@ describe("passing", () => {
 		expect(result!.total).toBeGreaterThanOrEqual(2);
 		expect(result!.total).toBeLessThanOrEqual(12);
 	});
+	it("valid even when starting with +", () => {
+		const result = core.roll("+2d6");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("2d6");
+		expect(result!.total).toBeGreaterThanOrEqual(2);
+		expect(result!.total).toBeLessThanOrEqual(12);
+	});
 	it("modifier", () => {
 		const result = core.roll("2d6+3");
 		expect(result).not.toBeUndefined();
