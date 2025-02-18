@@ -3,17 +3,15 @@ import { evaluate } from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
-import type { StatisticalTemplate } from ".";
-import { createCriticalCustom, roll } from "./dice";
-import {
-	DiceTypeError,
+import {type StatisticalTemplate, createCriticalCustom, roll, DiceTypeError,
 	EmptyObjectError,
 	FormulaError,
 	NoStatisticsError,
-	TooManyDice,
-} from "./errors";
-import { templateSchema } from "./interfaces/zod";
-import { escapeRegex, replaceFormulaInDice } from "./utils";
+	escapeRegex, replaceFormulaInDice,
+	templateSchema,
+	TooManyDice,} from ".";
+import {isNumber} from "./utils";
+
 
 /**
  * Verify if the provided dice work with random value
@@ -138,9 +136,6 @@ export function evalOneCombinaison(
 
 function convertNumber(number: string | number | undefined) {
 	if (!number) return undefined;
-	const isNumber = (value: unknown): boolean =>
-		typeof value === "number" ||
-		(!Number.isNaN(Number(value)) && typeof value === "string");
 	if (number.toString().length === 0) return undefined;
 	if (isNumber(number)) return Number.parseInt(number.toString(), 10);
 	return undefined;

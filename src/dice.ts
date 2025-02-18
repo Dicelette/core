@@ -1,5 +1,6 @@
 import {DiceRoller} from "@dice-roller/rpg-dice-roller";
 import {evaluate} from "mathjs";
+import {isNumber} from "./utils";
 
 import {
 	type Compare,
@@ -8,11 +9,12 @@ import {
 	diceTypeRandomParse,
 	type Modifier,
 	type Resultat,
-	type Sign, standardizeDice,
+	type Sign,
+	standardizeDice,
 	type StatisticalTemplate,
+	DiceTypeError,
+	COMMENT_REGEX, SIGN_REGEX, SIGN_REGEX_SPACE, SYMBOL_DICE
 } from ".";
-import {DiceTypeError} from "./errors";
-import {COMMENT_REGEX, SIGN_REGEX, SIGN_REGEX_SPACE, SYMBOL_DICE,} from "./interfaces/constant";
 
 function getCompare(
 	dice: string,
@@ -47,9 +49,6 @@ function getCompare(
 }
 
 function rollCompare(value: unknown) {
-	const isNumber = (value: unknown): boolean =>
-		typeof value === "number" ||
-		(!Number.isNaN(Number(value)) && typeof value === "string");
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
 	const rollComp = roll(value as string);
 	if (!rollComp?.total) //not a dice throw
