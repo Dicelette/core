@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.2](https://github.com/Dicelette/core/compare/v1.12.1...v1.12.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* **dice:** remove leading '+' from dice string in roll function ([9e2aee9](https://github.com/Dicelette/core/commit/9e2aee9e70283e1fe0d6bca41a97120e917911d8))
+* **utils:** rename variable for clarity in replaceFormulaInDice function ([40b619b](https://github.com/Dicelette/core/commit/40b619bc03f9405aa119612b7a4e0448512b43ee))
+
+## [1.12.1](https://github.com/Dicelette/core/compare/v1.12.0...v1.12.1) (2025-02-11)
+
+
+### Bug Fixes
+
+* **dice:** use {exp} to prevent colliding with {{exp}} stats name ([05fab86](https://github.com/Dicelette/core/commit/05fab86ed7d8e6a89f434bbf23b2c76ff95b158a))
+
+## [1.12.0](https://github.com/Dicelette/core/compare/v1.11.7...v1.12.0) (2025-02-11)
+
+
+### Features
+
+* **verify:template:** replace {{exp}} placeholder with default value in dice evaluation ([6e33ab3](https://github.com/Dicelette/core/commit/6e33ab3acce0c96f801c850b9d7906c688a77c93))
+
+## [1.11.7](https://github.com/Dicelette/core/compare/v1.11.6...v1.11.7) (2025-02-09)
+
+
+### Bug Fixes
+
+* **sharedRoll:** comments with parenthesis collide with hidden main dice ([db82c33](https://github.com/Dicelette/core/commit/db82c33789374148bc3105acb2fc7af603c27879))
+
+## [1.11.6](https://github.com/Dicelette/core/compare/v1.11.5...v1.11.6) (2025-02-09)
+
+
+### Bug Fixes
+
+* **sharedRoll:** comments for roll shouldn't be used as global command ([e65fbab](https://github.com/Dicelette/core/commit/e65fbab04c8c1f255a6ce5b1732b9ecbaaa07634))
+
 ## [1.11.5](https://github.com/Dicelette/core/compare/v1.11.4...v1.11.5) (2024-12-31)
 
 

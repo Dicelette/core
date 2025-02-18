@@ -1,7 +1,7 @@
 import { expect, it } from "bun:test";
 import * as core from "../src";
 
-it("creating roll dice with formula", () => {
+it("simple roll", () => {
 	const dice = "1d20+$>20";
 	const userStat = 10;
 	const calculation = core.replaceFormulaInDice(
@@ -11,7 +11,7 @@ it("creating roll dice with formula", () => {
 	const expectedFormula = "1d20+10>20 coucou";
 	expect(formula).toEqual(expectedFormula);
 });
-it("creating roll dice with success formula", () => {
+it("success formula", () => {
 	const dice = "1d20+5>{{$*2}}";
 	const userStat = 10;
 	const calculation = core.replaceFormulaInDice(
@@ -21,7 +21,7 @@ it("creating roll dice with success formula", () => {
 	const expectedFormula = "1d20+5>20 coucou";
 	expect(formula).toEqual(expectedFormula);
 });
-it("creating roll dice with complicated formula", () => {
+it("complicated formula", () => {
 	const dice = "1d20+{{ceil((10-$)/2)}}>20";
 	const userStat = 5;
 	const calculation = core.replaceFormulaInDice(
@@ -31,7 +31,7 @@ it("creating roll dice with complicated formula", () => {
 	const expectedFormula = "1d20+3>20 coucou";
 	expect(formula).toEqual(expectedFormula);
 });
-it("creating roll dice with negative formula", () => {
+it("negative formula", () => {
 	const dice = "1d20+{{ceil(($-10)/2)}}>20";
 	const userStat = 5;
 	const calculation = core.replaceFormulaInDice(

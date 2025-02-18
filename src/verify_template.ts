@@ -31,7 +31,7 @@ export function evalStatsDice(testDice: string, allStats?: Record<string, number
 		}
 	}
 	try {
-		if (!roll(replaceFormulaInDice(dice)))
+		if (!roll(replaceFormulaInDice(dice.replace("{exp}", "1"))))
 			throw new DiceTypeError(dice, "evalStatsDice", "no roll result");
 		return testDice;
 	} catch (error) {

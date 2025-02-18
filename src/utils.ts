@@ -1,6 +1,6 @@
-import {evaluate} from "mathjs";
+import { evaluate } from "mathjs";
 import "uniformize";
-import {FormulaError} from ".";
+import { FormulaError } from "./errors";
 
 /**
  * Escape regex string
@@ -16,11 +16,9 @@ export function escapeRegex(string: string) {
  * @return {string} the dice with the text in brackets as if, but the dice (not in brackets) is standardized
  */
 export function standardizeDice(dice: string): string {
-	return dice.replace(
-			/(\[[^\]]+\])|([^[]+)/g,
-			(match, insideBrackets, outsideText) =>
-				insideBrackets ? insideBrackets : outsideText.standardize()
-		);
+	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (match, insideBrackets, outsideText) =>
+		insideBrackets ? insideBrackets : outsideText.standardize()
+	);
 }
 
 /**
@@ -57,16 +55,16 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
+	const regExp = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice;
-	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-	while ((match = formula.exec(dice)) !== null) {
+	while ((match = regExp.exec(dice)) !== null) {
 		if (match.groups?.formula) {
-			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
+			const formula = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
-				const result = evaluate(formulae);
+				const result = evaluate(formula);
+				if (result instanceof Object || typeof result === "function") continue;
 				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
 				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
@@ -84,17 +82,6 @@ export function replaceFormulaInDice(dice: string) {
  * - `--` = `+`
  * @param dice {string}
  */
-function cleanedDice(dice: string) {
+export function cleanedDice(dice: string) {
 	return dice.replaceAll("+-", "-").replaceAll("--", "+").replaceAll("++", "+").trimEnd();
-}
-
-/**
- * Verify if a value is a number, even if it's a "number" string
- * @private
- * @param value {unknown}
- * @returns {boolean}
- */
-export function isNumber(value: unknown): boolean {
-	return typeof value === "number" ||
-		(!Number.isNaN(Number(value)) && typeof value === "string");
 }
