@@ -11,14 +11,13 @@ import {
 	type StatisticalTemplate,
 	diceTypeRandomParse,
 	standardizeDice,
-} from ".";
-import { DiceTypeError } from "./errors";
-import {
+	DiceTypeError,
 	COMMENT_REGEX,
 	SIGN_REGEX,
 	SIGN_REGEX_SPACE,
 	SYMBOL_DICE,
-} from "./interfaces/constant";
+} from ".";
+import { isNumber } from "./utils";
 
 function getCompare(
 	dice: string,
@@ -53,9 +52,6 @@ function getCompare(
 }
 
 function rollCompare(value: unknown) {
-	const isNumber = (value: unknown): boolean =>
-		typeof value === "number" ||
-		(!Number.isNaN(Number(value)) && typeof value === "string");
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
 	const rollComp = roll(value as string);
 	if (!rollComp?.total)

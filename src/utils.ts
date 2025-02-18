@@ -1,6 +1,6 @@
 import { evaluate } from "mathjs";
 import "uniformize";
-import { FormulaError } from "./errors";
+import { FormulaError } from ".";
 
 /**
  * Escape regex string
@@ -55,16 +55,16 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const regExp = /(?<formula>\{{2}(.+?)}{2})/gim;
+	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let match;
 	let modifiedDice = dice;
-	while ((match = regExp.exec(dice)) !== null) {
+	// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
-			const formula = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
+			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
-				const result = evaluate(formula);
-				if (result instanceof Object || typeof result === "function") continue;
+				const result = evaluate(formulae);
 				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
 				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
@@ -82,6 +82,21 @@ export function replaceFormulaInDice(dice: string) {
  * - `--` = `+`
  * @param dice {string}
  */
-export function cleanedDice(dice: string) {
+function cleanedDice(dice: string) {
 	return dice.replaceAll("+-", "-").replaceAll("--", "+").replaceAll("++", "+").trimEnd();
+}
+
+/**
+ * Verify if a value is a number, even if it's a "number" string
+ * @param value {unknown}
+ * @returns {boolean}
+ */
+export function isNumber(value: unknown): boolean {
+	return (
+		value !== undefined &&
+		(typeof value === "number" ||
+			(!Number.isNaN(Number(value)) &&
+				typeof value === "string" &&
+				value.trim().length > 0))
+	);
 }

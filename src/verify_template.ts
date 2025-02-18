@@ -3,15 +3,20 @@ import { evaluate } from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
-import {type StatisticalTemplate, createCriticalCustom, roll, DiceTypeError,
+import {
+	type StatisticalTemplate,
+	createCriticalCustom,
+	roll,
+	DiceTypeError,
 	EmptyObjectError,
 	FormulaError,
 	NoStatisticsError,
-	escapeRegex, replaceFormulaInDice,
+	escapeRegex,
+	replaceFormulaInDice,
 	templateSchema,
-	TooManyDice,} from ".";
-import {isNumber} from "./utils";
-
+	TooManyDice,
+} from ".";
+import { isNumber } from "./utils";
 
 /**
  * Verify if the provided dice work with random value
