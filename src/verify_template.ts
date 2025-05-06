@@ -208,7 +208,7 @@ export function testDiceRegistered(template: StatisticalTemplate) {
 	if (Object.keys(template.damage).length > 25) throw new TooManyDice();
 	for (const [name, dice] of Object.entries(template.damage)) {
 		if (!dice) continue;
-		const randomDiceParsed = diceRandomParse(dice, template);
+		const randomDiceParsed = diceRandomParse(dice, template).replaceAll("{exp}", "1");
 		try {
 			const rolled = roll(randomDiceParsed);
 			if (!rolled) throw new DiceTypeError(name, "no_roll_result", dice);

@@ -77,3 +77,13 @@ it("should throw an error for invalid dice type", () => {
 	};
 	expect(() => core.verifyTemplateValue(template)).toThrow();
 });
+it("Should be valid", () => {
+	const template = {
+		diceType: "1d20",
+		damage: {
+			piercing: "1d{exp}",
+		},
+	};
+	const result = core.verifyTemplateValue(template);
+	expect(result).toMatchObject(template);
+})
