@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.4](https://github.com/Dicelette/core/compare/v1.12.3...v1.12.4) (2025-05-06)
+
+
+### Bug Fixes
+
+* **verifyTemplate:** in case where there are no statistic, the dice was returned without replacing the {exp} and other expr. ([16859f3](https://github.com/Dicelette/core/commit/16859f3a48bee454b4b78bc089ce18a1a0c6659d))
+
 ## [1.12.3](https://github.com/Dicelette/core/compare/v1.12.2...v1.12.3) (2025-02-18)
 
 ## [1.12.2](https://github.com/Dicelette/core/compare/v1.12.1...v1.12.2) (2025-02-12)
