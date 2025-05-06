@@ -49,7 +49,7 @@ export function evalStatsDice(testDice: string, allStats?: Record<string, number
  * @returns
  */
 export function diceRandomParse(value: string, template: StatisticalTemplate) {
-	if (!template.statistics) return value;
+	if (!template.statistics) return replaceFormulaInDice(value.standardize());
 	value = value.standardize();
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
