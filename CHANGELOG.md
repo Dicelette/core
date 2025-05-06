@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.5](https://github.com/Dicelette/core/compare/v1.12.4...v1.12.5) (2025-05-06)
+
+
+### Bug Fixes
+
+* **verifyTemplate:** when testing registered dice, replace the {exp} by 1 to validate ([285c5bf](https://github.com/Dicelette/core/commit/285c5bfde4e58478ce82c45e6fbae27a7ebc3a4a))
+
 ## [1.12.4](https://github.com/Dicelette/core/compare/v1.12.3...v1.12.4) (2025-05-06)
 
 
