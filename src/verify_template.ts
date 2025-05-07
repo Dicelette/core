@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { evaluate } from "mathjs";
+import { evaluate, randomInt } from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
@@ -208,7 +207,8 @@ export function testDiceRegistered(template: StatisticalTemplate) {
 	if (Object.keys(template.damage).length > 25) throw new TooManyDice();
 	for (const [name, dice] of Object.entries(template.damage)) {
 		if (!dice) continue;
-		const randomDiceParsed = diceRandomParse(dice, template).replaceAll("{exp}", "1");
+		const diceReplaced = dice.replaceAll("{exp}", `${randomInt(1, 999)}`);
+		const randomDiceParsed = diceRandomParse(diceReplaced, template);
 		try {
 			const rolled = roll(randomDiceParsed);
 			if (!rolled) throw new DiceTypeError(name, "no_roll_result", dice);

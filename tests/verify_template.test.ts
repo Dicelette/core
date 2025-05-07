@@ -86,4 +86,18 @@ it("Should be valid", () => {
 	};
 	const result = core.verifyTemplateValue(template);
 	expect(result).toMatchObject(template);
-})
+});
+
+it("Should calculate an exp with a formula and statistics", () => {
+	const template = {
+		diceType: "1d100",
+		statistics: {
+			force: { min: 1, max: 10 },
+		},
+		damage: {
+			piercing: "1d{{floor({exp}+force/2)}}",
+		},
+	};
+	const result = core.verifyTemplateValue(template);
+	expect(result).toMatchObject(template);
+});
