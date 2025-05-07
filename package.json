@@ -16,11 +16,11 @@
   "scripts": {
     "test": "vitest",
     "build": "tsup",
-    "prerelease": "npm run build",
+    "prerelease": "bun run build",
     "lint": "biome format --write src",
     "tsc": "tsc --noEmit --skipLibCheck",
     "release": "commit-and-tag-version",
-    "postrelease": "git push --follow-tags origin main && pnpm publish"
+    "postrelease": "git push --follow-tags origin main && bun publish"
   },
   "keywords": [
     "discord",
