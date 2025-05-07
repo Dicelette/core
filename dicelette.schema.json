@@ -30,11 +30,12 @@
 					"sign": {
 						"description": "The sign of the comparaison",
 						"enum": [
-							"=",
+							"==",
 							"<",
 							">",
 							"<=",
-							">="
+							">=",
+							"!="
 						],
 						"type": "string"
 					},
