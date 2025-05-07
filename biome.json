@@ -1,29 +1,14 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 	"files": {
-		"ignore": ["node_modules", "dist"]
+		"includes": ["**", "!**/node_modules", "!**/dist"]
 	},
 	"linter": {
 		"rules": {
 			"recommended": true,
-			"style": {
-				"noVar": "error",
-				"useFilenamingConvention": "error",
-				"useImportType": "error",
-				"noParameterAssign": "off",
-				"useNamingConvention": {
-					"level": "warn",
-					"options": {
-						"strictCase": false
-					}
-				},
-				"useTemplate": "warn",
-				"useConst": "error",
-				"noNonNullAssertion": "off"
-			},
 			"complexity": {
 				"noExtraBooleanCast": "error",
-				"noMultipleSpacesInRegularExpressionLiterals": "error",
+				"noAdjacentSpacesInRegex": "error",
 				"noUselessCatch": "error",
 				"noWith": "error"
 			},
@@ -35,7 +20,9 @@
 				"noGlobalObjectCalls": "error",
 				"noInnerDeclarations": "error",
 				"noInvalidConstructorSuper": "error",
-				"noNewSymbol": "error",
+				"noInvalidBuiltinInstantiation": {
+					"level": "error"
+				},
 				"noNonoctalDecimalEscape": "error",
 				"noPrecisionLoss": "error",
 				"noSelfAssign": "error",
@@ -76,16 +63,48 @@
 				"noShadowRestrictedNames": "error",
 				"noUnsafeNegation": "error",
 				"useGetterReturn": "error",
-				"useValidTypeof": "error"
+				"useValidTypeof": "error",
+				"noVar": "error"
+			},
+			"style": {
+				"useFilenamingConvention": "error",
+				"useImportType": "error",
+				"noParameterAssign": "off",
+				"useNamingConvention": {
+					"level": "warn",
+					"options": {
+						"strictCase": false
+					}
+				},
+				"useTemplate": "warn",
+				"useConst": "error",
+				"noNonNullAssertion": "off",
+				"useLiteralEnumMembers": "error",
+				"noCommaOperator": "error",
+				"useNodejsImportProtocol": "error",
+				"useAsConstAssertion": "error",
+				"useNumericLiterals": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"useExponentiationOperator": "error",
+				"useDefaultParameterLast": "error",
+				"noArguments": "error",
+				"useExportType": "error",
+				"noUselessElse": "error",
+				"useShorthandFunctionType": "error"
 			}
 		}
 	},
 	"overrides": [
-		{ "ignore": ["**/*.js"], "include": ["**/*.ts", "**/*.tsx"] },
-		{ "include": ["**/*.js"] },
-		{ "include": ["*.json"] },
+		{ "includes": ["**/*.ts", "**/*.tsx", "!**/*.js", "!**/node_modules/**"] },
+		{ "includes": ["**/*.js", "!**/node_modules/**"] },
+		{ "includes": ["**/*.json", "!**/node_modules/**"] },
 		{
-			"include": ["src/commands/gimmick/graph.ts"],
+			"includes": ["**/src/commands/gimmick/graph.ts", "!**/node_modules/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -98,7 +117,7 @@
 	"formatter": {
 		"enabled": true,
 		"formatWithErrors": true,
-		"ignore": [],
+		"includes": ["**", "!**/node_modules/**"],
 		"indentStyle": "tab",
 		"indentWidth": 2,
 		"lineEnding": "lf",
