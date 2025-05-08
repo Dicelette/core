@@ -119,10 +119,22 @@ export function isNumber(value: unknown): boolean {
 }
 
 /**
- * Replace the `{exp}` in the dice string by a random value between 1 and 999
+ * Replace the `{exp}` in the dice.
+ * If the `{exp}` has a default value in the form of `{exp || defaultValue}`, it will be replaced by the default value.
  * @param {string} dice
  * @returns {string} the dice with the {exp} replaced by a random value
  */
 export function replaceExp(dice: string): string {
-	return dice.replaceAll("{exp}", `${randomInt(1, 999)}`);
+	const diceRegex = /\{exp( \|\| (?<default>\d+))?}/gi
+	const match = dice.match(diceRegex);
+	if (match) {
+		const randomValue = randomInt(1, 999);
+		const defaultValue = match[0].match(/(?<=\|\| )\d+/g)?.[0];
+		if (defaultValue) {
+			dice = dice.replace(diceRegex, defaultValue);
+		} else {
+			dice = dice.replace(diceRegex, randomValue.toString());
+		}
+	}
+	return dice;
 }
