@@ -101,3 +101,11 @@ it("Should calculate an exp with a formula and statistics", () => {
 	const result = core.verifyTemplateValue(template);
 	expect(result).toMatchObject(template);
 });
+it("Should validate a dice type with {exp}", () => {
+	const template = {
+		diceType: "{exp}d100"
+	};
+	const result = core.verifyTemplateValue(template);
+	expect(result).toMatchObject(template);
+});
+

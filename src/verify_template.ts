@@ -1,4 +1,4 @@
-import { evaluate, randomInt } from "mathjs";
+import {evaluate, random, randomInt} from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
@@ -13,7 +13,7 @@ import {
 	escapeRegex,
 	replaceFormulaInDice,
 	templateSchema,
-	TooManyDice,
+	TooManyDice, replaceExp,
 } from ".";
 import { isNumber } from "./utils";
 
@@ -35,7 +35,7 @@ export function evalStatsDice(testDice: string, allStats?: Record<string, number
 		}
 	}
 	try {
-		if (!roll(replaceFormulaInDice(dice.replace("{exp}", "1"))))
+		if (!roll(replaceFormulaInDice(replaceExp(dice))))
 			throw new DiceTypeError(dice, "evalStatsDice", "no roll result");
 		return testDice;
 	} catch (error) {
@@ -79,6 +79,7 @@ export function diceRandomParse(value: string, template: StatisticalTemplate) {
  * @param template {StatisticalTemplate}
  */
 export function diceTypeRandomParse(dice: string, template: StatisticalTemplate) {
+	dice = replaceExp(dice);
 	if (!template.statistics) return dice;
 	const firstStatNotcombinaison = Object.keys(template.statistics).find(
 		(stat) => !template.statistics?.[stat].combinaison
@@ -207,7 +208,7 @@ export function testDiceRegistered(template: StatisticalTemplate) {
 	if (Object.keys(template.damage).length > 25) throw new TooManyDice();
 	for (const [name, dice] of Object.entries(template.damage)) {
 		if (!dice) continue;
-		const diceReplaced = dice.replaceAll("{exp}", `${randomInt(1, 999)}`);
+		const diceReplaced = replaceExp(dice);
 		const randomDiceParsed = diceRandomParse(diceReplaced, template);
 		try {
 			const rolled = roll(randomDiceParsed);

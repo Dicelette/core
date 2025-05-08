@@ -1,4 +1,4 @@
-import { evaluate } from "mathjs";
+import {evaluate, randomInt} from "mathjs";
 import "uniformize";
 import { FormulaError } from ".";
 
@@ -116,4 +116,13 @@ export function isNumber(value: unknown): boolean {
 				typeof value === "string" &&
 				value.trim().length > 0))
 	);
+}
+
+/**
+ * Replace the `{exp}` in the dice string by a random value between 1 and 999
+ * @param {string} dice
+ * @returns {string} the dice with the {exp} replaced by a random value
+ */
+export function replaceExp(dice: string): string {
+	return dice.replaceAll("{exp}", `${randomInt(1, 999)}`);
 }

@@ -48,3 +48,23 @@ it("should validate even if the stats are used multiple time", () => {
 	const expected = "1d20+0>5";
 	expect(result).toEqual(expected);
 });
+it("Testing with a simple diceType", ()=>{
+	const customCritical: CustomCritical = {
+      "sign": "==",
+      "value": "1",
+      "onNaturalDice": false,
+      "affectSkill": true
+    };
+	const template: StatisticalTemplate = {
+		diceType: "1d100",
+		damage: {
+			main: "1d100",
+		},
+		customCritical: {
+			fail: customCritical,
+		},
+	}
+	const result = createCriticalCustom("1d100", customCritical, template);
+	const expected = "1d100==1";
+	expect(result).toEqual(expected);
+})
