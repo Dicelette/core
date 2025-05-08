@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.3](https://github.com/Dicelette/core/compare/v1.14.2...v1.14.3) (2025-05-08)
+
+
+### Bug Fixes
+
+* allow multiple `{exp||default}` in a diceType/damage dice. ([3931bab](https://github.com/Dicelette/core/commit/3931babfd9fdbec89c407ec654939989e1b0b5ba))
+
 ## [1.14.2](https://github.com/Dicelette/core/compare/v1.14.1...v1.14.2) (2025-05-08)
 
 
