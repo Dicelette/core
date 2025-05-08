@@ -24,10 +24,11 @@ export function standardizeDice(dice: string): string {
 }
 
 /**
- * Replace the stat name by their value using stat and after evaluate any formula using `replaceFormulaInDice`
- * @param originalDice {dice}
- * @param stats {Record<string,number>}
- * @param dollarValue
+ * Replace the stat name by their value using stat
+ * and after evaluate any formula using `replaceFormulaInDice`
+ * @param {string} originalDice
+ * @param {Record<string,number>|undefined} stats
+ * @param {string|undefined} dollarValue
  */
 export function generateStatsDice(
 	originalDice: string,
