@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.2](https://github.com/Dicelette/core/compare/v1.14.1...v1.14.2) (2025-05-08)
+
+
+### Bug Fixes
+
+* use exec for groups naming instead of match ([138980e](https://github.com/Dicelette/core/commit/138980ee1c002c7e2bcd82875f5178f6d9558633))
+
 ## [1.14.1](https://github.com/Dicelette/core/compare/v1.14.0...v1.14.1) (2025-05-08)
 
 
