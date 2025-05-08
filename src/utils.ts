@@ -124,7 +124,7 @@ export function isNumber(value: unknown): boolean {
  * @param {string} dice
  * @returns {string} the dice with the {exp} replaced by a random value
  */
-export function replaceExp(dice: string): string {
+export function replaceExpByRandom(dice: string): string {
 	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi
 	const match = dice.match(diceRegex);
 	if (match) {
