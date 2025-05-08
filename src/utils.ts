@@ -126,7 +126,7 @@ export function isNumber(value: unknown): boolean {
  */
 export function replaceExpByRandom(dice: string): string {
 	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi
-	const match = dice.match(diceRegex);
+	const match = diceRegex.exec(dice)
 	if (match) {
 		const randomValue = randomInt(1, 999);
 		const defaultValue = match.groups?.default;
