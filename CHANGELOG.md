@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.0](https://github.com/Dicelette/core/compare/v1.12.7...v1.13.0) (2025-05-08)
+
+
+### Features
+
+* allow {exp} in diceType ([e75d94e](https://github.com/Dicelette/core/commit/e75d94e491ef3d1d6fd9177ab4bf2ebb2f061f8b))
+
 ## [1.12.7](https://github.com/Dicelette/core/compare/v1.12.6...v1.12.7) (2025-05-07)
 
 
