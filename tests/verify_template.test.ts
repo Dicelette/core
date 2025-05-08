@@ -109,3 +109,10 @@ it("Should validate a dice type with {exp}", () => {
 	expect(result).toMatchObject(template);
 });
 
+it("Should validate a dice type with {exp||defaultValue}", () => {
+	const template = {
+		diceType: "{exp||2}d100"
+	};
+	const result = core.verifyTemplateValue(template);
+	expect(result).toMatchObject(template);
+});
