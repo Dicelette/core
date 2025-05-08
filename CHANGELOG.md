@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.1](https://github.com/Dicelette/core/compare/v1.14.0...v1.14.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* allow to set as `{exp||2}` ([3705e04](https://github.com/Dicelette/core/commit/3705e04b809a70dda9a21aec42a69d6e35870b65))
+
 ## [1.14.0](https://github.com/Dicelette/core/compare/v1.13.0...v1.14.0) (2025-05-08)
 
 
