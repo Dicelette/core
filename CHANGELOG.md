@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.0](https://github.com/Dicelette/core/compare/v1.13.0...v1.14.0) (2025-05-08)
+
+
+### Features
+
+* allow default value in {exp} in the form of `{exp || defaultValue}` ([5d8be15](https://github.com/Dicelette/core/commit/5d8be156a4a716fb4f261cebbdb462c9c5dc1583))
+
 ## [1.13.0](https://github.com/Dicelette/core/compare/v1.12.7...v1.13.0) (2025-05-08)
 
 
