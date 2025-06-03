@@ -148,10 +148,11 @@ function convertNumber(number: string | number | undefined) {
 
 /**
  * Parse the provided JSON and verify each field to check if everything could work when rolling
- * @param {any} template
+ * @param {unknown} template
+ * @param {boolean} verify - If true, will roll the dices to check if everything is valid
  * @returns {StatisticalTemplate}
  */
-export function verifyTemplateValue(template: unknown): StatisticalTemplate {
+export function verifyTemplateValue(template: unknown, verify: boolean=true): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
 	const { success, failure } = parsedTemplate.critical ?? {};
 	const criticicalVal = {
@@ -167,6 +168,7 @@ export function verifyTemplateValue(template: unknown): StatisticalTemplate {
 		damage: parsedTemplate.damage,
 		customCritical: parsedTemplate.customCritical,
 	};
+	if (!verify) return statistiqueTemplate;
 	if (statistiqueTemplate.diceType) {
 		const cleanedDice = diceTypeRandomParse(
 			statistiqueTemplate.diceType,
