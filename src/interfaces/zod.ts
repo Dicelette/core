@@ -5,8 +5,8 @@ import { z } from "zod";
 
 const statisticValueSchema = z
 	.object({
-		max: z.number().min(0).optional(),
-		min: z.number().min(0).optional(),
+		max: z.number().min(0).transform(val => val === 0 ? undefined : val).optional(),
+		min: z.number().min(0).transform(val => val === 0 ? undefined : val).optional(),
 		combinaison: z
 			.string()
 			.transform((str) => str.trim() || undefined)
@@ -14,6 +14,7 @@ const statisticValueSchema = z
 		exclude: z.boolean().optional(),
 	})
 	.superRefine((data, ctx) => {
+		
 		if (data.max !== undefined && data.min !== undefined && data.max <= data.min) {
 			ctx.addIssue({
 				code: "custom",
