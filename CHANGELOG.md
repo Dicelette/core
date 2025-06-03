@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.4](https://github.com/Dicelette/core/compare/v1.14.3...v1.14.4) (2025-06-03)
+
+
+### Bug Fixes
+
+* zod thrown an error for invalid template if 0 but should not ([ec3a1af](https://github.com/Dicelette/core/commit/ec3a1af3f67532758f97c9d644c69f89a771136c))
+
 ## [1.14.3](https://github.com/Dicelette/core/compare/v1.14.2...v1.14.3) (2025-05-08)
 
 
