@@ -5,8 +5,8 @@ import { z } from "zod";
 
 const statisticValueSchema = z
 	.object({
-		max: z.number().positive().optional(),
-		min: z.number().positive().optional(),
+		max: z.number().min(0).optional(),
+		min: z.number().min(0).optional(),
 		combinaison: z
 			.string()
 			.transform((str) => str.trim() || undefined)
@@ -32,8 +32,8 @@ const statisticSchema = z
 
 const criticalSchema = z
 	.object({
-		success: z.string().or(z.number().positive()).optional(),
-		failure: z.string().or(z.number().positive()).optional(),
+		success: z.string().or(z.number().min(0)).optional(),
+		failure: z.string().or(z.number().min(0)).optional(),
 	})
 	.transform((values) => {
 		if (values.success === "") values.success = undefined;
