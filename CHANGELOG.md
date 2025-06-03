@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.0](https://github.com/Dicelette/core/compare/v1.14.4...v1.15.0) (2025-06-03)
+
+
+### Features
+
+* **verify:template:** allow to skip the complete verification and return the parsed ([318e5a5](https://github.com/Dicelette/core/commit/318e5a58e76260d9697def0813e71ebdf6b4ffa1))
+
 ## [1.14.4](https://github.com/Dicelette/core/compare/v1.14.3...v1.14.4) (2025-06-03)
 
 
