@@ -28,6 +28,10 @@ function getCompare(
 	 * Some system count the number of a dice that are greater than or equal to a target, and not the "total" of rolled dice.
 	 * We "count" the number of dice that meet a criterion, and not the total of the dice.
 	 * To support this, we use the group notation. It a little different than the notation of dice-roller, but it a sacrifice to not break the current notation.
+	 * @note:
+	 * - `{2d3}>=4` will be the same as `2d3>=4` and thus keep the comparaison.
+	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
+	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
 	 */
 	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))[><=!]+\d+\}?)|\{(.*)([><=!]+).*\}/)) return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
