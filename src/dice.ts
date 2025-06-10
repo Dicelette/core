@@ -23,11 +23,20 @@ function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray
 ): { dice: string; compare: ComparedValue | undefined } {
+	/**
+	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
+	 * Some system count the number of a dice that are greater than or equal to a target, and not the "total" of rolled dice.
+	 * We "count" the number of dice that meet a criterion, and not the total of the dice.
+	 * To support this, we use the group notation. It a little different than the notation of dice-roller, but it a sacrifice to not break the current notation.
+	 */
+	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))[><=!]+\d+\}?)|\{(.*)([><=!]+).*\}/)) return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
 	const calc = compareRegex[1];
 	const sign = calc.match(/[+-\/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
+	
+	
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
 		const rCompare = rollCompare(toCalc);
