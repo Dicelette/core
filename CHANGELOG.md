@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.0](https://github.com/Dicelette/core/compare/v1.16.0...v1.17.0) (2025-06-14)
+
+
+### Features
+
+* add force distribution ([58073f5](https://github.com/Dicelette/core/commit/58073f5c77bd923e6cf2bf4ac49ccf92a1e0f48c))
+
 ## [1.16.0](https://github.com/Dicelette/core/compare/v1.15.0...v1.16.0) (2025-06-10)
 
 
