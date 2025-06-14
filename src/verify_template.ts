@@ -167,6 +167,7 @@ export function verifyTemplateValue(template: unknown, verify: boolean=true): St
 		charName: parsedTemplate.charName,
 		damage: parsedTemplate.damage,
 		customCritical: parsedTemplate.customCritical,
+		forceDistrib: parsedTemplate.forceDistrib,
 	};
 	if (!verify) return statistiqueTemplate;
 	if (statistiqueTemplate.diceType) {
