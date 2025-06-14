@@ -72,8 +72,10 @@ export type Statistic = Record<
 	 * The name of the statistic
 	 * @TJS-type string
 	 */
-	string,
-	{
+	string, StatEntry
+>;
+	
+	type StatEntry = {
 		/**
 		 * The value of the statistic that can take the stats
 		 * @TJS-type integer
@@ -94,7 +96,6 @@ export type Statistic = Record<
 		 */
 		exclude?: boolean;
 	}
->;
 
 /**
  * @example
@@ -119,6 +120,11 @@ export interface StatisticalTemplate {
 	 * @TJS-type integer
 	 */
 	total?: number;
+	
+	/**
+	 * Force the distribition of all the points
+	 */
+	forceDistrib?: boolean;
 	/** A dice type in the notation supported by the bot */
 	diceType?: string;
 	/**
@@ -129,13 +135,14 @@ export interface StatisticalTemplate {
 	 * Custom critical, allow to adjust the critical on a statistic, and set multiple critical value
 	 * @maximum 22
 	 */
-	customCritical?: Record<string, CustomCritical>;
+	customCritical?: CustomCriticalMap
 
 	/** Special dice for damage
 	 * @maximum 25
 	 * */
 	damage?: Record<string, string>;
 }
+export type CustomCriticalMap = Record<string, CustomCritical>;
 
 /**
  * If the result can be considered as a critical

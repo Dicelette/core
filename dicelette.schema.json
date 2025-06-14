@@ -1,113 +1,165 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"definitions": {
-		"Critical": {
-			"description": "If the result can be considered as a critical\nCritical is compared to the \"natural\" dice result, so any modifier doesn't count",
-			"properties": {
-				"failure": {
-					"description": "The value that will be considered as a failure.\nCan only be compared strictly with the natural dice result",
-					"type": "integer"
-				},
-				"success": {
-					"description": "The value that will be considered as a success\nCan only be compared strictly with the natural dice result",
-					"type": "integer"
-				}
-			},
-			"type": "object"
-		},
-		"Record<string,CustomCritical>": {
-			"type": "object",
-			"additionalProperties": {
-				"properties": {
-					"affectSkill": {
-						"description": "If the critical affect the skill dice (aka dbd commands)",
-						"type": "boolean"
-					},
-					"onNaturalDice": {
-						"description": "If the critical is only on the natural dice and not the total.",
-						"type": "boolean"
-					},
-					"sign": {
-						"description": "The sign of the comparaison",
-						"enum": [
-							"==",
-							"<",
-							">",
-							"<=",
-							">=",
-							"!="
-						],
-						"type": "string"
-					},
-					"value": {
-						"description": "The value of the critical. Can be a formule, includes other dice, includes statistiques with $ or their name.",
-						"type": "string"
-					}
-				},
-				"type": "object"
-			}
-		},
-		"Record<string,string>": {
-			"type": "object"
-		}
-	},
-	"properties": {
-		"$schema": {
-			"description": "Specifies the URL for the schema definition\nThis property is optional and should contain a valid URI.",
-			"type": "string"
-		},
-		"charName": {
-			"description": "Allow to force the user to choose a name for them characters",
-			"type": "boolean"
-		},
-		"critical": {
-			"$ref": "#/definitions/Critical",
-			"description": "How the success/echec will be done"
-		},
-		"customCritical": {
-			"$ref": "#/definitions/Record<string,CustomCritical>",
-			"description": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
-			"maximum": 22
-		},
-		"damage": {
-			"$ref": "#/definitions/Record<string,string>",
-			"description": "Special dice for damage",
-			"maximum": 25
-		},
-		"diceType": {
-			"description": "A dice type in the notation supported by the bot",
-			"type": "string"
-		},
-		"statistics": {
-			"additionalProperties": {
-				"properties": {
-					"combinaison": {
-						"description": "The combinaison that can be made with ANOTHER statistic\nAutomatically disable the max/min value",
-						"type": "string"
-					},
-					"max": {
-						"description": "The value of the statistic that can take the stats",
-						"type": "integer"
-					},
-					"min": {
-						"description": "The minimal value of the statistic that can take the stats",
-						"type": "integer"
-					},
-					"exclude": {
-						"description": "Allow to exclude from the command dbroll",
-						"type": "boolean"
-					}
-				},
-				"type": "object"
-			},
-			"description": "The statistics that can be used in the dice throw",
-			"maximum": 25,
-			"type": "object"
-		},
-		"total": {
-			"description": "A total can be set, it allows to calculate the total value of a future register member\nIf the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown",
-			"type": "integer"
-		}
-	},
-	"type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/StatisticalSchema",
+  "definitions": {
+    "StatisticalSchema": {
+      "type": "object",
+      "properties": {
+        "charName": {
+          "type": "boolean",
+          "description": "Allow to force the user to choose a name for them characters",
+          "markdownDescription": "Allow to force the user to choose a name for them characters"
+        },
+        "statistics": {
+          "$ref": "#/definitions/Statistic",
+          "description": "The statistics that can be used in the dice throw",
+          "markdownDescription": "The statistics that can be used in the dice throw",
+          "maximum": 25
+        },
+        "total": {
+          "type": "number",
+          "description": "A total can be set, it allows to calculate the total value of a future register member If the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown",
+          "markdownDescription": "A total can be set, it allows to calculate the total value of a future register member\nIf the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown"
+        },
+        "forceDistrib": {
+          "type": "boolean",
+          "description": "Force the distribition of all the points",
+          "markdownDescription": "Force the distribition of all the points"
+        },
+        "diceType": {
+          "type": "string",
+          "description": "A dice type in the notation supported by the bot",
+          "markdownDescription": "A dice type in the notation supported by the bot"
+        },
+        "critical": {
+          "$ref": "#/definitions/Critical",
+          "description": "How the success/echec will be done",
+          "markdownDescription": "How the success/echec will be done"
+        },
+        "customCritical": {
+          "$ref": "#/definitions/CustomCriticalMap",
+          "description": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
+          "markdownDescription": "Custom critical, allow to adjust the critical on a statistic, and set multiple critical value",
+          "maximum": 22
+        },
+        "damage": {
+          "$ref": "#/definitions/Record%3Cstring%2Cstring%3E",
+          "description": "Special dice for damage",
+          "markdownDescription": "Special dice for damage",
+          "maximum": 25
+        },
+        "$schema": {
+          "type": "string",
+          "description": "Specifies the URL for the schema definition This property is optional and should contain a valid URI.",
+          "markdownDescription": "Specifies the URL for the schema definition\nThis property is optional and should contain a valid URI."
+        }
+      }
+    },
+    "Statistic": {
+      "$ref": "#/definitions/Record%3Cstring%2CStatEntry%3E",
+      "description": "Statistic object template",
+      "markdownDescription": "Statistic object template"
+    },
+    "Record<string,StatEntry>": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/StatEntry"
+      }
+    },
+    "StatEntry": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "number",
+          "description": "The value of the statistic that can take the stats",
+          "markdownDescription": "The value of the statistic that can take the stats"
+        },
+        "min": {
+          "type": "number",
+          "description": "The minimal value of the statistic that can take the stats",
+          "markdownDescription": "The minimal value of the statistic that can take the stats"
+        },
+        "combinaison": {
+          "type": "string",
+          "description": "The combinaison that can be made with ANOTHER statistic Automatically disable the max/min value",
+          "markdownDescription": "The combinaison that can be made with ANOTHER statistic\nAutomatically disable the max/min value"
+        },
+        "exclude": {
+          "type": "boolean",
+          "description": "Allow to exclude from roll selection in /dbroll!",
+          "markdownDescription": "Allow to exclude from roll selection in /dbroll!"
+        }
+      }
+    },
+    "Critical": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "number",
+          "description": "The value that will be considered as a success Can only be compared strictly with the natural dice result",
+          "markdownDescription": "The value that will be considered as a success\nCan only be compared strictly with the natural dice result"
+        },
+        "failure": {
+          "type": "number",
+          "description": "The value that will be considered as a failure. Can only be compared strictly with the natural dice result",
+          "markdownDescription": "The value that will be considered as a failure.\nCan only be compared strictly with the natural dice result"
+        }
+      },
+      "description": "If the result can be considered as a critical Critical is compared to the \"natural\" dice result, so any modifier doesn't count",
+      "markdownDescription": "If the result can be considered as a critical\nCritical is compared to the \"natural\" dice result, so any modifier doesn't count"
+    },
+    "CustomCriticalMap": {
+      "$ref": "#/definitions/Record%3Cstring%2CCustomCritical%3E"
+    },
+    "Record<string,CustomCritical>": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/CustomCritical"
+      }
+    },
+    "CustomCritical": {
+      "type": "object",
+      "properties": {
+        "sign": {
+          "type": "string",
+          "enum": [
+            "<",
+            ">",
+            "<=",
+            ">=",
+            "!=",
+            "=="
+          ],
+          "description": "Sign of the comparison",
+          "markdownDescription": "Sign of the comparison"
+        },
+        "value": {
+          "type": "string",
+          "description": "Can be a simple value, or a formula, including the statistics with $",
+          "markdownDescription": "Can be a simple value, or a formula, including the statistics with $"
+        },
+        "onNaturalDice": {
+          "type": "boolean",
+          "description": "If \"true\", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any.",
+          "markdownDescription": "If \"true\", the comparison will be made on the natural dice result, without any modifier, including the statistics bonus if any."
+        },
+        "affectSkill": {
+          "type": "boolean",
+          "description": "Allow to use the custom critical on dbD command (damage)",
+          "markdownDescription": "Allow to use the custom critical on dbD command (damage)",
+          "default": false
+        }
+      },
+      "required": [
+        "sign",
+        "value"
+      ]
+    },
+    "Record<string,string>": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
 }
