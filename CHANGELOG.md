@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.0](https://github.com/Dicelette/core/compare/v1.17.0...v1.18.0) (2025-06-19)
+
+
+### Features
+
+* allow cs/cf in dice as `{xx}` ([9595c6c](https://github.com/Dicelette/core/commit/9595c6cf79f86a1f8c49383085036d7bb895a15c))
+
 ## [1.17.0](https://github.com/Dicelette/core/compare/v1.16.0...v1.17.0) (2025-06-14)
 
 
