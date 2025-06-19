@@ -15,7 +15,7 @@ import {
 	COMMENT_REGEX,
 	SIGN_REGEX,
 	SIGN_REGEX_SPACE,
-	SYMBOL_DICE,
+	SYMBOL_DICE, DETECT_CRITICAL,
 } from ".";
 import { isNumber } from "./utils";
 
@@ -132,6 +132,7 @@ export function roll(dice: string): Resultat | undefined {
 	//parse dice string
 	dice = standardizeDice(dice).replace(/^\+/, "").trimStart();
 	if (!dice.includes("d")) return undefined;
+	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
 	if (dice.includes(";")) return sharedRolls(dice);
@@ -141,11 +142,10 @@ export function roll(dice: string): Resultat | undefined {
 		compare = compareResult.compare;
 	}
 	const modificator = getModifier(dice);
-
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
 		const numberOfDice = Number.parseInt(diceArray[0], 10);
-		const diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
+		let diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
 		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
 		const roller = new DiceRoller();
@@ -168,6 +168,7 @@ export function roll(dice: string): Resultat | undefined {
 	}
 	const roller = new DiceRoller();
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
+	
 	try {
 		roller.roll(diceWithoutComment);
 	} catch (error) {

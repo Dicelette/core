@@ -25,6 +25,7 @@ export interface Resultat {
 	total?: number;
 }
 
+
 export interface Compare {
 	/**
 	 * Sign of the comparison
