@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.1](https://github.com/Dicelette/core/compare/v1.18.0...v1.18.1) (2025-06-19)
+
+
+### Bug Fixes
+
+* allow dice in detect critical + remove the * for natural dice ([1a77dc3](https://github.com/Dicelette/core/commit/1a77dc32a7d11f13e41a138fdb8b711a1fb64d8d))
+
 ## [1.18.0](https://github.com/Dicelette/core/compare/v1.17.0...v1.18.0) (2025-06-19)
 
 
