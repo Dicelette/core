@@ -1,5 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import * as core from "../src";
+import {DiceRoller} from "@dice-roller/rpg-dice-roller";
+import {isArray} from "mathjs";
+
+function roll(dice: string) {
+	const roller = new DiceRoller();
+	const res = roller.roll(dice);
+	return isArray(res) ? res[0] : res;
+}
 
 describe("passing", () => {
 	it("simple", () => {
@@ -8,6 +16,8 @@ describe("passing", () => {
 		expect(result!.dice).toEqual("2d6");
 		expect(result!.total).toBeGreaterThanOrEqual(2);
 		expect(result!.total).toBeLessThanOrEqual(12);
+		const rollResult = roll("2d6");
+		expect(result!.dice).toEqual(rollResult.notation);
 	});
 	it("valid even when starting with +", () => {
 		const result = core.roll("+2d6");

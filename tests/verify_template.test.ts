@@ -15,6 +15,13 @@ it("should verify the template correctly", () => {
 	expect(result).toMatchObject(template);
 });
 
+it("should throw an error for invalid dice type with custom critical", () =>{
+	const template: StatisticalTemplate = {
+		diceType: "1d100{cs:<=5}{cf:>=96}>55"
+	}
+	expect(() => core.verifyTemplateValue(template)).toThrow();
+})
+
 it("template validated with customCritical value", () => {
 	const template: StatisticalTemplate = {
 		statistics: { stat1: { max: 10, min: 1 } },

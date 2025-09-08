@@ -13,7 +13,7 @@ import {
 	escapeRegex,
 	replaceFormulaInDice,
 	templateSchema,
-	TooManyDice, replaceExpByRandom,
+	TooManyDice, replaceExpByRandom, DETECT_CRITICAL,
 } from ".";
 import { isNumber } from "./utils";
 
@@ -171,6 +171,13 @@ export function verifyTemplateValue(template: unknown, verify: boolean=true): St
 	};
 	if (!verify) return statistiqueTemplate;
 	if (statistiqueTemplate.diceType) {
+		if (statistiqueTemplate.diceType.match(DETECT_CRITICAL)) {
+			throw new DiceTypeError(
+				statistiqueTemplate.diceType,
+				"verifyTemplateValue",
+				"contains critical detection: should be in custom critical instead"
+			);
+		}
 		const cleanedDice = diceTypeRandomParse(
 			statistiqueTemplate.diceType,
 			statistiqueTemplate
