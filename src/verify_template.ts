@@ -174,7 +174,7 @@ export function verifyTemplateValue(template: unknown, verify: boolean=true): St
 		if (statistiqueTemplate.diceType.match(DETECT_CRITICAL)) {
 			throw new DiceTypeError(
 				statistiqueTemplate.diceType,
-				"verifyTemplateValue",
+				"critical_dice_type",
 				"contains critical detection: should be in custom critical instead"
 			);
 		}
@@ -184,12 +184,12 @@ export function verifyTemplateValue(template: unknown, verify: boolean=true): St
 		);
 		const rolled = roll(cleanedDice);
 		if (!rolled) {
-			throw new DiceTypeError(cleanedDice, "verifyTemplateValue", "no roll result");
+			throw new DiceTypeError(cleanedDice, "no_roll_result", "no roll result");
 		}
 	}
 	if (statistiqueTemplate.customCritical) {
 		if (!statistiqueTemplate.diceType) {
-			throw new DiceTypeError("no_dice_type", "verifyTemplateValue", "no dice type");
+			throw new DiceTypeError("no_dice_type", "no_dice_type", "no dice type");
 		}
 		const customCritical = statistiqueTemplate.customCritical;
 		for (const [, custom] of Object.entries(customCritical)) {
