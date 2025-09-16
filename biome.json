@@ -9,8 +9,7 @@
 			"complexity": {
 				"noExtraBooleanCast": "error",
 				"noAdjacentSpacesInRegex": "error",
-				"noUselessCatch": "error",
-				"noWith": "error"
+				"noUselessCatch": "error"
 			},
 			"correctness": {
 				"noConstAssign": "error",
@@ -63,7 +62,6 @@
 				"noShadowRestrictedNames": "error",
 				"noUnsafeNegation": "error",
 				"useGetterReturn": "error",
-				"useValidTypeof": "error",
 				"noVar": "error"
 			},
 			"style": {
@@ -80,10 +78,8 @@
 				"useConst": "error",
 				"noNonNullAssertion": "off",
 				"useLiteralEnumMembers": "error",
-				"noCommaOperator": "error",
 				"useNodejsImportProtocol": "error",
 				"useAsConstAssertion": "error",
-				"useNumericLiterals": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
 				"useSingleVarDeclarator": "error",
@@ -92,7 +88,6 @@
 				"noInferrableTypes": "error",
 				"useExponentiationOperator": "error",
 				"useDefaultParameterLast": "error",
-				"noArguments": "error",
 				"useExportType": "error",
 				"noUselessElse": "error",
 				"useShorthandFunctionType": "error"
