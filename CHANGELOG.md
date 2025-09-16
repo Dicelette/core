@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.5](https://github.com/Dicelette/core/compare/v1.18.4...v1.18.5) (2025-09-16)
+
 ## [1.18.4](https://github.com/Dicelette/core/compare/v1.18.3...v1.18.4) (2025-09-16)
 
 ## [1.18.3](https://github.com/Dicelette/core/compare/v1.18.2...v1.18.3) (2025-09-08)
