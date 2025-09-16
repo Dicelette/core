@@ -5,8 +5,16 @@ import { z } from "zod";
 
 const statisticValueSchema = z
 	.object({
-		max: z.number().min(0).transform(val => val === 0 ? undefined : val).optional(),
-		min: z.number().min(0).transform(val => val === 0 ? undefined : val).optional(),
+		max: z
+			.number()
+			.min(0)
+			.transform((val) => (val === 0 ? undefined : val))
+			.optional(),
+		min: z
+			.number()
+			.min(0)
+			.transform((val) => (val === 0 ? undefined : val))
+			.optional(),
 		combinaison: z
 			.string()
 			.transform((str) => str.trim() || undefined)
@@ -14,7 +22,6 @@ const statisticValueSchema = z
 		exclude: z.boolean().optional(),
 	})
 	.superRefine((data, ctx) => {
-		
 		if (data.max !== undefined && data.min !== undefined && data.max <= data.min) {
 			ctx.addIssue({
 				code: "custom",
@@ -70,7 +77,11 @@ const customCriticalSchema = z
 export const templateSchema = z.object({
 	charName: z.boolean().optional(),
 	statistics: statisticSchema,
-	total: z.number().min(0).transform(val => val === 0 ? undefined : val).optional(),
+	total: z
+		.number()
+		.min(0)
+		.transform((val) => (val === 0 ? undefined : val))
+		.optional(),
 	forceDistrib: z.boolean().optional(),
 	diceType: z.string().optional(),
 	critical: criticalSchema.optional(),

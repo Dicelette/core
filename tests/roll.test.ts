@@ -19,6 +19,7 @@ describe("passing", () => {
 		const rollResult = roll("2d6");
 		expect(result!.dice).toEqual(rollResult.notation);
 	});
+	
 	it("valid even when starting with +", () => {
 		const result = core.roll("+2d6");
 		expect(result).not.toBeUndefined();
@@ -39,6 +40,13 @@ describe("passing", () => {
 		expect(result!.dice).toEqual("2d6");
 		expect(result!.total).toBeGreaterThanOrEqual(2);
 		expect(result!.total).toBeLessThanOrEqual(12);
+	});
+	it("Simple with inverted sign (2d6=>5)", () => {
+		const result = core.roll("1d100=>80");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("1d100");
+		expect(result!.total).toBeGreaterThanOrEqual(1);
+		expect(result!.total).toBeLessThanOrEqual(100);
 	});
 	it("multiple dice", () => {
 		const result = core.roll("2#2d6");

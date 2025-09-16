@@ -25,7 +25,6 @@ export interface Resultat {
 	total?: number;
 }
 
-
 export interface Compare {
 	/**
 	 * Sign of the comparison
@@ -73,30 +72,31 @@ export type Statistic = Record<
 	 * The name of the statistic
 	 * @TJS-type string
 	 */
-	string, StatEntry
+	string,
+	StatEntry
 >;
-	
-	type StatEntry = {
-		/**
-		 * The value of the statistic that can take the stats
-		 * @TJS-type integer
-		 */
-		max?: number;
-		/**
-		 * The minimal value of the statistic that can take the stats
-		 * @TJS-type integer
-		 */
-		min?: number;
-		/**
-		 * The combinaison that can be made with ANOTHER statistic
-		 * Automatically disable the max/min value
-		 */
-		combinaison?: string;
-		/**
-		 * Allow to exclude from roll selection in /dbroll!
-		 */
-		exclude?: boolean;
-	}
+
+type StatEntry = {
+	/**
+	 * The value of the statistic that can take the stats
+	 * @TJS-type integer
+	 */
+	max?: number;
+	/**
+	 * The minimal value of the statistic that can take the stats
+	 * @TJS-type integer
+	 */
+	min?: number;
+	/**
+	 * The combinaison that can be made with ANOTHER statistic
+	 * Automatically disable the max/min value
+	 */
+	combinaison?: string;
+	/**
+	 * Allow to exclude from roll selection in /dbroll!
+	 */
+	exclude?: boolean;
+};
 
 /**
  * @example
@@ -121,7 +121,7 @@ export interface StatisticalTemplate {
 	 * @TJS-type integer
 	 */
 	total?: number;
-	
+
 	/**
 	 * Force the distribition of all the points
 	 */
@@ -136,7 +136,7 @@ export interface StatisticalTemplate {
 	 * Custom critical, allow to adjust the critical on a statistic, and set multiple critical value
 	 * @maximum 22
 	 */
-	customCritical?: CustomCriticalMap
+	customCritical?: CustomCriticalMap;
 
 	/** Special dice for damage
 	 * @maximum 25

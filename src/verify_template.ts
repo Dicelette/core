@@ -1,4 +1,4 @@
-import {evaluate, random, randomInt} from "mathjs";
+import { evaluate, random, randomInt } from "mathjs";
 import { Random } from "random-js";
 import "uniformize";
 
@@ -13,7 +13,9 @@ import {
 	escapeRegex,
 	replaceFormulaInDice,
 	templateSchema,
-	TooManyDice, replaceExpByRandom, DETECT_CRITICAL,
+	TooManyDice,
+	replaceExpByRandom,
+	DETECT_CRITICAL,
 } from ".";
 import { isNumber } from "./utils";
 
@@ -152,7 +154,10 @@ function convertNumber(number: string | number | undefined) {
  * @param {boolean} verify - If true, will roll the dices to check if everything is valid
  * @returns {StatisticalTemplate}
  */
-export function verifyTemplateValue(template: unknown, verify: boolean=true): StatisticalTemplate {
+export function verifyTemplateValue(
+	template: unknown,
+	verify: boolean = true
+): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
 	const { success, failure } = parsedTemplate.critical ?? {};
 	const criticicalVal = {
