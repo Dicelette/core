@@ -15,7 +15,8 @@ import {
 	COMMENT_REGEX,
 	SIGN_REGEX,
 	SIGN_REGEX_SPACE,
-	SYMBOL_DICE, DETECT_CRITICAL,
+	SYMBOL_DICE,
+	DETECT_CRITICAL,
 } from ".";
 import { isNumber } from "./utils";
 
@@ -33,14 +34,14 @@ function getCompare(
 	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
 	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
 	 */
-	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))[><=!]+\d+\}?)|\{(.*)([><=!]+).*\}/)) return { dice, compare: undefined };
+	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))[><=!]+\d+\}?)|\{(.*)([><=!]+).*\}/))
+		return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
 	const calc = compareRegex[1];
 	const sign = calc.match(/[+-\/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
-	
-	
+
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
 		const rCompare = rollCompare(toCalc);
@@ -130,7 +131,11 @@ function getModifier(dice: string) {
  */
 export function roll(dice: string): Resultat | undefined {
 	//parse dice string
-	dice = standardizeDice(dice).replace(/^\+/, "").trimStart();
+	dice = standardizeDice(dice)
+		.replace(/^\+/, "")
+		.replaceAll("=>", ">=")
+		.replaceAll("=<", "<=")
+		.trimStart();
 	if (!dice.includes("d")) return undefined;
 	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
@@ -168,7 +173,7 @@ export function roll(dice: string): Resultat | undefined {
 	}
 	const roller = new DiceRoller();
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
-	
+
 	try {
 		roller.roll(diceWithoutComment);
 	} catch (error) {

@@ -1,4 +1,4 @@
-import {evaluate, randomInt} from "mathjs";
+import { evaluate, randomInt } from "mathjs";
 import "uniformize";
 import { FormulaError } from ".";
 
@@ -16,10 +16,8 @@ export function escapeRegex(string: string) {
  * @return {string} the dice with the text in brackets as if, but the dice (not in brackets) is standardized
  */
 export function standardizeDice(dice: string): string {
-	return dice.replace(
-		/(\[[^\]]+\])|([^[]+)/g,
-		(match, insideBrackets, outsideText) =>
-			insideBrackets ? insideBrackets : outsideText.standardize(),
+	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (match, insideBrackets, outsideText) =>
+		insideBrackets ? insideBrackets : outsideText.standardize()
 	);
 }
 
@@ -33,7 +31,7 @@ export function standardizeDice(dice: string): string {
 export function generateStatsDice(
 	originalDice: string,
 	stats?: Record<string, number>,
-	dollarValue?: string,
+	dollarValue?: string
 ) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
@@ -42,10 +40,7 @@ export function generateStatsDice(
 		//the dice will be converted before roll
 		const allStats = Object.keys(stats);
 		for (const stat of allStats) {
-			const regex = new RegExp(
-				`(?!\\[)${escapeRegex(stat.standardize())}(?!\\])`,
-				"gi",
-			);
+			const regex = new RegExp(`(?!\\[)${escapeRegex(stat.standardize())}(?!\\])`, "gi");
 			if (dice.match(regex)) {
 				const statValue = stats[stat];
 				dice = dice.replace(regex, statValue.toString());
@@ -67,21 +62,12 @@ export function replaceFormulaInDice(dice: string) {
 	// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
 	while ((match = formula.exec(dice)) !== null) {
 		if (match.groups?.formula) {
-			const formulae = match.groups.formula
-				.replaceAll("{{", "")
-				.replaceAll("}}", "");
+			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
 				const result = evaluate(formulae);
-				modifiedDice = modifiedDice.replace(
-					match.groups.formula,
-					result.toString(),
-				);
+				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
-				throw new FormulaError(
-					match.groups.formula,
-					"replaceFormulasInDice",
-					error,
-				);
+				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
 			}
 		}
 	}
@@ -101,6 +87,8 @@ function cleanedDice(dice: string) {
 		.replaceAll("+-", "-")
 		.replaceAll("--", "+")
 		.replaceAll("++", "+")
+		.replaceAll("=>", ">=")
+		.replaceAll("=<", "<=")
 		.trimEnd();
 }
 
@@ -126,7 +114,7 @@ export function isNumber(value: unknown): boolean {
  * @returns {string} the dice with the {exp} replaced by a random value
  */
 export function replaceExpByRandom(dice: string): string {
-	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi
+	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi;
 	return dice.replace(diceRegex, (_match, _p1, _p2, _offset, _string, groups) => {
 		const defaultValue = groups?.default;
 		return defaultValue ?? randomInt(1, 999).toString();
