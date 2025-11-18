@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.0](https://github.com/Dicelette/core/compare/v1.18.5...v1.19.0) (2025-11-18)
+
+
+### Features
+
+* **dice-utils:** add engine parameter to roll function and update dependencies ([c468bdc](https://github.com/Dicelette/core/commit/c468bdcbff0f4a8d10b2716dcf221ca91c337855))
+
 ## [1.18.5](https://github.com/Dicelette/core/compare/v1.18.4...v1.18.5) (2025-09-16)
 
 ## [1.18.4](https://github.com/Dicelette/core/compare/v1.18.3...v1.18.4) (2025-09-16)
