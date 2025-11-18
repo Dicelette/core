@@ -1,208 +1,202 @@
 # @Core
 
-The core module for Dicelette, contains :
-- The dice function (that parse the string into a Dice Parser and send the result in a good message) ;
-- The verification of the template
+The core module for Dicelette — public API reference
 
-The two are used in the bot and documentation.
+This README documents the public API exported by the `core` package. It lists types, constants, functions and errors that are exported by the module (via `src/index.ts`).
 
-# Type alias
-- **Sign**: `"+" | "-" | "*" | "/" | "%" | "^" | "**";`
-- **Statistic** : `{ [name: string]: { combinaison?: string; max?: number; min?: number; } }` :
-  - **name**: `string` : The name of the statistic
-  - **combinaison**: `string` : A combinaison between multiple/other statistic, formula... (ex: `constitution+2`). Can't coexist with min & max.
-  - **max**: `number` : The maximum value of the statistic
-  - **min**: `number` : The minimum value of the statistic
+## Overview
 
-# Interface ([index.d.ts](@types/index.d.ts))
-## Compare
+The `core` module provides small utilities to parse and evaluate dice notation, to generate and replace statistical values in dice expressions, and to validate statistical templates. The API is intended to be consumed by higher-level modules (bot, CLI, etc.).
 
-- **sign**: ``"<"`` \| ``">"`` \| ``">="`` \| ``"<="`` \| ``"="`` \| ``"!="`` \| ``"=="``
-- **value**: `number`
+## Public API
 
-## Critical
+Note: when a parameter `engine` is shown it usually defaults to the `NumberGenerator.engines.nodeCrypto` engine (from `@dice-roller/rpg-dice-roller`) unless otherwise specified.
 
-- `Optional` **failure**: `number`
-- `Optional` **success**: `number`
+### Interfaces & Types (from `src/interfaces`)
 
-## Modifier
+#### Interface: Resultat
+- dice: string — Original dice throw
+- result: string — Formatted result from the dice roller
+- comment?: string — Optional comment attached to the dice
+- compare?: ComparedValue — Optional comparison attached to the roll
+- modifier?: Modifier — Optional modifier applied to the roll
+- total?: number — Optional numeric total of the roll
 
-- **sign**: [Sign](#sign)
-- **value**: `number`
+#### Interface: Compare
+- sign: "<" | ">" | ">=" | "<=" | "=" | "!=" | "=="
+- value: number
 
-## Resultat
+#### Type: Sign
+- `"+" | "-" | "*" | "/" | "%" | "^" | "**"` — Used for modifiers calculation
 
-- `Optional` **comment**: `string`
-- `Optional` **compare**: [`Compare`](#compare)
-- **dice**: `string`
-- `Optional` **modifier**: [`Modifier`](#modifier)
-- **result**: `string`
+#### Type: ComparedValue
+- `Compare & { originalDice?: string; rollValue?: string }` — Extends `Compare` with optional original dice and roll output when comparison uses a dice expression
 
-## Statistical Template
-### Example
+#### Interface: Modifier
+- sign?: Sign
+- value: number
 
-```ts
-diceType: "1d20+{{$}}>=20"
-```
-The dice throw will be 1d20 + statistique that must be less than 20
+#### Type: Statistic
+- Record<string, StatEntry> — map of statistic name to options (see `StatisticalTemplate`)
 
-```ts
-diceType: "1d20<=$"
-```
-The dice throw will be 1d20 that must be less than the statistic
+#### Interface: StatisticalTemplate
+- charName?: boolean — force character name selection
+- statistics?: Statistic — statistics available for a template
+- total?: number — optional total for distribution checks
+- forceDistrib?: boolean — force distribution
+- diceType?: string — dice expression for rolls
+- critical?: Critical — numerical critical settings
+- customCritical?: CustomCriticalMap — map of custom critical rules
+- damage?: Record<string, string> — named damage dice expressions
 
-### Properties
-- `Optional` **charName**: `boolean` 
-Allow to force the user to choose a name for them characters
+#### Interface: Critical
+- success?: number
+- failure?: number
 
-- `Optional` **critical**: [`Critical`](#critical)
-How the success/echec will be done
+#### Type: CustomCriticalMap
+- `Record<string, CustomCritical>`
 
-- `Optional` **damage**: `{ [name: string]: string }`
-Special dice for damage
+#### Interface: CustomCritical
+- sign: "<" | ">" | "<=" | ">=" | "!=" | "=="
+- value: string — can be a numeric string or a formula (may include `$` for statistic insertion)
+- onNaturalDice?: boolean
+- affectSkill?: boolean
 
-- `Optional` **diceType**: `string`
-A die type in the notation supported by the bot. [See documentation for syntaxe](https://dicelette.github.io/en/docs/model/register).
+### Constants (from `src/interfaces/constant.ts`)
 
-- `Optional` **statistics**: [`Statistic`](#statistic-type)
+#### Constant: COMMENT_REGEX
+- RegExp — regex used to capture inline comments in a dice expression
 
-- `Optional` **total**: `number`
-A total can be set, it allows to calculate the total value of a future register member
-If the sum of the value > total, the bot will send a message to the user to inform him that the total is exceeded and an error will be thrown
-Note: Statistic that have a formula will be ignored from the total
+#### Constant: SIGN_REGEX
+- RegExp — regex matching comparison signs (`>`, `<`, `>=`, `<=`, `==`, `!=`, etc.)
 
-# Modules
-## Dice
+#### Constant: SIGN_REGEX_SPACE
+- RegExp — regex matching comparison sign and following token
 
-### Variables
-- `const` **COMMENT_REGEX**: `RegExp`
+#### Constant: SYMBOL_DICE
+- string — symbol used to reference previous dice result inside shared rolls (value: `"&"`)
 
-### Functions
-#### **calculator**(`sign`, `value`, `total`): `number`
-Evaluate a formula and replace "^" by "**" if any
+#### Constant: DETECT_CRITICAL
+- RegExp — regex pattern used to detect inlined critical markers in dice type strings
 
-| Name | Type |
-| :------ | :------ |
-| `sign` | [`Sign`](#sign) |
-| `value` | `number` |
-| `total` | `number` |
+### Utility functions (`src/utils.ts`)
 
-#### **roll**(`dice`): [`Resultat`](#resultat) `| undefined`
-Parse the string provided and turn it as a readable dice for dice parser
+#### Function: escapeRegex(string: string): string
+- Escape input string to be used in a RegExp.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `dice` | `string` | {string} |
+#### Function: standardizeDice(dice: string): string
+- Standardizes dice notation while preserving bracketed text.
 
+#### Function: generateStatsDice(originalDice: string, stats?: Record<string, number>, dollarValue?: string): string
+- Replace statistic names with numeric values from `stats` and evaluate `{{ }}` formulas.
+- If `dollarValue` is provided, all `$` placeholders are replaced by it before formula evaluation.
 
-## Utils
-### **cleanedDice**(`dice`): `string`
+#### Function: replaceFormulaInDice(dice: string): string
+- Finds `{{ ... }}` tokens in a dice string and evaluates their content using `mathjs`.
+- Throws `FormulaError` on invalid expression.
 
-Replace the ++ +- -- by their proper value:
-- `++` = `+`
-- `+-` = `-`
-- `--` = `+`
+#### Function: isNumber(value: unknown): boolean
+- Returns `true` if `value` is a number or numeric string.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `dice` | `string` | {string} |
+#### Function: replaceExpByRandom(dice: string, engine?: Engine | null): string
+- Replaces `{exp}` placeholders by a random integer between 1 and 999 or a default value if provided (`{exp || 10}`). Uses `random-js` engine.
 
-### **escapeRegex**(`string`): `string`
-Escape regex string
+#### Function: randomInt(min: number, max: number, engine?: Engine | null): number
+- Returns a random integer between `min` and `max` using `random-js` and the provided engine.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `string` | `string` | {string} |
+#### Function: getEngineId(engine: unknown): string
+- Returns a human readable id for a `NumberGenerator` engine, e.g. `nodeCrypto`, `nativeMath`, `browserCrypto`, or fallbacks like constructor name.
 
-### **generateStatsDice**(`originalDice`, `stats?`): `string`
+#### Function: getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto"): Engine
+- Returns the engine instance (from `NumberGenerator.engines`) matching the provided name.
 
-Replace the stat name by their value using stat and after evaluate any formula using `replaceFormulaInDice`
+### Dice functions (`src/dice.ts`)
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `originalDice` | `string` | {dice} |
-| `stats?` | `Object` | {[name: string]: number} |
+#### Function: roll(dice: string, engine?: Engine | null): Resultat | undefined
+- Parse a dice notation string and perform the roll(s) using `rpg-dice-roller`.
+- Supports comments, grouped/shared rolls, comparisons, modifiers and custom notation (see module docs).
+- Returns `Resultat` when a dice expression is recognized, otherwise `undefined`.
+- Throws `DiceTypeError` when the expression cannot be parsed or rolled.
 
-### **replaceFormulaInDice**(`dice`, `stats`): `string`
+#### Function: calculator(sign: Sign, value: number, total: number): number
+- Evaluate a simple binary operation between `total` and `value` using the `sign` (supports `^` which is normalized to `**`). Uses `mathjs` to compute.
 
-Replace the {{}} in the dice string and evaluate the interior if any
+#### Function: createCriticalCustom(dice: string, customCritical: CustomCritical, template: StatisticalTemplate, engine?: Engine | null): string
+- Create and return a dice expression where the template's `$` placeholders and formulas are evaluated for a custom critical rule.
+- Throws `DiceTypeError` if the generated comparison contains `$` (not resolved) or if underlying dice parsing fails.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `dice` | `string` | {string} |
+### Template verification (`src/verify_template.ts`)
 
+#### Function: evalStatsDice(testDice: string, allStats?: Record<string, number>, engine?: Engine | null): string
+- Replace statistic names in `testDice` with provided `allStats`, evaluate formulas / `{exp}` and verify the expression can be rolled.
+- Returns the original `testDice` if validation passes, otherwise throws `DiceTypeError`.
 
-## Verify Template
-### **diceRandomParse**(`value`, `template`): `string`
+#### Function: diceRandomParse(value: string, template: StatisticalTemplate, engine?: Engine | null): string
+- For a damage dice expression (or similar), randomly choose a statistic value from `template.statistics` and replace statistic names, then evaluate `{{ }}` formulas.
 
-Generate a random dice and remove the formula (+ evaluate it)
-Used for diceDamage only
+#### Function: diceTypeRandomParse(dice: string, template: StatisticalTemplate, engine?: Engine | null): string
+- For a `diceType` expression, picks one statistic (non-combination) from `template.statistics`, generates a random value and replaces `$` placeholders. Also replaces `{exp}` placeholders.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `value` | `string` | {string} |
-| `template` | [`StatisticalTemplate`](#statistical-template) | {StatisticalTemplate} |
+#### Function: evalCombinaison(combinaison: Record<string,string>, stats: Record<string, number | string>): Record<string, number>
+- For each entry in `combinaison`, replace referenced stats and evaluate the formula to produce numeric values.
+- Throws `FormulaError` on invalid formula.
 
-### **diceTypeRandomParse**(`dice`, `template`): `string`
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `dice` | `string` | {string} |
-| `template` | [`StatisticalTemplate`](#statistical-template) | {StatisticalTemplate} |
+#### Function: evalOneCombinaison(combinaison: string, stats: Record<string, number | string>): any
+- Replace stats in the single `combinaison` string and evaluate; returns the evaluation result or throws `FormulaError`.
 
-### **evalCombinaison**(`combinaison`, `stats`): `Object`
-Random the combinaison and evaluate it to check if everything is valid
+#### Function: verifyTemplateValue(template: unknown, verify?: boolean, engine?: Engine | null): StatisticalTemplate
+- Parse and validate a raw template object using Zod `templateSchema`. Convert some fields (like critical success/failure) to numbers.
+- If `verify` is true it runs extra verification (rolls `diceType` expressions, tests custom criticals, registered damages and stat combinations) and throws domain errors if invalid.
+- Returns a typed `StatisticalTemplate` on success.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `combinaison` | `Object` | {[name: string]: string} |
-| `stats` | `Object` | {[name: string]: string\|number} |
+#### Function: testDiceRegistered(template: StatisticalTemplate, engine?: Engine | null): void
+- Validate `template.damage` entries by generating random dice and attempting to roll them. Throws `DiceTypeError` or domain errors for invalid entries.
 
-### **evalOneCombinaison**(`combinaison`, `stats`): `any`
+#### Function: testStatCombinaison(template: StatisticalTemplate, engine?: Engine | null): void
+- Validates `statistics` that are combination formulas (`combinaison`) by generating random backing stats and evaluating each formula.
 
-Evaluate one selected combinaison
+#### Function: generateRandomStat(total?: number, max?: number, min?: number, engine?: Engine | null): number
+- Generate a single random statistic value honoring optional `min` / `max` and `total` constraints; repeats until a valid value is found.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `combinaison` | `string` | {string} |
-| `stats` | `Object` | {[name: string]: string\|number} |
+### Errors (from `src/errors.ts`)
 
-### **evalStatsDice**(`testDice`, `stats?`): `string`
+#### Error class: DiceTypeError
+- extends `Error`
+- Properties: `dice: string`, `cause?: string`, `method?: unknown`
+- Thrown when a dice expression cannot be parsed or rolled; used widely across the module.
 
-Verify if the provided dice work with random value
+#### Error class: FormulaError
+- extends `Error`
+- Properties: `formula: string`, `cause?: string`, `method?: unknown`
+- Thrown when a formula (e.g. inside `{{ }}` or a combinaison) cannot be evaluated.
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `testDice` | `string` | {string} |
-| `stats?` | `Object` | {[name: string]: number} |
+#### Error class: MaxGreater
+- extends `Error`
+- Properties: `name: string`, `value: number`, `max: number`
+- Thrown by schema refinement when `max` <= `min`.
 
-### **generateRandomStat**(`total?`, `max?`, `min?`): `number`
+#### Error class: EmptyObjectError
+- extends `Error` — Thrown when an object expected to be non-empty is empty.
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `total` | `undefined` \| `number` | `100` |
-| `max?` | `number` | `undefined` |
-| `min?` | `number` | `undefined` |
+#### Error class: TooManyDice
+- extends `Error` — Thrown when too many damage dice entries are present.
 
-### **testCombinaison**(`template`): `void`
+#### Error class: TooManyStats
+- extends `Error` — Thrown when too many statistics are provided.
 
-Test all combinaison with generated random value
+#### Error class: NoStatisticsError
+- extends `Error` — Thrown when combinaison validation requires base statistics but none are present.
 
-| Name | Type |
-| :------ | :------ |
-| `template` | [`StatisticalTemplate`](#statistical-template) |
+### Zod Schema (from `src/interfaces/zod.ts`)
 
-### **testDamageRoll**(`template`): `void`
+#### Export: templateSchema
+- Zod schema for `StatisticalTemplate` JSON: `charName`, `statistics`, `total`, `forceDistrib`, `diceType`, `critical`, `customCritical`, `damage`.
+- Use `templateSchema.parse(obj)` to validate raw JSON and obtain transformed values.
 
-Test each damage roll from the template.damage
+### Usage notes
 
-| Name | Type |
-| :------ | :------ |
-| `template` | [`StatisticalTemplate`](#statistical-template) |
+- Most functions accept an optional `engine` parameter to control random number generation. The engine values correspond to `NumberGenerator.engines` from `@dice-roller/rpg-dice-roller` (e.g. `nodeCrypto`, `nativeMath`, `browserCrypto`). Use `getEngine("nodeCrypto")` to obtain the engine instance.
 
-### **verifyTemplateValue**(`template`): [`StatisticalTemplate`](#statistical-template)
+- Errors thrown by this module are typed (see the `Errors` section). Catch and inspect the thrown error to determine the failure reason.
 
-Parse the provided JSON and verify each field to check if everything could work when rolling
-
-| Name | Type |
-| :------ | :------ |
-| `template` | `any` |
+- For working examples, see the test cases in the `tests/` directory of the package.
