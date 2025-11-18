@@ -1,6 +1,8 @@
-import {evaluate, randomInt} from "mathjs";
+import {evaluate} from "mathjs";
 import "uniformize";
 import {FormulaError} from ".";
+import {NumberGenerator} from "@dice-roller/rpg-dice-roller";
+import {Engine, Random} from "random-js";
 
 /**
  * Escape regex string
@@ -111,13 +113,37 @@ export function isNumber(value: unknown): boolean {
  * Replace the `{exp}` in the dice.
  * If the `{exp}` has a default value in the form of `{exp || defaultValue}`, it will be replaced by the default value.
  * @param {string} dice
+ * @param engine
  * @returns {string} the dice with the {exp} replaced by a random value
  */
-export function replaceExpByRandom(dice: string): string {
+export function replaceExpByRandom(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): string {
 	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi;
 	return dice.replace(diceRegex, (_match, _p1, _p2, _offset, _string, groups) => {
 		const defaultValue = groups?.default;
-		return defaultValue ?? randomInt(1, 999).toString();
+		return defaultValue ?? randomInt(1, 999, engine).toString();
 	});
 }
 
+/**
+ * Utility function to get the engine from its name
+ * @param engine {"nativeMath" | "browserCrypto" | "nodeCrypto"} The engine name
+ * @returns {Engine} The engine
+ * @public
+ */
+export function getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto"): Engine {
+	switch (engine) {
+		case "nativeMath":
+			return NumberGenerator.engines.nativeMath;
+		case "browserCrypto":
+			return NumberGenerator.engines.browserCrypto;
+		case "nodeCrypto":
+			return NumberGenerator.engines.nodeCrypto;
+		default:
+			return NumberGenerator.engines.nativeMath;
+	}
+}
+
+export function randomInt(min: number, max: number, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+	const rng = new Random(engine || undefined);
+	return rng.integer(min, max);
+}

@@ -23,7 +23,8 @@ import {Engine} from "random-js";
 
 function getCompare(
 	dice: string,
-	compareRegex: RegExpMatchArray
+	compareRegex: RegExpMatchArray,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ): { dice: string; compare: ComparedValue | undefined } {
 	/**
 	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
@@ -45,7 +46,7 @@ function getCompare(
 
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
-		const rCompare = rollCompare(toCalc);
+		const rCompare = rollCompare(toCalc, engine);
 		const total = evaluate(rCompare.value.toString());
 		dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 		compare = {
@@ -55,7 +56,7 @@ function getCompare(
 			rollValue: rCompare.diceResult,
 		};
 	} else {
-		const rcompare = rollCompare(calc);
+		const rcompare = rollCompare(calc, engine);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
 			value: rcompare.value,
@@ -66,9 +67,9 @@ function getCompare(
 	return { dice, compare };
 }
 
-function rollCompare(value: unknown) {
+function rollCompare(value: unknown, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
-	const rollComp = roll(value as string);
+	const rollComp = roll(value as string, engine);
 	if (!rollComp?.total)
 		//not a dice throw
 		return { value: evaluate(value as string), diceResult: value as string };
@@ -90,17 +91,18 @@ function rollCompare(value: unknown) {
 export function createCriticalCustom(
 	dice: string,
 	customCritical: CustomCritical,
-	template: StatisticalTemplate
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let customDice = dice;
-	const compareValue = diceTypeRandomParse(customCritical.value, template);
+	const compareValue = diceTypeRandomParse(customCritical.value, template, engine);
 	if (compareValue.includes("$"))
 		throw new DiceTypeError(compareValue, "createCriticalCustom");
 	const comparaison = `${customCritical.sign}${compareValue}`;
 	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
 	else customDice += comparaison;
-	return diceTypeRandomParse(customDice, template);
+	return diceTypeRandomParse(customDice, template, engine);
 }
 
 function getModifier(dice: string) {
@@ -141,9 +143,9 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
-	if (dice.includes(";")) return sharedRolls(dice);
+	if (dice.includes(";")) return sharedRolls(dice, engine);
 	if (compareRegex) {
-		const compareResult = getCompare(dice, compareRegex);
+		const compareResult = getCompare(dice, compareRegex, engine);
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
@@ -230,7 +232,8 @@ function replaceInFormula(
 	element: string,
 	diceResult: Resultat,
 	compareResult: { dice: string; compare: Compare | undefined },
-	res: boolean
+	res: boolean,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	const { formule, diceAll } = replaceText(
 		element,
@@ -246,7 +249,7 @@ function replaceInFormula(
 		evaluateRoll = evaluate(compareResult.dice);
 		return `${validSign} ${diceAll}: ${formule} = ${evaluateRoll}${invertedSign}${compareResult.compare?.value}`;
 	} catch (error) {
-		const evaluateRoll = roll(compareResult.dice) as Resultat | undefined;
+		const evaluateRoll = roll(compareResult.dice, engine) as Resultat | undefined;
 		if (evaluateRoll)
 			return `${validSign} ${diceAll}: ${evaluateRoll.result.split(":").splice(1).join(":")}`;
 
@@ -258,19 +261,20 @@ function compareSignFormule(
 	toRoll: string,
 	compareRegex: RegExpMatchArray,
 	element: string,
-	diceResult: Resultat
+	diceResult: Resultat,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	let results = "";
-	const compareResult = getCompare(toRoll, compareRegex);
+	const compareResult = getCompare(toRoll, compareRegex, engine);
 	const toCompare = `${compareResult.dice}${compareResult.compare?.sign}${compareResult.compare?.value}`;
 	let res: unknown;
 	try {
 		res = evaluate(toCompare);
 	} catch (error) {
-		res = roll(toCompare);
+		res = roll(toCompare, engine);
 	}
 	if (typeof res === "boolean") {
-		results = replaceInFormula(element, diceResult, compareResult, res);
+		results = replaceInFormula(element, diceResult, compareResult, res, engine);
 	} else if (res instanceof Object) {
 		const diceResult = res as Resultat;
 		if (diceResult.compare) {
@@ -305,7 +309,7 @@ function formatComment(dice: string) {
 	return commentsMatch?.groups?.comments ? `__${commentsMatch.groups.comments}__ — ` : "";
 }
 
-function sharedRolls(dice: string): Resultat | undefined {
+function sharedRolls(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): Resultat | undefined {
 	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
 			dice,
@@ -330,7 +334,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 	const commentsRegex = /\[(?<comments>.*?)\]/gi;
 	const comments = formatComment(diceMain);
 	diceMain = diceMain.replaceAll(commentsRegex, "").trim();
-	const diceResult = roll(diceMain);
+	const diceResult = roll(diceMain, engine);
 	if (!diceResult || !diceResult.total) return undefined;
 	results.push(`※ ${comments}${diceResult.result}`);
 	let total = diceResult.total;
@@ -342,7 +346,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
-			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult);
+			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult, engine);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
 		} else {
@@ -357,7 +361,7 @@ function sharedRolls(dice: string): Resultat | undefined {
 				results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
 				total += Number.parseInt(evaluated, 10);
 			} catch (error) {
-				const evaluated = roll(toRoll);
+				const evaluated = roll(toRoll, engine);
 				if (evaluated)
 					results.push(
 						`◈ ${comment}${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`
