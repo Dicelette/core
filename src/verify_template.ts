@@ -188,9 +188,9 @@ export function verifyTemplateValue(
 			statistiqueTemplate
 		);
 		const rolled = roll(cleanedDice);
-		if (!rolled) {
+		if (!rolled)
 			throw new DiceTypeError(cleanedDice, "no_roll_result", "no roll result");
-		}
+		
 	}
 	if (statistiqueTemplate.customCritical) {
 		if (!statistiqueTemplate.diceType) {

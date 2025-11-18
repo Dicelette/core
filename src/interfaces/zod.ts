@@ -32,7 +32,7 @@ const statisticValueSchema = z
 	});
 
 const statisticSchema = z
-	.record(statisticValueSchema)
+	.record(z.string(), statisticValueSchema)
 	.optional()
 	.refine((stats) => !stats || Object.keys(stats).length <= 25, {
 		message: "TooManyStats",
@@ -61,14 +61,14 @@ const criticalValueSchema = z.object({
 });
 
 const damageSchema = z
-	.record(z.string())
+	.record(z.string(), z.string())
 	.optional()
 	.refine((stats) => !stats || Object.keys(stats).length <= 25, {
 		message: "TooManyDice",
 	});
 
 const customCriticalSchema = z
-	.record(criticalValueSchema)
+	.record(z.string(), criticalValueSchema)
 	.optional()
 	.refine((stats) => !stats || Object.keys(stats).length <= 22, {
 		message: "TooManyDice",

@@ -1,6 +1,6 @@
-import { evaluate, randomInt } from "mathjs";
+import {evaluate, randomInt} from "mathjs";
 import "uniformize";
-import { FormulaError } from ".";
+import {FormulaError} from ".";
 
 /**
  * Escape regex string
@@ -120,3 +120,4 @@ export function replaceExpByRandom(dice: string): string {
 		return defaultValue ?? randomInt(1, 999).toString();
 	});
 }
+

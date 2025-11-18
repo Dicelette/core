@@ -1,5 +1,10 @@
 import { defineConfig } from "tsup";
 
+const args = process.argv.slice(2);
+const isDev = args.includes("--watch") || args.includes("--dev") || args.includes("-d") || args.includes("-w");
+
+console.log(`Building in ${isDev ? "development" : "production"} mode...`);
+
 export default defineConfig({
 	entry: ["src/index.ts"],
 	format: ["cjs", "esm"], // Build for commonJS and ESmodules
@@ -8,6 +13,6 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	esbuildOptions: options => {
-		options.drop = ["console", "debugger"];
+		options.drop = !isDev ? ["console", "debugger"] : [];
 	}
 });

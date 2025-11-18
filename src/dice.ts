@@ -1,4 +1,4 @@
-import { DiceRoller } from "@dice-roller/rpg-dice-roller";
+import {DiceRoller, NumberGenerator} from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 
 import {
@@ -19,6 +19,7 @@ import {
 	DETECT_CRITICAL,
 } from ".";
 import { isNumber } from "./utils";
+import {Engine} from "random-js";
 
 function getCompare(
 	dice: string,
@@ -129,7 +130,7 @@ function getModifier(dice: string) {
  * Parse the string provided and turn it as a readable dice for dice parser
  * @param dice {string}
  */
-export function roll(dice: string): Resultat | undefined {
+export function roll(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): Resultat | undefined {
 	//parse dice string
 	dice = standardizeDice(dice)
 		.replace(/^\+/, "")
@@ -154,6 +155,7 @@ export function roll(dice: string): Resultat | undefined {
 		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
 		const roller = new DiceRoller();
+		NumberGenerator.generator.engine = engine;
 		//remove comments if any
 		for (let i = 0; i < numberOfDice; i++) {
 			try {
@@ -172,6 +174,7 @@ export function roll(dice: string): Resultat | undefined {
 		};
 	}
 	const roller = new DiceRoller();
+	NumberGenerator.generator.engine = engine;
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 
 	try {

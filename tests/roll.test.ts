@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import * as core from "../src";
-import {DiceRoller} from "@dice-roller/rpg-dice-roller";
+import {DiceRoller, NumberGenerator} from "@dice-roller/rpg-dice-roller";
 import {isArray} from "mathjs";
 
 function roll(dice: string) {
 	const roller = new DiceRoller();
+	NumberGenerator.generator.engine = NumberGenerator.engines.nodeCrypto;
 	const res = roller.roll(dice);
 	return isArray(res) ? res[0] : res;
 }
