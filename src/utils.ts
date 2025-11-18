@@ -1,8 +1,8 @@
-import {evaluate} from "mathjs";
+import { evaluate } from "mathjs";
 import "uniformize";
-import {FormulaError} from ".";
-import {NumberGenerator} from "@dice-roller/rpg-dice-roller";
-import {Engine, Random} from "random-js";
+import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
+import { type Engine, Random } from "random-js";
+import { FormulaError } from ".";
 
 /**
  * Escape regex string
@@ -18,7 +18,7 @@ export function escapeRegex(string: string) {
  * @return {string} the dice with the text in brackets as if, but the dice (not in brackets) is standardized
  */
 export function standardizeDice(dice: string): string {
-	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (match, insideBrackets, outsideText) =>
+	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (_match, insideBrackets, outsideText) =>
 		insideBrackets ? insideBrackets : outsideText.standardize()
 	);
 }
@@ -59,6 +59,7 @@ export function generateStatsDice(
  */
 export function replaceFormulaInDice(dice: string) {
 	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
+	// biome-ignore lint/suspicious/noImplicitAnyLet: needed for regex loop
 	let match;
 	let modifiedDice = dice;
 	// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
@@ -116,12 +117,57 @@ export function isNumber(value: unknown): boolean {
  * @param engine
  * @returns {string} the dice with the {exp} replaced by a random value
  */
-export function replaceExpByRandom(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): string {
+export function replaceExpByRandom(
+	dice: string,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+): string {
 	const diceRegex = /\{exp( ?\|\| ?(?<default>\d+))?}/gi;
 	return dice.replace(diceRegex, (_match, _p1, _p2, _offset, _string, groups) => {
 		const defaultValue = groups?.default;
 		return defaultValue ?? randomInt(1, 999, engine).toString();
 	});
+}
+
+/**
+ * Utility function to get a random integer between min and max and using the specified engine
+ * @param min {number}
+ * @param max {number}
+ * @param engine {Engine | null} Engine to use, default to nodeCrypto
+ * @param rng {Random | undefined} Random instance to use, see https://www.npmjs.com/package/random-js#usage
+ * @returns {number} Random integer between min and max
+ */
+export function randomInt(
+	min: number,
+	max: number,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	rng?: Random
+): number {
+	if (!rng) rng = new Random(engine || undefined);
+	return rng.integer(min, max);
+}
+/**
+ * Utility function that allow to get the id of an engine
+ * @param engine {unknown} Engine to identify
+ * @returns {string} Id of the engine or "unknown"
+ * @private
+ */
+export function getEngineId(engine: unknown): string {
+	// Comparaisons directes avec les engines exposés par la lib
+	if (engine === NumberGenerator.engines.nodeCrypto) return "nodeCrypto";
+	if (engine === NumberGenerator.engines.nativeMath) return "nativeMath";
+	if (engine === NumberGenerator.engines.browserCrypto) return "browserCrypto";
+	// Fallback: essayer de lire un nom ou le constructeur
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: needed for dynamic access
+		const e = engine as any;
+		if (e && typeof e === "object") {
+			if (typeof e.name === "string" && e.name) return e.name;
+			if (e.constructor?.name) return e.constructor.name;
+		}
+	} catch {
+		/* ignore */
+	}
+	return "unknown";
 }
 
 /**
@@ -141,9 +187,4 @@ export function getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto")
 		default:
 			return NumberGenerator.engines.nativeMath;
 	}
-}
-
-export function randomInt(min: number, max: number, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
-	const rng = new Random(engine || undefined);
-	return rng.integer(min, max);
 }

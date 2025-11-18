@@ -1,25 +1,25 @@
-import {DiceRoller, NumberGenerator} from "@dice-roller/rpg-dice-roller";
+import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
-
+import type { Engine } from "random-js";
 import {
+	COMMENT_REGEX,
 	type Compare,
 	type ComparedValue,
 	type CustomCritical,
+	DETECT_CRITICAL,
+	DiceTypeError,
+	diceTypeRandomParse,
+	getEngineId,
+	isNumber,
 	type Modifier,
 	type Resultat,
-	type Sign,
-	type StatisticalTemplate,
-	diceTypeRandomParse,
-	standardizeDice,
-	DiceTypeError,
-	COMMENT_REGEX,
 	SIGN_REGEX,
 	SIGN_REGEX_SPACE,
+	type Sign,
+	type StatisticalTemplate,
 	SYMBOL_DICE,
-	DETECT_CRITICAL,
+	standardizeDice,
 } from ".";
-import { isNumber } from "./utils";
-import {Engine} from "random-js";
 
 function getCompare(
 	dice: string,
@@ -41,7 +41,7 @@ function getCompare(
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
 	const calc = compareRegex[1];
-	const sign = calc.match(/[+-\/*^]/)?.[0];
+	const sign = calc.match(/[+-/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
 
 	if (sign) {
@@ -67,7 +67,10 @@ function getCompare(
 	return { dice, compare };
 }
 
-function rollCompare(value: unknown, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+function rollCompare(
+	value: unknown,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
 	const rollComp = roll(value as string, engine);
 	if (!rollComp?.total)
@@ -132,7 +135,10 @@ function getModifier(dice: string) {
  * Parse the string provided and turn it as a readable dice for dice parser
  * @param dice {string}
  */
-export function roll(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): Resultat | undefined {
+export function roll(
+	dice: string,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+): Resultat | undefined {
 	//parse dice string
 	dice = standardizeDice(dice)
 		.replace(/^\+/, "")
@@ -153,11 +159,12 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
 		const numberOfDice = Number.parseInt(diceArray[0], 10);
-		let diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
+		const diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
 		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
 		const roller = new DiceRoller();
 		NumberGenerator.generator.engine = engine;
+		console.log("Engine set:", getEngineId(NumberGenerator.generator.engine));
 		//remove comments if any
 		for (let i = 0; i < numberOfDice; i++) {
 			try {
@@ -166,6 +173,7 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 				throw new DiceTypeError(diceToRoll, "roll", error);
 			}
 		}
+		console.log("Used engine after roll:", getEngineId(NumberGenerator.generator.engine));
 		return {
 			dice: diceToRoll,
 			result: roller.output,
@@ -177,6 +185,8 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 	}
 	const roller = new DiceRoller();
 	NumberGenerator.generator.engine = engine;
+	console.log("Engine set:", getEngineId(NumberGenerator.generator.engine));
+
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 
 	try {
@@ -186,6 +196,7 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 	}
 	const commentMatch = dice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
+	console.log("Used engine after roll:", getEngineId(NumberGenerator.generator.engine));
 	return {
 		dice,
 		result: roller.output,
@@ -195,6 +206,7 @@ export function roll(dice: string, engine: Engine | null = NumberGenerator.engin
 		total: roller.total,
 	};
 }
+
 /**
  * Evaluate a formula and replace "^" by "**" if any
  * @param {Sign} sign
@@ -309,7 +321,10 @@ function formatComment(dice: string) {
 	return commentsMatch?.groups?.comments ? `__${commentsMatch.groups.comments}__ — ` : "";
 }
 
-function sharedRolls(dice: string, engine: Engine | null = NumberGenerator.engines.nodeCrypto): Resultat | undefined {
+function sharedRolls(
+	dice: string,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+): Resultat | undefined {
 	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
 			dice,
@@ -346,7 +361,13 @@ function sharedRolls(dice: string, engine: Engine | null = NumberGenerator.engin
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
-			const compareResult = compareSignFormule(toRoll, compareRegex, element, diceResult, engine);
+			const compareResult = compareSignFormule(
+				toRoll,
+				compareRegex,
+				element,
+				diceResult,
+				engine
+			);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
 		} else {

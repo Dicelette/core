@@ -1,31 +1,35 @@
-import { evaluate, random, randomInt } from "mathjs";
-import {Engine, Random} from "random-js";
+import { evaluate } from "mathjs";
+import { type Engine, Random } from "random-js";
 import "uniformize";
 
+import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import {
-	type StatisticalTemplate,
 	createCriticalCustom,
-	roll,
+	DETECT_CRITICAL,
 	DiceTypeError,
 	EmptyObjectError,
+	escapeRegex,
 	FormulaError,
 	NoStatisticsError,
-	escapeRegex,
-	replaceFormulaInDice,
-	templateSchema,
-	TooManyDice,
 	replaceExpByRandom,
-	DETECT_CRITICAL,
+	replaceFormulaInDice,
+	roll,
+	type StatisticalTemplate,
+	TooManyDice,
+	templateSchema,
 } from ".";
-import { isNumber } from "./utils";
-import {NumberGenerator} from "@dice-roller/rpg-dice-roller";
+import { isNumber, randomInt } from "./utils";
 
 /**
  * Verify if the provided dice work with random value
  * @param testDice {string}
  * @param allStats {Record<string,number>}
  */
-export function evalStatsDice(testDice: string, allStats?: Record<string, number>, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+export function evalStatsDice(
+	testDice: string,
+	allStats?: Record<string, number>,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	let dice = testDice.trimEnd();
 	if (allStats && Object.keys(allStats).length > 0) {
 		const names = Object.keys(allStats);
@@ -53,7 +57,11 @@ export function evalStatsDice(testDice: string, allStats?: Record<string, number
  * @param template {StatisticalTemplate}
  * @returns
  */
-export function diceRandomParse(value: string, template: StatisticalTemplate, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+export function diceRandomParse(
+	value: string,
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	if (!template.statistics) return replaceFormulaInDice(value.standardize());
 	value = value.standardize();
 	const statNames = Object.keys(template.statistics);
@@ -61,8 +69,8 @@ export function diceRandomParse(value: string, template: StatisticalTemplate, en
 	for (const name of statNames) {
 		const regex = new RegExp(escapeRegex(name.standardize()), "gi");
 		if (value.match(regex)) {
-			let max: undefined | number = undefined;
-			let min: undefined | number = undefined;
+			let max: undefined | number;
+			let min: undefined | number;
 			const foundStat = template.statistics?.[name];
 			if (foundStat) {
 				max = foundStat.max;
@@ -81,7 +89,11 @@ export function diceRandomParse(value: string, template: StatisticalTemplate, en
  * @param dice {string}
  * @param template {StatisticalTemplate}
  */
-export function diceTypeRandomParse(dice: string, template: StatisticalTemplate, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+export function diceTypeRandomParse(
+	dice: string,
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	dice = replaceExpByRandom(dice);
 	if (!template.statistics) return dice;
 	const firstStatNotcombinaison = Object.keys(template.statistics).find(
@@ -157,7 +169,7 @@ function convertNumber(number: string | number | undefined) {
  */
 export function verifyTemplateValue(
 	template: unknown,
-	verify: boolean = true,
+	verify = true,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
@@ -191,9 +203,7 @@ export function verifyTemplateValue(
 			engine
 		);
 		const rolled = roll(cleanedDice, engine);
-		if (!rolled)
-			throw new DiceTypeError(cleanedDice, "no_roll_result", "no roll result");
-		
+		if (!rolled) throw new DiceTypeError(cleanedDice, "no_roll_result", "no roll result");
 	}
 	if (statistiqueTemplate.customCritical) {
 		if (!statistiqueTemplate.diceType) {
@@ -221,7 +231,10 @@ export function verifyTemplateValue(
  * Test each damage roll from the template.damage
  * @param {StatisticalTemplate} template
  */
-export function testDiceRegistered(template: StatisticalTemplate, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+export function testDiceRegistered(
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	if (!template.damage) return;
 	if (Object.keys(template.damage).length === 0) throw new EmptyObjectError();
 	if (Object.keys(template.damage).length > 25) throw new TooManyDice();
@@ -243,7 +256,10 @@ export function testDiceRegistered(template: StatisticalTemplate, engine: Engine
  * Test all combinaison with generated random value
  * @param {StatisticalTemplate} template
  */
-export function testStatCombinaison(template: StatisticalTemplate, engine: Engine | null = NumberGenerator.engines.nodeCrypto) {
+export function testStatCombinaison(
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
 	if (!template.statistics) return;
 	const onlycombinaisonStats = Object.fromEntries(
 		Object.entries(template.statistics).filter(
@@ -292,12 +308,12 @@ export function generateRandomStat(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	let randomStatValue = total + 1;
+	const random = new Random(engine || NumberGenerator.engines.nodeCrypto);
 	while (randomStatValue >= total || randomStatValue === 0) {
-		const random = new Random(engine || undefined);
-		if (max && min) randomStatValue = random.integer(min, max);
-		else if (max) randomStatValue = random.integer(1, max);
-		else if (min) randomStatValue = random.integer(min, total);
-		else randomStatValue = random.integer(1, total);
+		if (max && min) randomStatValue = randomInt(min, max, engine, random);
+		else if (max) randomStatValue = randomInt(1, max, engine, random);
+		else if (min) randomStatValue = randomInt(min, total, engine, random);
+		else randomStatValue = randomInt(1, total, engine, random);
 	}
 	return randomStatValue;
 }
