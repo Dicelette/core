@@ -18,7 +18,7 @@ export function escapeRegex(string: string) {
  * @return {string} the dice with the text in brackets as if, but the dice (not in brackets) is standardized
  */
 export function standardizeDice(dice: string): string {
-	return dice.replace(/(\[[^\]]+\])|([^[]+)/g, (_match, insideBrackets, outsideText) =>
+	return dice.replace(/(\[[^\]]+])|([^[]+)/g, (_match, insideBrackets, outsideText) =>
 		insideBrackets ? insideBrackets : outsideText.standardize()
 	);
 }
@@ -37,17 +37,61 @@ export function generateStatsDice(
 ) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
-		//damage field support adding statistic, like : 1d6 + strength
-		//check if the value contains a statistic & calculate if it's okay
-		//the dice will be converted before roll
-		const allStats = Object.keys(stats);
-		for (const stat of allStats) {
-			const regex = new RegExp(`(?!\\[)${escapeRegex(stat.standardize())}(?!\\])`, "gi");
-			if (dice.match(regex)) {
-				const statValue = stats[stat];
-				dice = dice.replace(regex, statValue.toString());
+		const statKeys = Object.keys(stats);
+		const partsRegex = /(\[[^\]]+])|([^[]+)/g;
+		let result = "";
+		let match: RegExpExecArray | null;
+		// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
+		while ((match = partsRegex.exec(dice)) !== null) {
+			const insideBrackets = match[1];
+			const outsideText = match[2];
+			if (insideBrackets) {
+				result += insideBrackets;
+				continue;
 			}
+			if (!outsideText) {
+				continue;
+			}
+			const tokenRegex = /([\p{L}\p{N}_]+)/gu;
+			let lastIndex = 0;
+			let tokenMatch: RegExpExecArray | null;
+			// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
+			while ((tokenMatch = tokenRegex.exec(outsideText)) !== null) {
+				result += outsideText.slice(lastIndex, tokenMatch.index);
+				const token = tokenMatch[0];
+				const tokenStd = token.standardize();
+				let bestKey: string | null = null;
+				let bestScore = 0;
+				for (const key of statKeys) {
+					const keyStd = key.standardize();
+					if (
+						tokenStd === keyStd ||
+						keyStd.includes(tokenStd) ||
+						tokenStd.includes(keyStd) ||
+						keyStd.startsWith(tokenStd) ||
+						tokenStd.startsWith(keyStd)
+					) {
+						bestKey = key;
+						bestScore = 1;
+						break;
+					}
+					const score = similarityScore(tokenStd, keyStd);
+					if (score > bestScore) {
+						bestScore = score;
+						bestKey = key;
+					}
+				}
+				if (bestKey && bestScore >= 0.6) {
+					const statValue = stats[bestKey];
+					result += statValue.toString();
+				} else {
+					result += token;
+				}
+				lastIndex = tokenRegex.lastIndex;
+			}
+			result += outsideText.slice(lastIndex);
 		}
+		dice = result;
 	}
 	if (dollarValue) dice = dice.replaceAll("$", dollarValue);
 	return replaceFormulaInDice(dice);
@@ -187,4 +231,39 @@ export function getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto")
 		default:
 			return NumberGenerator.engines.nativeMath;
 	}
+}
+
+/**
+ * Calcule la distance de Levenshtein entre deux chaînes
+ */
+function levenshteinDistance(a: string, b: string): number {
+	if (a === b) return 0;
+	const al = a.length;
+	const bl = b.length;
+	if (al === 0) return bl;
+	if (bl === 0) return al;
+	const v0 = new Array<number>(bl + 1);
+	const v1 = new Array<number>(bl + 1);
+	for (let i = 0; i <= bl; i++) v0[i] = i;
+	for (let i = 0; i < al; i++) {
+		v1[0] = i + 1;
+		for (let j = 0; j < bl; j++) {
+			const cost = a[i] === b[j] ? 0 : 1;
+			v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+		}
+		for (let j = 0; j <= bl; j++) v0[j] = v1[j];
+	}
+	return v1[bl];
+}
+
+/**
+ * Score de similarité normalisé entre 0 et 1 (1 = identique)
+ */
+function similarityScore(a: string, b: string): number {
+	const la = a.length;
+	const lb = b.length;
+	if (la === 0 && lb === 0) return 1;
+	const dist = levenshteinDistance(a, b);
+	const max = Math.max(la, lb);
+	return 1 - dist / max;
 }
