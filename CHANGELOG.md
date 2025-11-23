@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0](https://github.com/Dicelette/core/compare/v1.20.1...v1.21.0) (2025-11-23)
+
+
+### Features
+
+* better matching stats in generateStatsDice ([85a2db1](https://github.com/Dicelette/core/commit/85a2db14d717c72b1ace340fb6771b581ee530ef))
+
 ## [1.20.1](https://github.com/Dicelette/core/compare/v1.20.0...v1.20.1) (2025-11-18)
 
 ## [1.20.0](https://github.com/Dicelette/core/compare/v1.19.0...v1.20.0) (2025-11-18)
