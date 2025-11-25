@@ -19,7 +19,7 @@ export function escapeRegex(string: string) {
  */
 export function standardizeDice(dice: string): string {
 	return dice.replace(/(\[[^\]]+])|([^[]+)/g, (_match, insideBrackets, outsideText) =>
-		insideBrackets ? insideBrackets : outsideText.standardize()
+		insideBrackets ? insideBrackets : outsideText.standardize().replaceAll("df", "dF")
 	);
 }
 
