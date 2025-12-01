@@ -9,10 +9,10 @@ import {
 	DETECT_CRITICAL,
 	DiceTypeError,
 	diceTypeRandomParse,
-	getEngineId,
 	isNumber,
 	type Modifier,
 	type Resultat,
+	replaceFormulaInDice,
 	SIGN_REGEX,
 	SIGN_REGEX_SPACE,
 	type Sign,
@@ -140,7 +140,7 @@ export function roll(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ): Resultat | undefined {
 	//parse dice string
-	dice = standardizeDice(dice)
+	dice = standardizeDice(replaceFormulaInDice(dice))
 		.replace(/^\+/, "")
 		.replaceAll("=>", ">=")
 		.replaceAll("=<", "<=")
@@ -155,6 +155,7 @@ export function roll(
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
+	dice = fixParenthesis(dice);
 	const modificator = getModifier(dice);
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
@@ -164,7 +165,6 @@ export function roll(
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
 		const roller = new DiceRoller();
 		NumberGenerator.generator.engine = engine;
-		console.log("Engine set:", getEngineId(NumberGenerator.generator.engine));
 		//remove comments if any
 		for (let i = 0; i < numberOfDice; i++) {
 			try {
@@ -173,7 +173,6 @@ export function roll(
 				throw new DiceTypeError(diceToRoll, "roll", error);
 			}
 		}
-		console.log("Used engine after roll:", getEngineId(NumberGenerator.generator.engine));
 		return {
 			dice: diceToRoll,
 			result: roller.output,
@@ -185,8 +184,6 @@ export function roll(
 	}
 	const roller = new DiceRoller();
 	NumberGenerator.generator.engine = engine;
-	console.log("Engine set:", getEngineId(NumberGenerator.generator.engine));
-
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 
 	try {
@@ -196,7 +193,6 @@ export function roll(
 	}
 	const commentMatch = dice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
-	console.log("Used engine after roll:", getEngineId(NumberGenerator.generator.engine));
 	return {
 		dice,
 		result: roller.output,
@@ -205,6 +201,13 @@ export function roll(
 		modifier: modificator,
 		total: roller.total,
 	};
+}
+
+function fixParenthesis(dice: string) {
+	//dice with like 1d(20) are not valid, we need to remove the parenthesis
+	//warning: the 1d(20+5) is valid and should not be changed
+	const parenthesisRegex = /d\((\d+)\)/g;
+	return dice.replaceAll(parenthesisRegex, (_match, p1) => `d${p1}`);
 }
 
 /**
