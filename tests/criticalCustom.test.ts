@@ -1,8 +1,8 @@
 import { expect, it } from "bun:test";
 import {
 	type CustomCritical,
-	type StatisticalTemplate,
 	createCriticalCustom,
+	type StatisticalTemplate,
 } from "../src";
 
 it("should return a custom critical dice", () => {
@@ -48,13 +48,13 @@ it("should validate even if the stats are used multiple time", () => {
 	const expected = "1d20+0>5";
 	expect(result).toEqual(expected);
 });
-it("Testing with a simple diceType", ()=>{
+it("Testing with a simple diceType", () => {
 	const customCritical: CustomCritical = {
-      "sign": "==",
-      "value": "1",
-      "onNaturalDice": false,
-      "affectSkill": true
-    };
+		sign: "==",
+		value: "1",
+		onNaturalDice: false,
+		affectSkill: true,
+	};
 	const template: StatisticalTemplate = {
 		diceType: "1d100",
 		damage: {
@@ -63,8 +63,8 @@ it("Testing with a simple diceType", ()=>{
 		customCritical: {
 			fail: customCritical,
 		},
-	}
+	};
 	const result = createCriticalCustom("1d100", customCritical, template);
 	const expected = "1d100==1";
 	expect(result).toEqual(expected);
-})
+});

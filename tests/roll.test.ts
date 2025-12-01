@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
+import { isArray } from "mathjs";
 import * as core from "../src";
-import {DiceRoller, NumberGenerator} from "@dice-roller/rpg-dice-roller";
-import {isArray} from "mathjs";
 
 function roll(dice: string) {
 	const roller = new DiceRoller();
@@ -20,7 +20,7 @@ describe("passing", () => {
 		const rollResult = roll("2d6");
 		expect(result!.dice).toEqual(rollResult.notation);
 	});
-	
+
 	it("valid even when starting with +", () => {
 		const result = core.roll("+2d6");
 		expect(result).not.toBeUndefined();

@@ -1,6 +1,6 @@
 import { expect, it } from "bun:test";
-import * as core from "../src";
 import type { StatisticalTemplate } from "../src";
+import * as core from "../src";
 
 // Add more tests for different scenarios
 it("should verify the template correctly", () => {
@@ -15,12 +15,12 @@ it("should verify the template correctly", () => {
 	expect(result).toMatchObject(template);
 });
 
-it("should throw an error for invalid dice type with custom critical", () =>{
+it("should throw an error for invalid dice type with custom critical", () => {
 	const template: StatisticalTemplate = {
-		diceType: "1d100{cs:<=5}{cf:>=96}>55"
-	}
+		diceType: "1d100{cs:<=5}{cf:>=96}>55",
+	};
 	expect(() => core.verifyTemplateValue(template)).toThrow();
-})
+});
 
 it("template validated with customCritical value", () => {
 	const template: StatisticalTemplate = {
@@ -110,7 +110,7 @@ it("Should calculate an exp with a formula and statistics", () => {
 });
 it("Should validate a dice type with {exp}", () => {
 	const template = {
-		diceType: "{exp}d100"
+		diceType: "{exp}d100",
 	};
 	const result = core.verifyTemplateValue(template);
 	expect(result).toMatchObject(template);
@@ -118,16 +118,16 @@ it("Should validate a dice type with {exp}", () => {
 
 it("Should validate a dice type with {exp||defaultValue}", () => {
 	const template = {
-		diceType: "{exp||2}d100"
+		diceType: "{exp||2}d100",
 	};
 	const result = core.verifyTemplateValue(template);
 	expect(result).toMatchObject(template);
 });
 
-it("Should validate in a dice with multiple exp & default value", ()=>{
+it("Should validate in a dice with multiple exp & default value", () => {
 	const template = {
-		diceType: "1d{exp||2}+{exp||6}"
+		diceType: "1d{exp||2}+{exp||6}",
 	};
 	const result = core.verifyTemplateValue(template);
 	expect(result).toMatchObject(template);
-})
+});
