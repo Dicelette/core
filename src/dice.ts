@@ -338,7 +338,7 @@ function sharedRolls(
 	const mainComment =
 		/\s+#(?<comment>.*)/.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
-	let diceMain = split[0];
+	let diceMain = fixParenthesis(split[0]);
 	const toHideRegex = /(?<!\[[^\]]*)\((?<dice>[^)]+)\)/;
 	const toHide = toHideRegex.exec(diceMain)?.groups;
 	let hidden = false;
@@ -352,7 +352,14 @@ function sharedRolls(
 	const commentsRegex = /\[(?<comments>.*?)\]/gi;
 	const comments = formatComment(diceMain);
 	diceMain = diceMain.replaceAll(commentsRegex, "").trim();
-	const diceResult = roll(diceMain, engine);
+	console.log("Dice main:", diceMain);
+	let diceResult = roll(diceMain, engine);
+	if (!diceResult || !diceResult.total) {
+		if (hidden) {
+			diceResult = roll(fixParenthesis(split[0]));
+			hidden = false;
+		} else return undefined;
+	}
 	if (!diceResult || !diceResult.total) return undefined;
 	results.push(`※ ${comments}${diceResult.result}`);
 	let total = diceResult.total;
