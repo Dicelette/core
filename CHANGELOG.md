@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.3](https://github.com/Dicelette/core/compare/v1.21.2...v1.21.3) (2025-12-02)
+
+
+### Bug Fixes
+
+* shared with dice parenthesis ([3bdeada](https://github.com/Dicelette/core/commit/3bdeada93447de613787ca73c4c6d307a3cab285))
+
 ## [1.21.2](https://github.com/Dicelette/core/compare/v1.21.1...v1.21.2) (2025-12-01)
 
 
