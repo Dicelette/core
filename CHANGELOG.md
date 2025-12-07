@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.0](https://github.com/Dicelette/core/compare/v1.21.5...v1.22.0) (2025-12-07)
+
+
+### Features
+
+* allow negative stats ([1f1a438](https://github.com/Dicelette/core/commit/1f1a4380c1dd6ee05248c9aee28047ade10e2231))
+
 ## [1.21.5](https://github.com/Dicelette/core/compare/v1.21.4...v1.21.5) (2025-12-05)
 
 ## [1.21.4](https://github.com/Dicelette/core/compare/v1.21.3...v1.21.4) (2025-12-05)
