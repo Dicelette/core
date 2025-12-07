@@ -7,12 +7,10 @@ const statisticValueSchema = z
 	.object({
 		max: z
 			.number()
-			.min(0)
 			.transform((val) => (val === 0 ? undefined : val))
 			.optional(),
 		min: z
 			.number()
-			.min(0)
 			.transform((val) => (val === 0 ? undefined : val))
 			.optional(),
 		combinaison: z
