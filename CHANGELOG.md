@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.1](https://github.com/Dicelette/core/compare/v1.22.0...v1.22.1) (2025-12-07)
+
+
+### Bug Fixes
+
+* improve number validation in statisticValueSchema and convertNumber function ([9504c5f](https://github.com/Dicelette/core/commit/9504c5f569bf5dfe79f098c71ed6a2ffc903f69b))
+
 ## [1.22.0](https://github.com/Dicelette/core/compare/v1.21.5...v1.22.0) (2025-12-07)
 
 
