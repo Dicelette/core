@@ -155,8 +155,12 @@ export function evalOneCombinaison(
 }
 
 function convertNumber(number: string | number | undefined) {
-	if (!number) return undefined;
-	if (number.toString().length === 0) return undefined;
+	if (number === undefined || number === null) return undefined;
+	if (
+		number.toString().length === 0 ||
+		Number.isNaN(Number.parseInt(number.toString(), 10))
+	)
+		return undefined;
 	if (isNumber(number)) return Number.parseInt(number.toString(), 10);
 	return undefined;
 }
@@ -173,6 +177,7 @@ export function verifyTemplateValue(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
+	console.log(parsedTemplate);
 	const { success, failure } = parsedTemplate.critical ?? {};
 	const criticicalVal = {
 		success: convertNumber(success),

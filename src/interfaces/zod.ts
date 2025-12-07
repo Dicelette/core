@@ -11,7 +11,9 @@ const statisticValueSchema = z
 			.optional(),
 		min: z
 			.number()
-			.transform((val) => (val === 0 ? undefined : val))
+			.transform((val) =>
+				Number.isNaN(Number.parseInt(val as unknown as string, 10)) ? undefined : val
+			)
 			.optional(),
 		combinaison: z
 			.string()
