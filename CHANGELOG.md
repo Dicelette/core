@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.2](https://github.com/Dicelette/core/compare/v1.22.1...v1.22.2) (2025-12-09)
+
+
+### Bug Fixes
+
+* **sharedRoll:** allow comments with space in the end of it ([aae8de6](https://github.com/Dicelette/core/commit/aae8de6561b4edd53d67587b480207374ce015d3))
+
 ## [1.22.1](https://github.com/Dicelette/core/compare/v1.22.0...v1.22.1) (2025-12-07)
 
 
