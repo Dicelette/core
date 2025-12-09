@@ -11,6 +11,7 @@ import {
 	diceTypeRandomParse,
 	isNumber,
 	type Modifier,
+	OPTIONAL_COMMENT,
 	type Resultat,
 	replaceFormulaInDice,
 	SIGN_REGEX,
@@ -321,7 +322,23 @@ function replaceText(element: string, total: number, dice: string) {
 function formatComment(dice: string) {
 	const commentsRegex = /\[(?<comments>.*?)\]/;
 	const commentsMatch = commentsRegex.exec(dice);
-	return commentsMatch?.groups?.comments ? `__${commentsMatch.groups.comments}__ — ` : "";
+	//search for optional comments too
+	const optionalComments = OPTIONAL_COMMENT.exec(dice);
+	const comments = commentsMatch?.groups?.comments
+		? `${commentsMatch.groups.comments}`
+		: "";
+	const optional = optionalComments?.groups?.comment
+		? `${optionalComments.groups.comment.trim()}`
+		: "";
+	//fusion of both comments with a space if both exists
+	//result expected = "__comment1 comment2__ — "
+	//or "__comment1__ — " or "__comment2__ — "
+	let finalComment = "";
+	if (comments && optional)
+		finalComment = `__${commentsMatch?.groups?.comments} ${optionalComments?.groups?.comment.trim()}__ — `;
+	else if (comments) finalComment = `__${comments}__ — `;
+	else if (optional) finalComment = `__${optional}__ — `;
+	return finalComment;
 }
 
 function sharedRolls(
@@ -351,7 +368,7 @@ function sharedRolls(
 	}
 	const commentsRegex = /\[(?<comments>.*?)\]/gi;
 	const comments = formatComment(diceMain);
-	diceMain = diceMain.replaceAll(commentsRegex, "").trim();
+	diceMain = diceMain.replace(commentsRegex, "").trim();
 	console.log("Dice main:", diceMain);
 	let diceResult = roll(diceMain, engine);
 	if (!diceResult || !diceResult.total) {
@@ -367,8 +384,14 @@ function sharedRolls(
 	if (!total) return diceResult;
 	for (let element of split.slice(1)) {
 		const comment = formatComment(element);
-		element = element.replace(commentsRegex, "").trim();
+		console.log(element);
+		element = element
+			.replaceAll(commentsRegex, "")
+			.replaceAll(OPTIONAL_COMMENT, "")
+			.trim();
+		console.log("Element to roll:", element);
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
+		//remove comments
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
 			const compareResult = compareSignFormule(
