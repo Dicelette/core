@@ -177,7 +177,6 @@ export function verifyTemplateValue(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ): StatisticalTemplate {
 	const parsedTemplate = templateSchema.parse(template);
-	console.log(parsedTemplate);
 	const { success, failure } = parsedTemplate.critical ?? {};
 	const criticicalVal = {
 		success: convertNumber(success),

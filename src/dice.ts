@@ -37,11 +37,13 @@ function getCompare(
 	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
 	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
 	 */
-	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))[><=!]+\d+\}?)|\{(.*)([><=!]+).*\}/))
+	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{(.*)(([><=]|!=)+).*\}/))
 		return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
-	const calc = compareRegex[1];
+	// compareRegex comes from SIGN_REGEX_SPACE: /([><=]|!=)+(\S+)/
+	// index 1 = the comparison sign (e.g., ">", ">=", "!="); index 2 = the compared value/expression
+	const calc = compareRegex[2];
 	const sign = calc.match(/[+-/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
 
@@ -322,20 +324,25 @@ function replaceText(element: string, total: number, dice: string) {
 function formatComment(dice: string) {
 	const commentsRegex = /\[(?<comments>.*?)\]/;
 	const commentsMatch = commentsRegex.exec(dice);
-	//search for optional comments too
-	const optionalComments = OPTIONAL_COMMENT.exec(dice);
 	const comments = commentsMatch?.groups?.comments
 		? `${commentsMatch.groups.comments}`
 		: "";
+	
+	// Search for optional comments (# or // style) only AFTER removing bracket comments
+	// to avoid conflicts with parentheses inside bracket comments
+	const diceWithoutBrackets = dice.replace(commentsRegex, "");
+	const optionalCommentsRegex = /\s+(#|\/\/)(?<comment>.*)/;
+	const optionalComments = optionalCommentsRegex.exec(diceWithoutBrackets);
 	const optional = optionalComments?.groups?.comment
 		? `${optionalComments.groups.comment.trim()}`
 		: "";
+	
 	//fusion of both comments with a space if both exists
 	//result expected = "__comment1 comment2__ — "
 	//or "__comment1__ — " or "__comment2__ — "
 	let finalComment = "";
 	if (comments && optional)
-		finalComment = `__${commentsMatch?.groups?.comments} ${optionalComments?.groups?.comment.trim()}__ — `;
+		finalComment = `__${comments} ${optional}__ — `;
 	else if (comments) finalComment = `__${comments}__ — `;
 	else if (optional) finalComment = `__${optional}__ — `;
 	return finalComment;
@@ -356,8 +363,13 @@ function sharedRolls(
 		/\s+#(?<comment>.*)/.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
 	let diceMain = fixParenthesis(split[0]);
-	const toHideRegex = /(?<!\[[^\]]*)\((?<dice>[^)]+)\)/;
-	const toHide = toHideRegex.exec(diceMain)?.groups;
+	// Extract and save the comments first to avoid conflicts with parentheses detection
+	const commentsRegex = /\[(?<comments>.*?)\]/gi;
+	const comments = formatComment(diceMain);
+	// Remove comments before checking for hidden dice (parentheses)
+	const diceMainWithoutComments = diceMain.replace(commentsRegex, "").trim();
+	const toHideRegex = /\((?<dice>[^)]+)\)/;
+	const toHide = toHideRegex.exec(diceMainWithoutComments)?.groups;
 	let hidden = false;
 	if (toHide?.dice) {
 		diceMain = toHide.dice;
@@ -365,11 +377,10 @@ function sharedRolls(
 	} else if (toHide) {
 		diceMain = "1d1";
 		hidden = true;
+	} else {
+		// No hidden dice, use the dice without comments
+		diceMain = diceMainWithoutComments;
 	}
-	const commentsRegex = /\[(?<comments>.*?)\]/gi;
-	const comments = formatComment(diceMain);
-	diceMain = diceMain.replace(commentsRegex, "").trim();
-	console.log("Dice main:", diceMain);
 	let diceResult = roll(diceMain, engine);
 	if (!diceResult || !diceResult.total) {
 		if (hidden) {
@@ -384,12 +395,10 @@ function sharedRolls(
 	if (!total) return diceResult;
 	for (let element of split.slice(1)) {
 		const comment = formatComment(element);
-		console.log(element);
 		element = element
 			.replaceAll(commentsRegex, "")
 			.replaceAll(OPTIONAL_COMMENT, "")
 			.trim();
-		console.log("Element to roll:", element);
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		//remove comments
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
