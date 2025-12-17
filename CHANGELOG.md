@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.3](https://github.com/Dicelette/core/compare/v1.22.2...v1.22.3) (2025-12-17)
+
+
+### Bug Fixes
+
+* better support for exploding dice ([4554257](https://github.com/Dicelette/core/commit/4554257d835b85c844f8078ac139676074e23b83))
+
 ## [1.22.2](https://github.com/Dicelette/core/compare/v1.22.1...v1.22.2) (2025-12-09)
 
 
