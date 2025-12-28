@@ -8,6 +8,47 @@ This README documents the public API exported by the `core` package. It lists ty
 
 The `core` module provides small utilities to parse and evaluate dice notation, to generate and replace statistical values in dice expressions, and to validate statistical templates. The API is intended to be consumed by higher-level modules (bot, CLI, etc.).
 
+## Pity System
+
+The pity system is an optional feature that automatically re-rolls dice when a comparison fails, ensuring successful outcomes. This is useful in role-playing games where certain rolls must succeed (e.g., a critical save action).
+
+### How It Works
+
+When the `pity` parameter is set to `true` in the `roll()` function and the dice expression includes a comparison operator (e.g., `1d6>=5`), the system:
+
+1. Evaluates the initial roll against the comparison condition
+2. If the condition is **not met**, automatically re-rolls and repeats until success
+3. Tracks the number of re-rolls in the `pityLogs` field of the result
+
+### Limitations
+
+The pity system only activates when a **comparison is theoretically possible**. For example:
+
+- `1d6>=7` — **Ignored** (impossible: maximum roll is 6)
+- `1d6>=5` — **Active** (possible: can roll 5 or 6)
+- `2d6>=12` — **Active** (possible: can roll 12)
+- `1d20>20` — **Ignored** (impossible: maximum roll is 20, not greater than 20)
+
+### Example
+
+```javascript
+const result = roll("1d6>=5", null, true);
+// If first roll is 3, pity system re-rolls
+// If second roll is 2, pity system re-rolls again
+// If third roll is 6, comparison succeeds and stops
+// result.total = 6
+// result.pityLogs = 2 (number of re-rolls)
+```
+
+Without pity (`pity = false` or `undefined`), a roll of `1d6>=5` would return the result regardless of comparison outcome, with no re-rolls.
+
+### Usage Notes
+
+- The pity system only applies when the roll includes a comparison operator
+- The system has a safety limit of 100 re-rolls to prevent infinite loops
+- The `pityLogs` field is only present in the result if at least one re-roll occurred
+- Impossible comparisons are silently ignored (no error thrown)
+
 ## Public API
 
 Note: when a parameter `engine` is shown it usually defaults to the `NumberGenerator.engines.nodeCrypto` engine (from `@dice-roller/rpg-dice-roller`) unless otherwise specified.
@@ -21,6 +62,7 @@ Note: when a parameter `engine` is shown it usually defaults to the `NumberGener
 - compare?: ComparedValue — Optional comparison attached to the roll
 - modifier?: Modifier — Optional modifier applied to the roll
 - total?: number — Optional numeric total of the roll
+- pityLogs?: number — Optional count of re-rolls triggered by the pity system (see Pity System below)
 
 #### Interface: Compare
 - sign: "<" | ">" | ">=" | "<=" | "=" | "!=" | "=="
@@ -112,9 +154,10 @@ Note: when a parameter `engine` is shown it usually defaults to the `NumberGener
 
 ### Dice functions (`src/dice.ts`)
 
-#### Function: roll(dice: string, engine?: Engine | null): Resultat | undefined
+#### Function: roll(dice: string, engine?: Engine | null, pity?: boolean): Resultat | undefined
 - Parse a dice notation string and perform the roll(s) using `rpg-dice-roller`.
 - Supports comments, grouped/shared rolls, comparisons, modifiers and custom notation (see module docs).
+- If `pity` is `true` and the roll includes a comparison (e.g., `1d6>=5`), automatically re-rolls until the comparison succeeds (see Pity System below).
 - Returns `Resultat` when a dice expression is recognized, otherwise `undefined`.
 - Throws `DiceTypeError` when the expression cannot be parsed or rolled.
 

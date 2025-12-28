@@ -24,11 +24,14 @@ import { isNumber, randomInt } from "./utils";
  * Verify if the provided dice work with random value
  * @param testDice {string}
  * @param allStats {Record<string,number>}
+ * @param engine
+ * @param pity
  */
 export function evalStatsDice(
 	testDice: string,
 	allStats?: Record<string, number>,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ) {
 	let dice = testDice.trimEnd();
 	if (allStats && Object.keys(allStats).length > 0) {
@@ -42,7 +45,7 @@ export function evalStatsDice(
 		}
 	}
 	try {
-		if (!roll(replaceFormulaInDice(replaceExpByRandom(dice)), engine))
+		if (!roll(replaceFormulaInDice(replaceExpByRandom(dice)), engine, pity))
 			throw new DiceTypeError(dice, "evalStatsDice", "no roll result");
 		return testDice;
 	} catch (error) {
@@ -55,6 +58,7 @@ export function evalStatsDice(
  * Used for diceDamage only
  * @param value {string}
  * @param template {StatisticalTemplate}
+ * @param engine
  * @returns
  */
 export function diceRandomParse(
@@ -88,6 +92,7 @@ export function diceRandomParse(
  * Same as damageDice but for DiceType
  * @param dice {string}
  * @param template {StatisticalTemplate}
+ * @param engine
  */
 export function diceTypeRandomParse(
 	dice: string,
@@ -169,6 +174,7 @@ function convertNumber(number: string | number | undefined) {
  * Parse the provided JSON and verify each field to check if everything could work when rolling
  * @param {unknown} template
  * @param {boolean} verify - If true, will roll the dices to check if everything is valid
+ * @param engine
  * @returns {StatisticalTemplate}
  */
 export function verifyTemplateValue(
@@ -234,6 +240,7 @@ export function verifyTemplateValue(
 /**
  * Test each damage roll from the template.damage
  * @param {StatisticalTemplate} template
+ * @param engine
  */
 export function testDiceRegistered(
 	template: StatisticalTemplate,
@@ -259,6 +266,7 @@ export function testDiceRegistered(
 /**
  * Test all combinaison with generated random value
  * @param {StatisticalTemplate} template
+ * @param engine
  */
 export function testStatCombinaison(
 	template: StatisticalTemplate,
@@ -303,6 +311,7 @@ export function testStatCombinaison(
  * @param {number|undefined} total
  * @param {number | undefined} max
  * @param {number | undefined} min
+ * @param engine
  * @returns
  */
 export function generateRandomStat(

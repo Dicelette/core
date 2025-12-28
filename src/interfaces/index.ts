@@ -23,6 +23,7 @@ export interface Resultat {
 	 * Total of the roll
 	 */
 	total?: number;
+	pityLogs?: number;
 }
 
 export interface Compare {
@@ -34,6 +35,11 @@ export interface Compare {
 	 * Value of the comparison
 	 */
 	value: number;
+	/**
+	 * Indicate if the comparison is "trivial"
+	 * aka if the comparaison is always true or always false
+	 */
+	trivial?: boolean;
 }
 
 /**

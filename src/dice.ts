@@ -1,4 +1,4 @@
-import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
+import { type DiceRoll, DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
 import {
@@ -22,10 +22,60 @@ import {
 	standardizeDice,
 } from ".";
 
+/**
+ * Check if a comparison is trivial (always true or always false)
+ * Uses the existing canComparisonSucceed logic and checks both success and failure conditions
+ * @param maxValue Maximum possible value from the dice roll
+ * @param minValue Minimum possible value from the dice roll
+ * @param compare The comparison object
+ * @returns true if the comparison is trivial (always true or always false)
+ */
+function isTrivialComparison(
+	maxValue: number,
+	minValue: number,
+	compare: ComparedValue
+): boolean {
+	// Check if comparison can never succeed (always false)
+	const canSucceed = canComparisonSucceed(maxValue, compare, minValue);
+
+	// Check if comparison can never fail (always true) by checking the inverse with minValue
+	const canFail = canComparisonFail(minValue, compare);
+
+	// Trivial if it can never succeed OR can never fail
+	return !canSucceed || !canFail;
+}
+
+/**
+ * Check if a comparison can theoretically fail given a minimum roll value
+ * @param minRollValue Minimum possible roll value
+ * @param compare The comparison object
+ * @returns true if the comparison can fail
+ */
+function canComparisonFail(minRollValue: number, compare: ComparedValue): boolean {
+	switch (compare.sign) {
+		case ">":
+			return minRollValue <= compare.value;
+		case ">=":
+			return minRollValue < compare.value;
+		case "<":
+			return minRollValue >= compare.value;
+		case "<=":
+			return minRollValue > compare.value;
+		case "=":
+		case "==":
+			return minRollValue !== compare.value;
+		case "!=":
+			return minRollValue === compare.value;
+		default:
+			return true;
+	}
+}
+
 function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ): { dice: string; compare: ComparedValue | undefined } {
 	/**
 	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
@@ -37,7 +87,9 @@ function getCompare(
 	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
 	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
 	 */
-	if (dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{(.*)(([><=]|!=)+).*\}/))
+	if (
+		dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{(.*)(([><=]|!=)+).*\}/)
+	)
 		return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
@@ -49,7 +101,7 @@ function getCompare(
 
 	if (sign) {
 		const toCalc = calc.replace(SIGN_REGEX, "").replace(/\s/g, "").replace(/;(.*)/, "");
-		const rCompare = rollCompare(toCalc, engine);
+		const rCompare = rollCompare(toCalc, engine, pity);
 		const total = evaluate(rCompare.value.toString());
 		dice = dice.replace(SIGN_REGEX_SPACE, `${compareSign}${total}`);
 		compare = {
@@ -59,7 +111,7 @@ function getCompare(
 			rollValue: rCompare.diceResult,
 		};
 	} else {
-		const rcompare = rollCompare(calc, engine);
+		const rcompare = rollCompare(calc, engine, pity);
 		compare = {
 			sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
 			value: rcompare.value,
@@ -67,18 +119,30 @@ function getCompare(
 			rollValue: rcompare.diceResult,
 		};
 	}
+
 	return { dice, compare };
 }
 
 function rollCompare(
 	value: unknown,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ) {
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
-	const rollComp = roll(value as string, engine);
-	if (!rollComp?.total)
+	// Handle empty value or string - return 0 as default
+	if (!value || (typeof value === "string" && value.trim() === "")) {
+		return { value: 0, diceResult: value as string };
+	}
+	const rollComp = roll(value as string, engine, pity);
+	if (!rollComp?.total) {
 		//not a dice throw
-		return { value: evaluate(value as string), diceResult: value as string };
+		try {
+			return { value: evaluate(value as string), diceResult: value as string };
+		} catch (error) {
+			// If evaluate fails, return 0
+			return { value: 0, diceResult: value as string };
+		}
+	}
 	return {
 		dice: value as string,
 		value: rollComp.total,
@@ -137,10 +201,13 @@ function getModifier(dice: string) {
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
  * @param dice {string}
+ * @param engine
+ * @param pity
  */
 export function roll(
 	dice: string,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ): Resultat | undefined {
 	//parse dice string
 	dice = standardizeDice(replaceFormulaInDice(dice))
@@ -153,13 +220,17 @@ export function roll(
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
 	if (dice.includes(";")) return sharedRolls(dice, engine);
+
+	dice = fixParenthesis(dice);
+	const modificator = getModifier(dice);
+
+	// Extract compare BEFORE rolling to remove it from the dice notation
 	if (compareRegex) {
-		const compareResult = getCompare(dice, compareRegex, engine);
+		const compareResult = getCompare(dice, compareRegex, engine, pity);
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
-	dice = fixParenthesis(dice);
-	const modificator = getModifier(dice);
+
 	if (dice.match(/\d+?#(.*)/)) {
 		const diceArray = dice.split("#");
 		const numberOfDice = Number.parseInt(diceArray[0], 10);
@@ -176,6 +247,7 @@ export function roll(
 				throw new DiceTypeError(diceToRoll, "roll", error);
 			}
 		}
+
 		return {
 			dice: diceToRoll,
 			result: roller.output,
@@ -189,13 +261,63 @@ export function roll(
 	NumberGenerator.generator.engine = engine;
 	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 
+	let diceRoll: DiceRoll | DiceRoll[];
 	try {
-		roller.roll(diceWithoutComment);
+		diceRoll = roller.roll(diceWithoutComment);
 	} catch (error) {
 		throw new DiceTypeError(diceWithoutComment, "roll", error);
 	}
+
+	// Update compare.trivial after rolling to get access to diceRoll for trivial detection
+	if (compare && diceRoll) {
+		const currentRoll = Array.isArray(diceRoll) ? diceRoll[0] : diceRoll;
+		const maxDiceValue = currentRoll.maxTotal;
+		const minDiceValue = currentRoll.minTotal;
+		const trivial = isTrivialComparison(maxDiceValue, minDiceValue, compare);
+		compare.trivial = trivial ? true : undefined;
+	}
+
 	const commentMatch = dice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
+	let rerollCount = 0;
+	let res: Resultat | undefined;
+	if (pity && compare) {
+		// Vérifier si la comparaison est théoriquement possible
+		const currentRoll = Array.isArray(diceRoll) ? diceRoll[0] : diceRoll;
+		const maxPossible = currentRoll ? currentRoll.maxTotal : null;
+		const isComparisonPossible =
+			maxPossible === null || canComparisonSucceed(maxPossible, compare);
+
+		if (isComparisonPossible) {
+			let isFail = evaluate(`${roller.total}${compare.sign}${compare.value}`);
+			if (!isFail) {
+				//reroll until success
+				const maxReroll = 100;
+				while (!isFail && rerollCount < maxReroll) {
+					try {
+						res = roll(diceWithoutComment, engine, false); // désactiver pity pour éviter la récursion infinie
+					} catch (error) {
+						throw new DiceTypeError(diceWithoutComment, "roll", error);
+					}
+					rerollCount++;
+					if (res && res.total !== undefined)
+						isFail = evaluate(`${res.total}${compare.sign}${compare.value}`);
+				}
+				if (res) {
+					return {
+						...res,
+						dice,
+						comment,
+						compare: compare,
+						modifier: modificator,
+						pityLogs: rerollCount,
+					};
+				}
+			}
+		}
+		// Si la comparaison est impossible, on ignore la pity et on retourne le résultat normal
+		console.log("Comparison impossible, ignoring pity reroll.");
+	}
 	return {
 		dice,
 		result: roller.output,
@@ -203,7 +325,38 @@ export function roll(
 		compare: compare ? compare : undefined,
 		modifier: modificator,
 		total: roller.total,
+		pityLogs: rerollCount > 0 ? rerollCount : undefined,
 	};
+}
+
+/**
+ * Check if a comparison can theoretically succeed given a maximum roll value
+ * @example
+ * canComparisonSucceed(10, { sign: ">=", value: 15 }) => false (impossible to roll >= 15 with 1d10)
+ * canComparisonSucceed(20, { sign: ">=", value: 15 }) => true (possible to roll >= 15 with 1d20)
+ */
+function canComparisonSucceed(
+	maxRollValue: number,
+	compare: ComparedValue,
+	minRollValue?: number
+): boolean {
+	switch (compare.sign) {
+		case ">":
+			return maxRollValue > compare.value;
+		case ">=":
+			return maxRollValue >= compare.value;
+		case "<":
+			return compare.value > (minRollValue ?? 1); // Au moins minRollValue possible
+		case "<=":
+			return compare.value >= (minRollValue ?? 1); // Au moins minRollValue possible
+		case "=":
+		case "==":
+			return maxRollValue >= compare.value && compare.value >= (minRollValue ?? 1);
+		case "!=":
+			return true; // != peut toujours réussir sauf cas très spécifiques
+		default:
+			return true;
+	}
 }
 
 function fixParenthesis(dice: string) {
@@ -251,7 +404,8 @@ function replaceInFormula(
 	diceResult: Resultat,
 	compareResult: { dice: string; compare: Compare | undefined },
 	res: boolean,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ) {
 	const { formule, diceAll } = replaceText(
 		element,
@@ -267,7 +421,7 @@ function replaceInFormula(
 		evaluateRoll = evaluate(compareResult.dice);
 		return `${validSign} ${diceAll}: ${formule} = ${evaluateRoll}${invertedSign}${compareResult.compare?.value}`;
 	} catch (error) {
-		const evaluateRoll = roll(compareResult.dice, engine) as Resultat | undefined;
+		const evaluateRoll = roll(compareResult.dice, engine, pity) as Resultat | undefined;
 		if (evaluateRoll)
 			return `${validSign} ${diceAll}: ${evaluateRoll.result.split(":").splice(1).join(":")}`;
 
@@ -280,7 +434,8 @@ function compareSignFormule(
 	compareRegex: RegExpMatchArray,
 	element: string,
 	diceResult: Resultat,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ) {
 	let results = "";
 	const compareResult = getCompare(toRoll, compareRegex, engine);
@@ -289,10 +444,10 @@ function compareSignFormule(
 	try {
 		res = evaluate(toCompare);
 	} catch (error) {
-		res = roll(toCompare, engine);
+		res = roll(toCompare, engine, pity);
 	}
 	if (typeof res === "boolean") {
-		results = replaceInFormula(element, diceResult, compareResult, res, engine);
+		results = replaceInFormula(element, diceResult, compareResult, res, engine, pity);
 	} else if (res instanceof Object) {
 		const diceResult = res as Resultat;
 		if (diceResult.compare) {
@@ -327,7 +482,7 @@ function formatComment(dice: string) {
 	const comments = commentsMatch?.groups?.comments
 		? `${commentsMatch.groups.comments}`
 		: "";
-	
+
 	// Search for optional comments (# or // style) only AFTER removing bracket comments
 	// to avoid conflicts with parentheses inside bracket comments
 	const diceWithoutBrackets = dice.replace(commentsRegex, "");
@@ -336,13 +491,12 @@ function formatComment(dice: string) {
 	const optional = optionalComments?.groups?.comment
 		? `${optionalComments.groups.comment.trim()}`
 		: "";
-	
+
 	//fusion of both comments with a space if both exists
 	//result expected = "__comment1 comment2__ — "
 	//or "__comment1__ — " or "__comment2__ — "
 	let finalComment = "";
-	if (comments && optional)
-		finalComment = `__${comments} ${optional}__ — `;
+	if (comments && optional) finalComment = `__${comments} ${optional}__ — `;
 	else if (comments) finalComment = `__${comments}__ — `;
 	else if (optional) finalComment = `__${optional}__ — `;
 	return finalComment;
@@ -350,7 +504,8 @@ function formatComment(dice: string) {
 
 function sharedRolls(
 	dice: string,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
 ): Resultat | undefined {
 	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
@@ -381,10 +536,10 @@ function sharedRolls(
 		// No hidden dice, use the dice without comments
 		diceMain = diceMainWithoutComments;
 	}
-	let diceResult = roll(diceMain, engine);
+	let diceResult = roll(diceMain, engine, pity);
 	if (!diceResult || !diceResult.total) {
 		if (hidden) {
-			diceResult = roll(fixParenthesis(split[0]));
+			diceResult = roll(fixParenthesis(split[0]), engine, pity);
 			hidden = false;
 		} else return undefined;
 	}
@@ -424,7 +579,7 @@ function sharedRolls(
 				results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
 				total += Number.parseInt(evaluated, 10);
 			} catch (error) {
-				const evaluated = roll(toRoll, engine);
+				const evaluated = roll(toRoll, engine, pity);
 				if (evaluated)
 					results.push(
 						`◈ ${comment}${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`
