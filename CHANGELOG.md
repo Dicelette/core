@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.23.0](https://github.com/Dicelette/core/compare/v1.22.3...v1.23.0) (2025-12-29)
+
+
+### Features
+
+* add pity support ([a0c9273](https://github.com/Dicelette/core/commit/a0c9273114678aa83e446828cd6459bca70f9bf3))
+
+
+### Bug Fixes
+
+* **trivial_compare:** refine comparison failure logic and update parameter handling ([cee1b34](https://github.com/Dicelette/core/commit/cee1b34beff725d89d8cfdffd6cc12bf6c05afb2))
+
 ## [1.22.3](https://github.com/Dicelette/core/compare/v1.22.2...v1.22.3) (2025-12-17)
 
 
