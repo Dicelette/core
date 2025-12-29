@@ -39,33 +39,38 @@ function isTrivialComparison(
 	const canSucceed = canComparisonSucceed(maxValue, compare, minValue);
 
 	// Check if comparison can never fail (always true) by checking the inverse with minValue
-	const canFail = canComparisonFail(minValue, compare);
+	const canFail = canComparisonFail(maxValue, compare, minValue);
 
 	// Trivial if it can never succeed OR can never fail
 	return !canSucceed || !canFail;
 }
 
 /**
- * Check if a comparison can theoretically fail given a minimum roll value
- * @param minRollValue Minimum possible roll value
+ * Check if a comparison can theoretically fail given roll bounds
+ * @param maxRollValue Maximum possible roll value
  * @param compare The comparison object
- * @returns true if the comparison can fail
+ * @param minRollValue Minimum possible roll value (defaults to 1)
+ * @returns true if the comparison can fail at least once
  */
-function canComparisonFail(minRollValue: number, compare: ComparedValue): boolean {
+function canComparisonFail(
+	maxRollValue: number,
+	compare: ComparedValue,
+	minRollValue = 1
+): boolean {
 	switch (compare.sign) {
 		case ">":
-			return minRollValue <= compare.value;
+			return minRollValue <= compare.value; // failure if roll <= value
 		case ">=":
-			return minRollValue < compare.value;
+			return minRollValue < compare.value; // failure if roll < value
 		case "<":
-			return minRollValue >= compare.value;
+			return maxRollValue >= compare.value; // failure if roll >= value
 		case "<=":
-			return minRollValue > compare.value;
+			return maxRollValue > compare.value; // failure if roll > value
 		case "=":
 		case "==":
-			return minRollValue !== compare.value;
+			return minRollValue !== compare.value || maxRollValue !== compare.value; // can differ
 		case "!=":
-			return minRollValue === compare.value;
+			return minRollValue <= compare.value && compare.value <= maxRollValue; // equality possible
 		default:
 			return true;
 	}
@@ -314,9 +319,7 @@ export function roll(
 					};
 				}
 			}
-		}
-		// Si la comparaison est impossible, on ignore la pity et on retourne le résultat normal
-		console.log("Comparison impossible, ignoring pity reroll.");
+		} else console.log("Comparison impossible, pity ignored");
 	}
 	return {
 		dice,
@@ -353,7 +356,7 @@ function canComparisonSucceed(
 		case "==":
 			return maxRollValue >= compare.value && compare.value >= (minRollValue ?? 1);
 		case "!=":
-			return true; // != peut toujours réussir sauf cas très spécifiques
+			return maxRollValue !== compare.value || (minRollValue ?? 1) !== compare.value;
 		default:
 			return true;
 	}
