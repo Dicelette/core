@@ -57,7 +57,7 @@ describe("passing", () => {
 		expect(result!.dice).toEqual("2d6");
 		expect(result!.total).toBeGreaterThanOrEqual(4);
 		expect(result!.total).toBeLessThanOrEqual(24);
-		expect(result?.result).toMatch(/2d6: \[\d+, \d+\] = \d+; 2d6: \[\d+, \d+\] = \d+/)
+		expect(result?.result).toMatch(/2d6: \[\d+, \d+\] = \d+; 2d6: \[\d+, \d+\] = \d+/);
 	});
 });
 
@@ -66,20 +66,30 @@ describe("Shared results", () => {
 		const result = core.roll("2d6;&+2");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
-		expect(result?.result).toMatch(/※ 2d6: \[\d+, \d+\] = \d+;◈ \[2d6\]\+2: \[\d+\]\+2 = \d+/);
+		expect(result?.result).toMatch(
+			/※ 2d6: \[\d+, \d+\] = \d+;◈ \[2d6\]\+2: \[\d+\]\+2 = \d+/
+		);
 	});
 	it("should be valid when starting with +", () => {
 		const result = core.roll("+2d6;&+2");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
-		expect(result?.result).toMatch(/※ 2d6: \[\d+, \d+\] = \d+;◈ \[2d6\]\+2: \[\d+\]\+2 = \d+/);
-
+		expect(result?.result).toMatch(
+			/※ 2d6: \[\d+, \d+\] = \d+;◈ \[2d6\]\+2: \[\d+\]\+2 = \d+/
+		);
 	});
 	it("comparison", () => {
 		const result = core.roll("2d6;&+2>5");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
-		expect(result?.result).toMatch(/※ 2d6: \[\d+, \d+\] = \d+;✓ \[2d6\]\+2>5: \[\d+\]\+2>5 = \d+.5/);
+		expect(result?.result).toMatch(
+			/※ 2d6: \[\d+, \d+\] = \d+;✓ \[2d6\]\+2>5: \[\d+\]\+2>5 = \d+.5/
+		);
+	});
+	it("devrait marquer trivial=true si une comparaison partagée est triviale", () => {
+		const result = core.roll("1d6;&>100");
+		expect(result).not.toBeUndefined();
+		expect(result!.compare).toEqual({ sign: ">", value: 100, trivial: true });
 	});
 	describe("comments", () => {
 		it("simple", () => {
