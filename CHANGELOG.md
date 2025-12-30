@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.23.1](https://github.com/Dicelette/core/compare/v1.23.0...v1.23.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* **sharedRoll:** set isTrivial in shared if any comparison is trivial ([b27b4cb](https://github.com/Dicelette/core/commit/b27b4cb210fe8e87cf0cbae7e7d5d7110ab34b77))
+
 ## [1.23.0](https://github.com/Dicelette/core/compare/v1.22.3...v1.23.0) (2025-12-29)
 
 
