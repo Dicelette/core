@@ -60,17 +60,32 @@ export function generateStatsDice(
 				result += outsideText.slice(lastIndex, tokenMatch.index);
 				const token = tokenMatch[0];
 				const tokenStd = token.standardize();
+
+				// Check for dice notation patterns like "1dstat1" or "dstat1"
+				const diceMatch = /^(\d*)d(.+)$/i.exec(tokenStd);
+				if (diceMatch) {
+					const diceCount = diceMatch[1] || "";
+					const afterD = diceMatch[2];
+					let foundStatAfterD = false;
+					for (const key of statKeys) {
+						const keyStd = key.standardize();
+						if (afterD === keyStd) {
+							result += `${diceCount}d${stats[key].toString()}`;
+							foundStatAfterD = true;
+							break;
+						}
+					}
+					if (foundStatAfterD) {
+						lastIndex = tokenRegex.lastIndex;
+						continue;
+					}
+				}
+
 				let bestKey: string | null = null;
 				let bestScore = 0;
 				for (const key of statKeys) {
 					const keyStd = key.standardize();
-					if (
-						tokenStd === keyStd ||
-						keyStd.includes(tokenStd) ||
-						tokenStd.includes(keyStd) ||
-						keyStd.startsWith(tokenStd) ||
-						tokenStd.startsWith(keyStd)
-					) {
+					if (tokenStd === keyStd) {
 						bestKey = key;
 						bestScore = 1;
 						break;

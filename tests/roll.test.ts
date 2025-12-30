@@ -83,7 +83,7 @@ describe("Shared results", () => {
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("2d6");
 		expect(result?.result).toMatch(
-			/※ 2d6: \[\d+, \d+\] = \d+;✓ \[2d6\]\+2>5: \[\d+\]\+2>5 = \d+.5/
+			/※ 2d6: \[\d+, \d+\] = \d+;[✓✕] \[2d6\]\+2>5: \[\d+\]\+2>5 = \d+.5/
 		);
 	});
 	it("devrait marquer trivial=true si une comparaison partagée est triviale", () => {

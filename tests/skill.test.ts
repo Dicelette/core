@@ -8,8 +8,8 @@ it("creating roll dice with face formula", () => {
 		stat2: 10,
 	};
 	dice = core.generateStatsDice(dice, userStat);
-	const formula = `${dice} cc`;
-	const expectedFormula = "1d5>20 cc";
+	const formula = `${dice} # cc`;
+	const expectedFormula = "1d5>20 # cc";
 	expect(formula).toEqual(expectedFormula);
 });
 it("creating complicated roll dice with face formula", () => {
@@ -41,8 +41,8 @@ it("creating complicated roll dice with comparator as formula", () => {
 		stat2: 10,
 	};
 	dice = core.generateStatsDice(dice, userStat);
-	const formula = `${dice} cc`;
-	const expectedFormula = "1d20+5>3 cc";
+	const formula = `${dice} # cc`;
+	const expectedFormula = "1d20+5>3 # cc";
 	expect(formula).toEqual(expectedFormula);
 });
 it("creating complicated roll dice with comparator as formula", () => {
