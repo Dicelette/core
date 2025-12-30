@@ -552,7 +552,8 @@ function compareSignFormule(
 	element: string,
 	diceResult: Resultat,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
-	pity?: boolean
+	pity?: boolean,
+	rollBounds?: { min: number; max: number }
 ): { dice: string; results: string; compare?: Compare; trivial: boolean } {
 	let results = "";
 	let trivial = false;
@@ -565,8 +566,12 @@ function compareSignFormule(
 		res = roll(toCompare, engine, pity);
 	}
 	if (typeof res === "boolean") {
-		trivial = true;
-		if (compareResult.compare) compareResult.compare.trivial = true;
+		const detectedTrivial =
+			rollBounds && compareResult.compare
+				? isTrivialComparison(rollBounds.max, rollBounds.min, compareResult.compare)
+				: false;
+		if (detectedTrivial && compareResult.compare) compareResult.compare.trivial = true;
+		if (detectedTrivial) trivial = true;
 		results = replaceInFormula(element, diceResult, compareResult, res, engine, pity);
 	} else if (res instanceof Object) {
 		const diceResult = res as Resultat;
@@ -623,6 +628,24 @@ function formatComment(dice: string) {
 	return finalComment;
 }
 
+function getRollBounds(
+	dice: string,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+): { min: number; max: number } | undefined {
+	try {
+		const roller = new DiceRoller();
+		NumberGenerator.generator.engine = engine;
+		const rollResult = roller.roll(dice);
+		const instance = Array.isArray(rollResult) ? rollResult[0] : rollResult;
+		const { minTotal, maxTotal } = instance;
+		if (typeof minTotal === "number" && typeof maxTotal === "number")
+			return { min: minTotal, max: maxTotal };
+	} catch (error) {
+		// Ignore bounds computation errors; trivial detection will simply be skipped
+	}
+	return undefined;
+}
+
 function sharedRolls(
 	dice: string,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
@@ -657,6 +680,7 @@ function sharedRolls(
 		// No hidden dice, use the dice without comments
 		diceMain = diceMainWithoutComments;
 	}
+	const rollBounds = getRollBounds(diceMain, engine);
 	let diceResult = roll(diceMain, engine, pity);
 	if (!diceResult || !diceResult.total) {
 		if (hidden) {
@@ -686,7 +710,9 @@ function sharedRolls(
 				compareRegex,
 				element,
 				diceResult,
-				engine
+				engine,
+				pity,
+				rollBounds
 			);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
