@@ -20,7 +20,8 @@
 		"lint": "biome check --write src --unsafe",
 		"tsc": "tsc --noEmit --skipLibCheck",
 		"release": "commit-and-tag-version",
-		"postrelease": "git push --follow-tags origin main && bun publish"
+		"postrelease": "git push --follow-tags origin main && bun publish",
+		"dev": "tsup --watch"
 	},
 	"keywords": [
 		"discord",
