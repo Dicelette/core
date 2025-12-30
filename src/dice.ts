@@ -255,7 +255,7 @@ export function roll(
 
 		return {
 			dice: diceToRoll,
-			result: roller.output,
+			result: replaceCurlyBrace(roller.output),
 			comment: comments,
 			compare: compare ? compare : undefined,
 			modifier: modificator,
@@ -323,13 +323,17 @@ export function roll(
 	}
 	return {
 		dice,
-		result: roller.output,
+		result: replaceCurlyBrace(roller.output),
 		comment,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
 		total: roller.total,
 		pityLogs: rerollCount > 0 ? rerollCount : undefined,
 	};
+}
+
+function replaceCurlyBrace(dice: string) {
+	return dice.replaceAll("{", "").replaceAll("}", "");
 }
 
 /**
@@ -576,7 +580,8 @@ function sharedRolls(
 			);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
-			if (!aggregatedCompare && compareResult.compare) aggregatedCompare = compareResult.compare;
+			if (!aggregatedCompare && compareResult.compare)
+				aggregatedCompare = compareResult.compare;
 			if (compareResult.trivial) hasTrivialComparison = true;
 		} else {
 			const { formule, diceAll } = replaceText(
@@ -610,9 +615,10 @@ function sharedRolls(
 		dice: diceMain,
 		result: results.join(";"),
 		comment: mainComment,
-		compare: hasTrivialComparison && aggregatedCompare
-			? { ...aggregatedCompare, trivial: true }
-			: aggregatedCompare,
+		compare:
+			hasTrivialComparison && aggregatedCompare
+				? { ...aggregatedCompare, trivial: true }
+				: aggregatedCompare,
 		modifier: diceResult.modifier,
 		total,
 	};
