@@ -439,8 +439,9 @@ function compareSignFormule(
 	diceResult: Resultat,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
 	pity?: boolean
-) {
+): { dice: string; results: string; compare?: Compare; trivial: boolean } {
 	let results = "";
+	let trivial = false;
 	const compareResult = getCompare(toRoll, compareRegex, engine);
 	const toCompare = `${compareResult.dice}${compareResult.compare?.sign}${compareResult.compare?.value}`;
 	let res: unknown;
@@ -450,6 +451,8 @@ function compareSignFormule(
 		res = roll(toCompare, engine, pity);
 	}
 	if (typeof res === "boolean") {
+		trivial = true;
+		if (compareResult.compare) compareResult.compare.trivial = true;
 		results = replaceInFormula(element, diceResult, compareResult, res, engine, pity);
 	} else if (res instanceof Object) {
 		const diceResult = res as Resultat;
@@ -464,9 +467,10 @@ function compareSignFormule(
 			const dice = replaceText(element, 0, diceResult.dice).diceAll;
 
 			results = `${sign} ${dice}: ${diceResult.result.split(":").splice(1).join(":").trim()}${invertedSign}${diceResult.compare.value}`;
+			if (diceResult.compare.trivial) trivial = true;
 		}
 	}
-	return { dice: compareResult.dice, results };
+	return { dice: compareResult.dice, results, compare: compareResult.compare, trivial };
 }
 
 function replaceText(element: string, total: number, dice: string) {
@@ -547,6 +551,8 @@ function sharedRolls(
 		} else return undefined;
 	}
 	if (!diceResult || !diceResult.total) return undefined;
+	let aggregatedCompare = diceResult.compare;
+	let hasTrivialComparison = diceResult.compare?.trivial === true;
 	results.push(`※ ${comments}${diceResult.result}`);
 	let total = diceResult.total;
 	diceResult.comment = mainComment;
@@ -570,6 +576,8 @@ function sharedRolls(
 			);
 			toRoll = compareResult.dice;
 			results.push(compareResult.results);
+			if (!aggregatedCompare && compareResult.compare) aggregatedCompare = compareResult.compare;
+			if (compareResult.trivial) hasTrivialComparison = true;
 		} else {
 			const { formule, diceAll } = replaceText(
 				element,
@@ -583,11 +591,14 @@ function sharedRolls(
 				total += Number.parseInt(evaluated, 10);
 			} catch (error) {
 				const evaluated = roll(toRoll, engine, pity);
-				if (evaluated)
+				if (evaluated) {
 					results.push(
 						`◈ ${comment}${diceAll}: ${evaluated.result.split(":").slice(1).join(":")}`
 					);
-				else results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
+					if (!aggregatedCompare && evaluated.compare)
+						aggregatedCompare = evaluated.compare;
+					if (evaluated.compare?.trivial) hasTrivialComparison = true;
+				} else results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
 				total += evaluated?.total ?? 0;
 			}
 		}
@@ -599,7 +610,9 @@ function sharedRolls(
 		dice: diceMain,
 		result: results.join(";"),
 		comment: mainComment,
-		compare: diceResult.compare,
+		compare: hasTrivialComparison && aggregatedCompare
+			? { ...aggregatedCompare, trivial: true }
+			: aggregatedCompare,
 		modifier: diceResult.modifier,
 		total,
 	};
