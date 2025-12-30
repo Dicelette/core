@@ -222,6 +222,16 @@ export function roll(
 		.trimStart();
 	if (!dice.includes("d")) return undefined;
 	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
+
+	// Detect curly braces with bulk rolls (e.g., {5#1d20>5})
+	// For these, we keep the curly braces in the dice notation and don't extract compare
+	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
+	const isCurlyBulk = !!curlyBulkMatch;
+	let bulkContent = "";
+	if (isCurlyBulk) {
+		bulkContent = curlyBulkMatch![1]; // Store content without curly braces for processing
+	}
+
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
 	if (dice.includes(";")) return sharedRolls(dice, engine);
@@ -229,19 +239,121 @@ export function roll(
 	dice = fixParenthesis(dice);
 	const modificator = getModifier(dice);
 
-	// Extract compare BEFORE rolling to remove it from the dice notation
-	if (compareRegex) {
+	// Extract compare BEFORE rolling, but NOT for curly bulk rolls
+	if (compareRegex && !isCurlyBulk) {
 		const compareResult = getCompare(dice, compareRegex, engine, pity);
 		dice = compareResult.dice;
 		compare = compareResult.compare;
 	}
 
-	if (dice.match(/\d+?#(.*)/)) {
-		const diceArray = dice.split("#");
+	// Handle bulk rolls (both with and without curly braces)
+	const bulkProcessContent = isCurlyBulk ? bulkContent : dice;
+	if (bulkProcessContent.match(/\d+?#(.*)/)) {
+		const diceArray = bulkProcessContent.split("#");
 		const numberOfDice = Number.parseInt(diceArray[0], 10);
-		const diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
+		let diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
 		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
+
+		// For curly bulk, extract comparison from diceToRoll
+		let curlyCompare: { sign: string; value: number } | undefined;
+		if (isCurlyBulk) {
+			const curlyCompareRegex = diceToRoll.match(SIGN_REGEX_SPACE);
+			if (curlyCompareRegex) {
+				const compareSign = curlyCompareRegex[0].match(SIGN_REGEX)?.[0];
+				const compareValue = curlyCompareRegex[2];
+				if (compareSign && compareValue) {
+					curlyCompare = {
+						sign: compareSign,
+						value: Number.parseInt(compareValue, 10),
+					};
+					// Remove comparison from diceToRoll for actual rolling
+					diceToRoll = diceToRoll.replace(SIGN_REGEX_SPACE, "");
+				}
+			}
+		}
+
+		// When there's a comparison (either from compare or curlyCompare), handle each roll individually
+		const activeCompare = compare || curlyCompare;
+		if (activeCompare) {
+			const results: string[] = [];
+			let successCount = 0;
+			const roller = new DiceRoller();
+			NumberGenerator.generator.engine = engine;
+
+			for (let i = 0; i < numberOfDice; i++) {
+				try {
+					const individualRoll = roller.roll(diceToRoll);
+					const rollTotal = Array.isArray(individualRoll)
+						? individualRoll[0].total
+						: individualRoll.total;
+					const isSuccess = evaluate(
+						`${rollTotal}${activeCompare.sign}${activeCompare.value}`
+					);
+
+					if (isSuccess) {
+						successCount++;
+						// Mark success with *
+						const rollOutput = Array.isArray(individualRoll)
+							? individualRoll[0].output
+							: individualRoll.output;
+						const modifiedOutput = rollOutput.replace(
+							/\[([^\]]+)\]/,
+							(_match, content) => {
+								// Add * to each die result in the brackets
+								const diceResults = content
+									.split(",")
+									.map((d: string) => `${d.trim()}*`)
+									.join(", ");
+								return `[${diceResults}]`;
+							}
+						);
+						// For curly bulk, add comparison notation to output
+						if (isCurlyBulk && curlyCompare) {
+							const outputWithCompare = modifiedOutput.replace(
+								/^([^:]+):/,
+								`$1${curlyCompare.sign}${curlyCompare.value}:`
+							);
+							results.push(outputWithCompare);
+						} else {
+							results.push(modifiedOutput);
+						}
+					} else {
+						const rollOutput = Array.isArray(individualRoll)
+							? individualRoll[0].output
+							: individualRoll.output;
+						// For curly bulk, add comparison notation to output
+						if (isCurlyBulk && curlyCompare) {
+							const outputWithCompare = rollOutput.replace(
+								/^([^:]+):/,
+								`$1${curlyCompare.sign}${curlyCompare.value}:`
+							);
+							results.push(outputWithCompare);
+						} else {
+							results.push(rollOutput);
+						}
+					}
+				} catch (error) {
+					throw new DiceTypeError(diceToRoll, "roll", error);
+				}
+			}
+
+			// For curly bulk, keep curly braces in dice notation with comparison
+			const finalDice = isCurlyBulk
+				? `{${diceToRoll}${curlyCompare?.sign}${curlyCompare?.value}}`
+				: diceToRoll;
+
+			return {
+				dice: finalDice,
+				result: replaceCurlyBrace(results.join("; ")),
+				comment: comments,
+				compare: isCurlyBulk ? undefined : compare,
+				modifier: modificator,
+				total: successCount,
+			};
+		}
+
+		// Original behavior when there's no comparison
 		const roller = new DiceRoller();
 		NumberGenerator.generator.engine = engine;
 		//remove comments if any
@@ -253,8 +365,11 @@ export function roll(
 			}
 		}
 
+		// For curly bulk without comparison, keep curly braces in dice
+		const finalDice = isCurlyBulk ? `{${diceToRoll}}` : diceToRoll;
+
 		return {
-			dice: diceToRoll,
+			dice: finalDice,
 			result: replaceCurlyBrace(roller.output),
 			comment: comments,
 			compare: compare ? compare : undefined,
