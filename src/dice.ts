@@ -205,14 +205,17 @@ function getModifier(dice: string) {
 
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
- * @param dice {string}
- * @param engine
- * @param pity
+ * @param {string} dice The dice string to parse and roll
+ * @param {Engine|null} engine The random engine to use, default to nodeCrypto
+ * @param {boolean} pity Whether to enable pity system (reroll on failure) or not
+ * @param {boolean} sort Whether to sort the dice results or not
+ * @returns {Resultat|undefined} The result of the roll
  */
 export function roll(
 	dice: string,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
-	pity?: boolean
+	pity?: boolean,
+	sort?: "sa" | "sd"
 ): Resultat | undefined {
 	//parse dice string
 	dice = standardizeDice(replaceFormulaInDice(dice))
@@ -271,6 +274,8 @@ export function roll(
 				}
 			}
 		}
+
+		if (sort) diceToRoll = `${diceToRoll}${sort}`;
 
 		// When there's a comparison, handle each roll individually
 		const activeCompare: Compare | undefined = compare || curlyCompare;
@@ -337,7 +342,7 @@ export function roll(
 
 			return {
 				dice: finalDice,
-				result: replaceCurlyBrace(results.join("; ")),
+				result: replaceUnwantedText(results.join("; ")),
 				comment: comments,
 				compare: isCurlyBulk ? undefined : compare,
 				modifier: modificator,
@@ -363,7 +368,7 @@ export function roll(
 
 		return {
 			dice: finalDice,
-			result: replaceCurlyBrace(roller.output),
+			result: replaceUnwantedText(roller.output),
 			comment: comments,
 			compare: compare ? compare : undefined,
 			modifier: modificator,
@@ -372,7 +377,8 @@ export function roll(
 	}
 	const roller = new DiceRoller();
 	NumberGenerator.generator.engine = engine;
-	const diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
+	let diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
+	if (sort) diceWithoutComment = `${diceWithoutComment}${sort}`;
 
 	let diceRoll: DiceRoll | DiceRoll[];
 	try {
@@ -432,7 +438,7 @@ export function roll(
 	}
 	return {
 		dice,
-		result: replaceCurlyBrace(roller.output),
+		result: replaceUnwantedText(roller.output),
 		comment,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
@@ -442,8 +448,8 @@ export function roll(
 	};
 }
 
-function replaceCurlyBrace(dice: string) {
-	return dice.replaceAll("{", "").replaceAll("}", "");
+function replaceUnwantedText(dice: string) {
+	return dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
 }
 
 /**
