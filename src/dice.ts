@@ -256,7 +256,7 @@ export function roll(
 		const comments = commentsMatch ? commentsMatch[2] : undefined;
 
 		// For curly bulk, extract comparison from diceToRoll
-		let curlyCompare: { sign: string; value: number } | undefined;
+		let curlyCompare: Compare | undefined;
 		if (isCurlyBulk) {
 			const curlyCompareRegex = diceToRoll.match(SIGN_REGEX_SPACE);
 			if (curlyCompareRegex) {
@@ -264,7 +264,7 @@ export function roll(
 				const compareValue = curlyCompareRegex[2];
 				if (compareSign && compareValue) {
 					curlyCompare = {
-						sign: compareSign,
+						sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
 						value: Number.parseInt(compareValue, 10),
 					};
 					diceToRoll = diceToRoll.replace(SIGN_REGEX_SPACE, "");
@@ -273,7 +273,8 @@ export function roll(
 		}
 
 		// When there's a comparison, handle each roll individually
-		const activeCompare = compare || curlyCompare;
+		const activeCompare: Compare | undefined = compare || curlyCompare;
+		let trivialComparisonDetected = false;
 		if (activeCompare) {
 			const results: string[] = [];
 			let successCount = 0;
@@ -302,12 +303,21 @@ export function roll(
 			for (let i = 0; i < numberOfDice; i++) {
 				try {
 					const individualRoll = roller.roll(diceToRoll);
-					const rollTotal = Array.isArray(individualRoll)
-						? individualRoll[0].total
-						: individualRoll.total;
-					const rollOutput = Array.isArray(individualRoll)
-						? individualRoll[0].output
-						: individualRoll.output;
+					const rollInstance = Array.isArray(individualRoll)
+						? individualRoll[0]
+						: individualRoll;
+					if (!trivialComparisonDetected && activeCompare) {
+						const { maxTotal, minTotal } = rollInstance;
+						if (typeof maxTotal === "number" && typeof minTotal === "number") {
+							trivialComparisonDetected = isTrivialComparison(
+								maxTotal,
+								minTotal,
+								activeCompare
+							);
+						}
+					}
+					const rollTotal = rollInstance.total;
+					const rollOutput = rollInstance.output;
 					const isSuccess = evaluate(
 						`${rollTotal}${activeCompare.sign}${activeCompare.value}`
 					);
@@ -318,6 +328,8 @@ export function roll(
 					throw new DiceTypeError(diceToRoll, "roll", error);
 				}
 			}
+
+			if (compare && trivialComparisonDetected) compare.trivial = true;
 
 			const finalDice = isCurlyBulk
 				? `{${diceToRoll}${curlyCompare?.sign}${curlyCompare?.value}}`
@@ -330,6 +342,7 @@ export function roll(
 				compare: isCurlyBulk ? undefined : compare,
 				modifier: modificator,
 				total: successCount,
+				trivial: trivialComparisonDetected ? true : undefined,
 			};
 		}
 
@@ -411,6 +424,7 @@ export function roll(
 						compare: compare,
 						modifier: modificator,
 						pityLogs: rerollCount,
+						trivial: res.trivial ?? (compare?.trivial ? true : undefined),
 					};
 				}
 			}
@@ -424,6 +438,7 @@ export function roll(
 		modifier: modificator,
 		total: roller.total,
 		pityLogs: rerollCount > 0 ? rerollCount : undefined,
+		trivial: compare?.trivial ? true : undefined,
 	};
 }
 
@@ -716,5 +731,6 @@ function sharedRolls(
 				: aggregatedCompare,
 		modifier: diceResult.modifier,
 		total,
+		trivial: hasTrivialComparison ? true : undefined,
 	};
 }

@@ -24,6 +24,7 @@ export interface Resultat {
 	 */
 	total?: number;
 	pityLogs?: number;
+	trivial?: boolean;
 }
 
 export interface Compare {

@@ -36,6 +36,13 @@ describe("bulk rolls", () => {
 		expect(result?.result).not.toMatch(/\*/);
 	});
 
+	it("Bulk roll with comparison - trivial detection without brackets", () => {
+		const result = core.roll("3#1d6>10");
+		expect(result).not.toBeUndefined();
+		expect(result!.compare?.trivial).toBe(true);
+		expect(result!.trivial).toBe(true);
+	});
+
 	it("Bulk roll with comparison - in brackets", () => {
 		const result = core.roll("{5#1d20>10}");
 		expect(result).not.toBeUndefined();
@@ -60,6 +67,13 @@ describe("bulk rolls", () => {
 		const successMatches = result!.result.match(/\*/g);
 		const successCount = successMatches ? successMatches.length : 0;
 		// Each success should have one * per die in the roll
+	});
+
+	it("Bulk roll with comparison - trivial detection in brackets", () => {
+		const result = core.roll("{2#1d6>10}");
+		expect(result).not.toBeUndefined();
+		expect(result!.compare).toBeUndefined();
+		expect(result!.trivial).toBe(true);
 	});
 
 	it("Bulk roll without brackets - should work same as before", () => {

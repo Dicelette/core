@@ -90,6 +90,7 @@ describe("Shared results", () => {
 		const result = core.roll("1d6;&>100");
 		expect(result).not.toBeUndefined();
 		expect(result!.compare).toEqual({ sign: ">", value: 100, trivial: true });
+		expect(result!.trivial).toBe(true);
 	});
 	describe("comments", () => {
 		it("simple", () => {
