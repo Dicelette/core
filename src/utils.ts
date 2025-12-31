@@ -2,7 +2,14 @@ import { evaluate } from "mathjs";
 import "uniformize";
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { type Engine, Random } from "random-js";
-import { FormulaError } from ".";
+import {
+	type CustomCritical,
+	DiceTypeError,
+	diceTypeRandomParse,
+	FormulaError,
+	SIGN_REGEX_SPACE,
+	type StatisticalTemplate,
+} from ".";
 
 /**
  * Escape regex string
@@ -204,49 +211,6 @@ export function randomInt(
 	if (!rng) rng = new Random(engine || undefined);
 	return rng.integer(min, max);
 }
-/**
- * Utility function that allow to get the id of an engine
- * @param engine {unknown} Engine to identify
- * @returns {string} Id of the engine or "unknown"
- * @private
- */
-export function getEngineId(engine: unknown): string {
-	// Comparaisons directes avec les engines exposés par la lib
-	if (engine === NumberGenerator.engines.nodeCrypto) return "nodeCrypto";
-	if (engine === NumberGenerator.engines.nativeMath) return "nativeMath";
-	if (engine === NumberGenerator.engines.browserCrypto) return "browserCrypto";
-	// Fallback: essayer de lire un nom ou le constructeur
-	try {
-		// biome-ignore lint/suspicious/noExplicitAny: needed for dynamic access
-		const e = engine as any;
-		if (e && typeof e === "object") {
-			if (typeof e.name === "string" && e.name) return e.name;
-			if (e.constructor?.name) return e.constructor.name;
-		}
-	} catch {
-		/* ignore */
-	}
-	return "unknown";
-}
-
-/**
- * Utility function to get the engine from its name
- * @param engine {"nativeMath" | "browserCrypto" | "nodeCrypto"} The engine name
- * @returns {Engine} The engine
- * @public
- */
-export function getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto"): Engine {
-	switch (engine) {
-		case "nativeMath":
-			return NumberGenerator.engines.nativeMath;
-		case "browserCrypto":
-			return NumberGenerator.engines.browserCrypto;
-		case "nodeCrypto":
-			return NumberGenerator.engines.nodeCrypto;
-		default:
-			return NumberGenerator.engines.nativeMath;
-	}
-}
 
 /**
  * Calcule la distance de Levenshtein entre deux chaînes
@@ -281,4 +245,29 @@ function similarityScore(a: string, b: string): number {
 	const dist = levenshteinDistance(a, b);
 	const max = Math.max(la, lb);
 	return 1 - dist / max;
+}
+
+/**
+ * Allow to replace the compare part of a dice and use the critical customized one
+ * @example
+ * dice = "1d20=20";
+ * custom critical {sign: ">", value: "$/2"}
+ * Random stats = 6
+ * result = "1d20>3"
+ */
+export function createCriticalCustom(
+	dice: string,
+	customCritical: CustomCritical,
+	template: StatisticalTemplate,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto
+) {
+	const compareRegex = dice.match(SIGN_REGEX_SPACE);
+	let customDice = dice;
+	const compareValue = diceTypeRandomParse(customCritical.value, template, engine);
+	if (compareValue.includes("$"))
+		throw new DiceTypeError(compareValue, "createCriticalCustom");
+	const comparaison = `${customCritical.sign}${compareValue}`;
+	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
+	else customDice += comparaison;
+	return diceTypeRandomParse(customDice, template, engine);
 }

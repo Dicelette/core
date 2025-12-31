@@ -191,3 +191,9 @@ export interface CustomCritical {
 	 */
 	affectSkill?: boolean;
 }
+
+export enum SortOrder {
+	Ascending = "sa",
+	Descending = "sd",
+	None = "none",
+}
