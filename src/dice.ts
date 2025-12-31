@@ -203,6 +203,107 @@ function getModifier(dice: string) {
 	return modificator;
 }
 
+type ExplodingSuccess = {
+	dice: string;
+	originalDice: string;
+	sign: Compare["sign"];
+	value: number;
+	normalizedSegment: string;
+	originalSegment: string;
+};
+
+const EXPLODING_SUCCESS_REGEX = /(!(?:>>=|<<=|!==|!!==|>>|<<|==|!=))(-?\d+(?:\.\d+)?)/;
+
+function normalizeExplodingSuccess(dice: string): ExplodingSuccess | undefined {
+	const match = dice.match(EXPLODING_SUCCESS_REGEX);
+	if (!match) return undefined;
+
+	const [, doubledSignRaw, valueStr] = match;
+	let doubledSign: string;
+	if (doubledSignRaw === "!!==") doubledSign = "==";
+	else if (doubledSignRaw === "!==") doubledSign = "!==";
+	else doubledSign = doubledSignRaw.replace(/^!/, "");
+	const signMap: Record<string, Compare["sign"]> = {
+		">>": ">",
+		"<<": "<",
+		">>=": ">=",
+		"<<=": "<=",
+		"==": "=",
+		"!==": "!=",
+		"!!==": "=",
+	};
+
+	const normalizedSign = signMap[doubledSign];
+	if (!normalizedSign) return undefined;
+	let parsedValue = Number.parseFloat(valueStr);
+	if (Number.isNaN(parsedValue)) {
+		try {
+			parsedValue = Number.parseFloat(evaluate(valueStr) as unknown as string);
+		} catch (_error) {
+			parsedValue = 0;
+		}
+	}
+
+	// Remove comparison for the actual explode mechanic so it uses default explode
+	const normalizedSegment = "!";
+	const replacedDice = dice.replace(match[0], normalizedSegment);
+
+	return {
+		dice: replacedDice,
+		originalDice: dice,
+		sign: normalizedSign,
+		value: parsedValue,
+		normalizedSegment,
+		originalSegment: match[0],
+	};
+}
+
+function countExplodingSuccesses(
+	diceRoll: DiceRoll | DiceRoll[],
+	sign: Compare["sign"],
+	value: number
+): number {
+	const rollsArray = Array.isArray(diceRoll) ? diceRoll : [diceRoll];
+	const flatValues: number[] = [];
+
+	for (const dr of rollsArray) {
+		const groups = (dr as DiceRoll).rolls ?? [];
+		for (const group of groups as unknown as Array<{
+			rolls?: Array<{ value?: number }>;
+		}>) {
+			const innerRolls = group.rolls ?? [];
+			for (const roll of innerRolls) {
+				if (typeof roll.value === "number") flatValues.push(roll.value);
+			}
+		}
+	}
+
+	return flatValues.reduce(
+		(acc, current) => acc + (matchComparison(sign, current, value) ? 1 : 0),
+		0
+	);
+}
+
+function matchComparison(sign: Compare["sign"], val: number, value: number) {
+	switch (sign) {
+		case ">":
+			return val > value;
+		case ">=":
+			return val >= value;
+		case "<":
+			return val < value;
+		case "<=":
+			return val <= value;
+		case "=":
+		case "==":
+			return val === value;
+		case "!=":
+			return val !== value;
+		default:
+			return false;
+	}
+}
+
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
  * @param {string} dice The dice string to parse and roll
@@ -226,18 +327,27 @@ export function roll(
 	if (!dice.includes("d")) return undefined;
 	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
 
+	const explodingSuccess = normalizeExplodingSuccess(dice);
+	if (explodingSuccess) dice = explodingSuccess.dice;
+
+	// For shared rolls, extract the main dice part before the semicolon for diceDisplay
+	let diceDisplay: string;
+	if (dice.includes(";")) {
+		const mainDice = dice.split(";")[0];
+		diceDisplay = explodingSuccess?.originalDice ?? mainDice;
+	} else diceDisplay = explodingSuccess?.originalDice ?? dice;
+
 	// Detect curly braces with bulk rolls (e.g., {5#1d20>5})
 	// For these, we keep the curly braces in the dice notation and don't extract compare
 	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
 	const isCurlyBulk = !!curlyBulkMatch;
 	let bulkContent = "";
-	if (isCurlyBulk) {
-		bulkContent = curlyBulkMatch![1]; // Store content without curly braces for processing
-	}
+	if (isCurlyBulk) bulkContent = curlyBulkMatch![1]; // Store content without curly braces for processing
 
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
-	if (dice.includes(";")) return sharedRolls(dice, engine);
+	if (dice.includes(";"))
+		return sharedRolls(dice, engine, pity, explodingSuccess, diceDisplay);
 
 	dice = fixParenthesis(dice);
 	const modificator = getModifier(dice);
@@ -278,7 +388,12 @@ export function roll(
 		if (sort) diceToRoll = `${diceToRoll}${sort}`;
 
 		// When there's a comparison, handle each roll individually
-		const activeCompare: Compare | undefined = compare || curlyCompare;
+		const activeCompare: Compare | undefined =
+			compare ||
+			curlyCompare ||
+			(explodingSuccess
+				? ({ sign: explodingSuccess.sign, value: explodingSuccess.value } as Compare)
+				: undefined);
 		let trivialComparisonDetected = false;
 		if (activeCompare) {
 			const results: string[] = [];
@@ -321,16 +436,73 @@ export function roll(
 							);
 						}
 					}
-					const rollTotal = rollInstance.total;
 					const rollOutput = rollInstance.output;
-					const isSuccess = evaluate(
-						`${rollTotal}${activeCompare.sign}${activeCompare.value}`
-					);
 
-					if (isSuccess) successCount++;
-					results.push(formatOutput(rollOutput, isSuccess));
+					if (explodingSuccess) {
+						const successesForRoll = countExplodingSuccesses(
+							rollInstance,
+							explodingSuccess.sign,
+							explodingSuccess.value
+						);
+						successCount += successesForRoll;
+
+						let formattedRollOutput = rollOutput
+							.replace(
+								explodingSuccess.normalizedSegment,
+								explodingSuccess.originalSegment
+							)
+							.replace(/=\s*-?\d+(?:\.\d+)?$/, `= ${successesForRoll}`);
+						// For exploding success counting, keep output consistent across bulk and curly bulk
+						// and avoid adding stars (which are only meant for classic comparison highlighting).
+						formattedRollOutput = formatOutput(formattedRollOutput, false);
+
+						results.push(formattedRollOutput);
+					} else {
+						const rollTotal = rollInstance.total;
+						const isSuccess = evaluate(
+							`${rollTotal}${activeCompare.sign}${activeCompare.value}`
+						);
+
+						if (isSuccess) successCount++;
+						results.push(formatOutput(rollOutput, isSuccess));
+					}
 				} catch (error) {
 					throw new DiceTypeError(diceToRoll, "roll", error);
+				}
+			}
+
+			const signSource = explodingSuccess?.originalDice ?? diceDisplay ?? dice;
+			const explodingMatch = signSource.match(EXPLODING_SUCCESS_REGEX);
+			if (explodingMatch) {
+				const [, doubledSignRaw, valueStr] = explodingMatch;
+				let doubledSign: string;
+				if (doubledSignRaw === "!!==") doubledSign = "==";
+				else if (doubledSignRaw === "!==") doubledSign = "!==";
+				else doubledSign = doubledSignRaw.replace(/^!/, "");
+				const signMap: Record<string, Compare["sign"]> = {
+					">>": ">",
+					"<<": "<",
+					">>=": ">=",
+					"<<=": "<=",
+					"==": "=",
+					"!==": "!=",
+					"!!==": "=",
+				};
+				const mappedSign = signMap[doubledSign];
+				const mappedValue = Number.parseFloat(valueStr);
+				if (mappedSign && !Number.isNaN(mappedValue)) {
+					const resultsString = replaceUnwantedText(results.join("; "));
+					const flatValues = resultsString
+						.split(";")
+						.flatMap((segment) => extractValuesFromOutput(segment));
+					if (mappedSign === "!=") {
+						const equalsCount = flatValues.filter((val) => val === mappedValue).length;
+						successCount = flatValues.length - equalsCount;
+					} else {
+						successCount = flatValues.filter((val) =>
+							matchComparison(mappedSign, val, mappedValue)
+						).length;
+					}
 				}
 			}
 
@@ -340,13 +512,23 @@ export function roll(
 				? `{${diceToRoll}${curlyCompare?.sign}${curlyCompare?.value}}`
 				: diceToRoll;
 
+			const resultOutput = replaceUnwantedText(results.join("; "));
+			const finalTotal = explodingSuccess
+				? resultOutput
+						.split(";")
+						.flatMap((segment) => extractValuesFromOutput(segment))
+						.filter((val) =>
+							matchComparison(explodingSuccess.sign, val, explodingSuccess.value)
+						).length
+				: successCount;
+
 			return {
-				dice: finalDice,
-				result: replaceUnwantedText(results.join("; ")),
+				dice: explodingSuccess ? diceDisplay : finalDice,
+				result: resultOutput,
 				comment: comments,
 				compare: isCurlyBulk ? undefined : compare,
 				modifier: modificator,
-				total: successCount,
+				total: finalTotal,
 				trivial: trivialComparisonDetected ? true : undefined,
 			};
 		}
@@ -436,9 +618,33 @@ export function roll(
 			}
 		} else console.log("Comparison impossible, pity ignored");
 	}
+	let resultOutput = replaceUnwantedText(roller.output);
+
+	if (explodingSuccess) {
+		const successes = countExplodingSuccesses(
+			diceRoll,
+			explodingSuccess.sign,
+			explodingSuccess.value
+		);
+		resultOutput = resultOutput
+			.replace(/=\s*-?\d+(?:\.\d+)?$/, `= ${successes}`)
+			.replace(explodingSuccess.normalizedSegment, explodingSuccess.originalSegment);
+
+		return {
+			dice: diceDisplay,
+			result: resultOutput,
+			comment,
+			compare: compare ? compare : undefined,
+			modifier: modificator,
+			total: successes,
+			pityLogs: rerollCount > 0 ? rerollCount : undefined,
+			trivial: compare?.trivial ? true : undefined,
+		};
+	}
+
 	return {
 		dice,
-		result: replaceUnwantedText(roller.output),
+		result: resultOutput,
 		comment,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
@@ -608,6 +814,21 @@ function replaceText(element: string, total: number, dice: string) {
 	};
 }
 
+function extractValuesFromOutput(output: string): number[] {
+	const values: number[] = [];
+	const regex = /\[([^\]]+)\]/g;
+	let match: RegExpExecArray | null;
+	// biome-ignore lint/suspicious/noAssignInExpressions: best method to extract all matches
+	while ((match = regex.exec(output)) !== null) {
+		const segmentValues = match[1]
+			.split(",")
+			.map((v) => Number.parseInt(v.replace(/[!*]/g, "").trim(), 10))
+			.filter((v) => !Number.isNaN(v));
+		values.push(...segmentValues);
+	}
+	return values;
+}
+
 function formatComment(dice: string) {
 	const commentsRegex = /\[(?<comments>.*?)\]/;
 	const commentsMatch = commentsRegex.exec(dice);
@@ -655,8 +876,18 @@ function getRollBounds(
 function sharedRolls(
 	dice: string,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
-	pity?: boolean
+	pity?: boolean,
+	explodingSuccessMain?: ExplodingSuccess,
+	diceDisplay?: string
 ): Resultat | undefined {
+	// If not provided (call from elsewhere), try to detect
+	if (!explodingSuccessMain) {
+		explodingSuccessMain = normalizeExplodingSuccess(dice.split(";")[0] ?? dice);
+	}
+	if (explodingSuccessMain) {
+		// Use normalized dice for internal processing but keep original for display
+		dice = dice.replace(explodingSuccessMain.originalSegment, "!");
+	}
 	if (dice.match(/\d+?#(.*?)/))
 		throw new DiceTypeError(
 			dice,
@@ -667,6 +898,7 @@ function sharedRolls(
 	const mainComment =
 		/\s+#(?<comment>.*)/.exec(dice)?.groups?.comment?.trimEnd() ?? undefined;
 	const split = dice.split(";");
+	const displayDice = diceDisplay ?? explodingSuccessMain?.originalDice ?? split[0];
 	let diceMain = fixParenthesis(split[0]);
 	// Extract and save the comments first to avoid conflicts with parentheses detection
 	const commentsRegex = /\[(?<comments>.*?)\]/gi;
@@ -695,12 +927,31 @@ function sharedRolls(
 		} else return undefined;
 	}
 	if (!diceResult || !diceResult.total) return undefined;
+
+	// If we had a double-sign exploding, recompute successes from the first segment output
+	if (explodingSuccessMain && diceResult.result) {
+		const values = extractValuesFromOutput(diceResult.result);
+		const successes = values.filter((v) =>
+			matchComparison(explodingSuccessMain!.sign, v, explodingSuccessMain!.value)
+		).length;
+		diceResult.total = successes;
+	}
 	let aggregatedCompare = diceResult.compare;
 	let hasTrivialComparison = diceResult.compare?.trivial === true;
 	results.push(`※ ${comments}${diceResult.result}`);
 	let total = diceResult.total;
 	diceResult.comment = mainComment;
-	if (!total) return diceResult;
+	if (!total) {
+		return {
+			dice: displayDice,
+			result: results.join(";"),
+			comment: mainComment,
+			compare: aggregatedCompare,
+			modifier: diceResult.modifier,
+			total,
+			trivial: hasTrivialComparison ? true : undefined,
+		};
+	}
 	for (let element of split.slice(1)) {
 		const comment = formatComment(element);
 		element = element
@@ -754,7 +1005,7 @@ function sharedRolls(
 		//remove the first in result
 		results.shift();
 	return {
-		dice: diceMain,
+		dice: displayDice,
 		result: results.join(";"),
 		comment: mainComment,
 		compare:
