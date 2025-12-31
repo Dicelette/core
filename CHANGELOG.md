@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.24.0](https://github.com/Dicelette/core/compare/v1.23.1...v1.24.0) (2025-12-31)
+
+
+### Features
+
+* add an option in roll to add sort (using in a option in the bot) ([d92b155](https://github.com/Dicelette/core/commit/d92b155e53e8c580d96cc052080b2a0d6dce81b7))
+
+
+### Bug Fixes
+
+* add support for exploding dice with double sign comparisons ([5754ca5](https://github.com/Dicelette/core/commit/5754ca51988dd86afd3d02f705b8f48c82d6fd4a))
+* bracket ([a918681](https://github.com/Dicelette/core/commit/a918681911f363ac4327b40404e8fe6e763a55cd))
+* **bulk:** should keep * only in curly brace ([4543dbd](https://github.com/Dicelette/core/commit/4543dbd249fd6fda822d18e792546fed5b2797b2))
+* output ([e05ccb8](https://github.com/Dicelette/core/commit/e05ccb8041b68075869a91a707ddcd5815e36252))
+* stat not recognized properly ([eb13062](https://github.com/Dicelette/core/commit/eb13062c4c0fba769375d62843bf62f56df8a753))
+* **trivial:** should detect trivial compare in bulk/shared roll ([c55e010](https://github.com/Dicelette/core/commit/c55e0105e667f0e1edd4ba779743b923ff1ad6e9))
+* **trivial:** should detect trivial in shared roll too ([cb9514d](https://github.com/Dicelette/core/commit/cb9514da6337cc7ff611ab0427bef7c1966c5dd7))
+
 ## [1.23.1](https://github.com/Dicelette/core/compare/v1.23.0...v1.23.1) (2025-12-30)
 
 
