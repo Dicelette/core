@@ -120,7 +120,6 @@ export function roll(
 		}
 
 		if (sort) diceToRoll = `${diceToRoll}${sort}`;
-
 		// When there's a comparison, handle each roll individually
 		const activeCompare: Compare | undefined =
 			compare ||
@@ -293,7 +292,6 @@ export function roll(
 	NumberGenerator.generator.engine = engine;
 	let diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
 	if (sort) diceWithoutComment = `${diceWithoutComment}${sort}`;
-
 	let diceRoll: DiceRoll | DiceRoll[];
 	try {
 		diceRoll = roller.roll(diceWithoutComment);
@@ -348,7 +346,7 @@ export function roll(
 					};
 				}
 			}
-		} else console.log("Comparison impossible, pity ignored");
+		}
 	}
 	let resultOutput = replaceUnwantedText(roller.output);
 
