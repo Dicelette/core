@@ -64,7 +64,19 @@ export function getRollBounds(
 export function setSortOrder(toRoll: string, sort?: SortOrder): string {
 	//First check if the diceToRoll contains already a sort order
 	const sortRegex = /(sa|sd|s)/i;
-	if (sort && !toRoll.match(sortRegex)) toRoll = `${toRoll}${sort}`;
+	if (sort && !toRoll.match(sortRegex)) {
+		//we should insert the sort order at the end of the dice string and before the possible modifier or comparison
+		const modifierComparisonRegex = /([+\-*/%^]\d+|([><=!]+\d+f)|([><=]|!=)+\d+)$/;
+		const match = toRoll.match(modifierComparisonRegex);
+		if (match) {
+			//Insert before the modifier or comparison
+			const index = match.index!;
+			toRoll = `${toRoll.slice(0, index)}${sort}${toRoll.slice(index)}`;
+		} else {
+			//Append at the end
+			toRoll += sort;
+		}
+	}
 	return toRoll;
 }
 
