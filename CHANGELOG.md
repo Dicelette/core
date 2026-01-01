@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.24.1](https://github.com/Dicelette/core/compare/v1.24.0...v1.24.1) (2026-01-01)
+
+
+### Bug Fixes
+
+* **curlyBrace:** allow combining math + comparator ([32228f7](https://github.com/Dicelette/core/commit/32228f7010e3440bb678d9e17e3092792cecd534))
+* **sharedroll:** curly brace broken ([9826cda](https://github.com/Dicelette/core/commit/9826cda73e581eeec6bd2cc61af8852f5905ec94))
+* **sort:** should insert the order at the end of the dice, before sign / comparison ([0731b41](https://github.com/Dicelette/core/commit/0731b414853384ac2cdbf79311e6a799be48e5b9))
+
 ## [1.24.0](https://github.com/Dicelette/core/compare/v1.23.1...v1.24.0) (2025-12-31)
 
 
