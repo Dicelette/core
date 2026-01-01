@@ -14,7 +14,6 @@
 		"dist"
 	],
 	"scripts": {
-		"test": "vitest",
 		"build": "tsup",
 		"prerelease": "bun run build",
 		"lint": "biome check --write src --unsafe",
