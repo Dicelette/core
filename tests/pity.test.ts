@@ -2,8 +2,8 @@ import { describe, expect, it } from "bun:test";
 import * as core from "../src";
 
 describe("pity system", () => {
-	describe("pity activée", () => {
-		it("devrait reroll jusqu'au succès et incrémenter pityLogs quand premier tir échoue", () => {
+	describe("pity enabled", () => {
+		it("should reroll until successful and increment pityLogs when first shot fails", () => {
 			const result = core.roll("1d6>=5", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -11,7 +11,7 @@ describe("pity system", () => {
 			expect(result!.compare).toEqual({ sign: ">=", value: 5 });
 		});
 
-		it("devrait fonctionner avec l'opérateur >", () => {
+		it("should works with >", () => {
 			const result = core.roll("1d6>3", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -19,7 +19,7 @@ describe("pity system", () => {
 			expect(result!.total).toBeLessThanOrEqual(6);
 		});
 
-		it("devrait fonctionner avec l'opérateur <", () => {
+		it("should works with <", () => {
 			const result = core.roll("1d6<5", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -27,7 +27,7 @@ describe("pity system", () => {
 			expect(result!.total).toBeLessThanOrEqual(4);
 		});
 
-		it("reroll jusqu'au succès avec <=", () => {
+		it("reroll until success with <=", () => {
 			const result = core.roll("1d6<=4", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -35,48 +35,46 @@ describe("pity system", () => {
 		});
 	});
 
-	describe("pity ignorée (comparaisons impossibles)", () => {
-		it("devrait ignorer pity quand la comparaison est impossible (1d6>=7)", () => {
+	describe("pity ignored (impossible comparison)", () => {
+		it("should ignore pity when comparison is impossible (1d6>=7)", () => {
 			const result = core.roll("1d6>=7", null, true);
 
 			expect(result).not.toBeUndefined();
-			// Impossible d'avoir >=7 avec 1d6, donc pity ignorée
 			expect(result!.pityLogs).toBeUndefined();
 		});
 
-		it("devrait ignorer pity pour 1d20>20 (impossible)", () => {
+		it("should ignore pity for 1d20>20 (impossible)", () => {
 			const result = core.roll("1d20>20", null, true);
 
 			expect(result).not.toBeUndefined();
 			expect(result!.pityLogs).toBeUndefined();
 		});
 
-		it("devrait ignorer pity pour 1d6<1 (impossible)", () => {
+		it("should ignore pity for 1d6<1 (impossible)", () => {
 			const result = core.roll("1d6<1", null, true);
 
 			expect(result).not.toBeUndefined();
 			expect(result!.pityLogs).toBeUndefined();
 		});
 
-		it("devrait accepter pity pour 2d6>=12 (possible)", () => {
+		it("should accept pity for 2d6>=12 (possible)", () => {
 			const result = core.roll("2d6>=12", null, true);
 
 			expect(result).not.toBeUndefined();
-			// Si le résultat est 12, c'est possible; sinon pity a rerollé
 			expect(result!.total).toBeGreaterThanOrEqual(2);
 			expect(result!.total).toBeLessThanOrEqual(12);
 		});
 	});
 
-	describe("pity désactivée", () => {
-		it("ne devrait pas reroll quand pity est false", () => {
+	describe("pity disabled", () => {
+		it("should not reroll if pity = false", () => {
 			const result = core.roll("1d6>=5", null, false);
 
 			expect(result).not.toBeUndefined();
 			expect(result!.pityLogs).toBeUndefined();
 		});
 
-		it("ne devrait pas reroll quand pity est undefined", () => {
+		it("should not reroll if pity = undefined", () => {
 			const result = core.roll("1d6>=5", null, undefined);
 
 			expect(result).not.toBeUndefined();
@@ -84,8 +82,8 @@ describe("pity system", () => {
 		});
 	});
 
-	describe("cas sans comparaison", () => {
-		it("ne devrait pas appliquer pity sans comparaison", () => {
+	describe("case without comparator", () => {
+		it("should not apply pity without comparison", () => {
 			const result = core.roll("1d6", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -94,25 +92,25 @@ describe("pity system", () => {
 		});
 	});
 
-	describe("cas limites", () => {
-		it("devrait gérer l'opérateur !=", () => {
+	describe("limit case", () => {
+		it("should ignore !=", () => {
 			const result = core.roll("1d6!=5", null, true);
 
 			expect(result).not.toBeUndefined();
-			// != est un opérateur d'explosion, pas une comparaison standard
-			// Le test vérifie juste que le roll fonctionne
+			// != is an explosion operator, not a standard comparison
+			// The test just checks that the roll works.
 			expect(result!.total).toBeGreaterThanOrEqual(1);
 			expect(result!.total).toBeLessThanOrEqual(6);
 		});
 
-		it("devrait gérer l'opérateur == (égal)", () => {
+		it("should works with == (equal)", () => {
 			const result = core.roll("1d6==5", null, true);
 
 			expect(result).not.toBeUndefined();
 			expect(result!.compare).toBeDefined();
 		});
 
-		it("devrait gérer <= (inférieur ou égal)", () => {
+		it("should works with <= (inferior or equal)", () => {
 			const result = core.roll("1d6<=5", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -120,8 +118,8 @@ describe("pity system", () => {
 		});
 	});
 
-	describe("integration avec dés multiples", () => {
-		it("devrait calculer correctement le max pour 2d6", () => {
+	describe("multiple die integration", () => {
+		it("should correctly calculate the maximum for 2d6", () => {
 			const result = core.roll("2d6>=12", null, true);
 
 			expect(result).not.toBeUndefined();
@@ -129,7 +127,7 @@ describe("pity system", () => {
 			expect(result!.total).toBeLessThanOrEqual(12);
 		});
 
-		it("devrait calculer correctement le max pour 3d4", () => {
+		it("should correctly calculate the maximum for 3d4", () => {
 			const result = core.roll("3d4>=12", null, true);
 
 			expect(result).not.toBeUndefined();
