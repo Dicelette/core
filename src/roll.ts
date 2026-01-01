@@ -75,6 +75,12 @@ export function roll(
 		compare = compareResult.compare;
 	}
 
+	// For simple curly braces, wrap the diceDisplay with braces
+	let finalDiceDisplay = prepared.diceDisplay;
+	if (prepared.isSimpleCurly && !prepared.diceDisplay.startsWith("{")) {
+		finalDiceDisplay = `{${prepared.diceDisplay}}`;
+	}
+
 	// Handle bulk rolls
 	const bulkProcessContent = prepared.isCurlyBulk ? prepared.bulkContent : processedDice;
 	if (bulkProcessContent.match(/\d+?#(.*)/)) {
@@ -133,7 +139,7 @@ export function roll(
 		if (pityResult) {
 			return {
 				...pityResult,
-				dice: processedDice,
+				dice: prepared.isSimpleCurly ? finalDiceDisplay : processedDice,
 				comment,
 				compare,
 				modifier: modificator,
@@ -160,7 +166,7 @@ export function roll(
 			);
 
 		return {
-			dice: prepared.diceDisplay,
+			dice: prepared.isSimpleCurly ? finalDiceDisplay : prepared.diceDisplay,
 			result: resultOutput,
 			comment,
 			compare: compare ? compare : undefined,
@@ -172,7 +178,7 @@ export function roll(
 	}
 
 	return {
-		dice: processedDice,
+		dice: prepared.isSimpleCurly ? finalDiceDisplay : processedDice,
 		result: resultOutput,
 		comment,
 		compare: compare ? compare : undefined,

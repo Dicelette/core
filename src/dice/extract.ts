@@ -76,6 +76,7 @@ interface PreparedDice {
 	isSharedCurly: boolean;
 	isCurlyBulk: boolean;
 	bulkContent: string;
+	isSimpleCurly: boolean;
 }
 
 /**
@@ -114,6 +115,24 @@ export function prepareDice(diceInput: string): PreparedDice {
 		diceDisplay = diceDisplay.slice(1);
 	}
 
+	// Handle simple curly braces like {1d20+5} or {1d20+5>10}
+	// But NOT dice pool notation like {2d6>4} where the comparison is inside the braces WITHOUT modifiers
+	let isSimpleCurly = false;
+	if (!isCurlyBulk && !isSharedRoll && dice.match(/^\{.*\}$/)) {
+		// Check if this is a dice pool (comparison inside the braces WITHOUT modifiers)
+		const innerContent = dice.slice(1, -1); // Remove outer braces
+		const hasModifiers = innerContent.match(/[+\-*/%^]/);
+		const hasComparison = innerContent.match(/(([><=!]+\d+f)|([><=]|!=)+\d+)/);
+
+		// Only remove braces if it's not a dice pool
+		// Dice pool: has comparison inside, NO modifiers (like {2d6>4})
+		// Simple curly: has modifiers before comparison (like {1d20+5>10}) or just plain dice (like {1d20+5})
+		if (!(hasComparison && !hasModifiers)) {
+			dice = innerContent;
+			isSimpleCurly = true;
+		}
+	}
+
 	return {
 		dice,
 		diceDisplay,
@@ -122,5 +141,6 @@ export function prepareDice(diceInput: string): PreparedDice {
 		isSharedCurly,
 		isCurlyBulk,
 		bulkContent,
+		isSimpleCurly,
 	};
 }
