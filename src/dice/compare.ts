@@ -3,7 +3,8 @@ import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
 import type { ComparedValue } from "../interfaces";
 import { SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
-import { rollCompare } from "../roll";
+import { roll } from "../roll";
+import { isNumber } from "../utils";
 
 /**
  * Check if a comparison is trivial (always true or always false)
@@ -57,6 +58,33 @@ export function canComparisonFail(
 		default:
 			return true;
 	}
+}
+
+export function rollCompare(
+	value: unknown,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
+) {
+	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
+	// Handle empty value or string - return 0 as default
+	if (!value || (typeof value === "string" && value.trim() === "")) {
+		return { value: 0, diceResult: value as string };
+	}
+	const rollComp = roll(value as string, engine, pity);
+	if (!rollComp?.total) {
+		//not a dice throw
+		try {
+			return { value: evaluate(value as string), diceResult: value as string };
+		} catch (error) {
+			// If evaluate fails, return 0
+			return { value: 0, diceResult: value as string };
+		}
+	}
+	return {
+		dice: value as string,
+		value: rollComp.total,
+		diceResult: rollComp?.result,
+	};
 }
 
 export function getCompare(

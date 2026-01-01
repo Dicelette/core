@@ -1,41 +1,36 @@
 import { type DiceRoll, DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
+
 import {
-	COMMENT_REGEX,
-	type Compare,
-	type ComparedValue,
-	countExplodingSuccesses,
-	DETECT_CRITICAL,
-	DiceTypeError,
-	EXPLODING_SUCCESS_REGEX,
-	type ExplodingSuccess,
-	isNumber,
-	normalizeExplodingSuccess,
-	OPTIONAL_COMMENT,
-	type Resultat,
-	replaceFormulaInDice,
-	SIGN_REGEX,
-	SIGN_REGEX_SPACE,
-	SortOrder,
-	SYMBOL_DICE,
-	standardizeDice,
-} from ".";
-import {
-	canComparisonSucceed,
 	compareSignFormule,
+	countExplodingSuccesses,
+	type ExplodingSuccess,
 	extractValuesFromOutput,
 	fixParenthesis,
 	formatComment,
 	getCompare,
 	getModifier,
 	getRollBounds,
+	handleBulkRolls,
+	handlePitySystem,
 	inverseSign,
 	isTrivialComparison,
 	matchComparison,
+	normalizeExplodingSuccess,
+	prepareDice,
 	replaceText,
 	replaceUnwantedText,
+	setSortOrder,
 } from "./dice";
+import { DiceTypeError } from "./errors";
+import { type Compare, type ComparedValue, type Resultat, SortOrder } from "./interfaces";
+import {
+	COMMENT_REGEX,
+	OPTIONAL_COMMENT,
+	SIGN_REGEX_SPACE,
+	SYMBOL_DICE,
+} from "./interfaces/constant";
 
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
@@ -52,264 +47,55 @@ export function roll(
 	sort?: SortOrder
 ): Resultat | undefined {
 	if (sort === SortOrder.None) sort = undefined;
-	//parse dice string
-	dice = standardizeDice(replaceFormulaInDice(dice))
-		.replace(/^\+/, "")
-		.replaceAll("=>", ">=")
-		.replaceAll("=<", "<=")
-		.trimStart();
-	if (!dice.includes("d")) return undefined;
-	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
 
-	const explodingSuccess = normalizeExplodingSuccess(dice);
-	if (explodingSuccess) dice = explodingSuccess.dice;
+	const prepared = prepareDice(dice);
+	if (!prepared.dice.includes("d")) return undefined;
 
-	// For shared rolls, extract the main dice part before the semicolon for diceDisplay
-	let diceDisplay: string;
-	if (dice.includes(";")) {
-		const mainDice = dice.split(";")[0];
-		diceDisplay = explodingSuccess?.originalDice ?? mainDice;
-	} else diceDisplay = explodingSuccess?.originalDice ?? dice;
-
-	// Detect curly braces with bulk rolls (e.g., {5#1d20>5})
-	// For these, we keep the curly braces in the dice notation and don't extract compare
-	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
-	const isCurlyBulk = !!curlyBulkMatch;
-	let bulkContent = "";
-	if (isCurlyBulk) bulkContent = curlyBulkMatch![1]; // Store content without curly braces for processing
-
-	const compareRegex = dice.match(SIGN_REGEX_SPACE);
-	let compare: ComparedValue | undefined;
-	if (dice.includes(";")) {
-		// Detect curly braces around the entire shared roll
-		// e.g., {1d20;&>20} -> 1d20;&>20
-		let sharedDice = dice;
-		let isSharedCurly = false;
-		if (dice.match(/^\{.*;\s*.*\}$/)) {
-			sharedDice = dice.slice(1, -1); // Remove outer curly braces
-			isSharedCurly = true;
-			// Also remove curly braces from diceDisplay
-			diceDisplay = diceDisplay.slice(1);
-		}
+	// Handle shared rolls
+	if (prepared.isSharedRoll) {
 		return sharedRolls(
-			sharedDice,
+			prepared.dice,
 			engine,
 			pity,
-			explodingSuccess,
-			diceDisplay,
-			isSharedCurly
+			prepared.explodingSuccess,
+			prepared.diceDisplay,
+			prepared.isSharedCurly
 		);
 	}
 
-	dice = fixParenthesis(dice);
-	const modificator = getModifier(dice);
+	let processedDice = fixParenthesis(prepared.dice);
+	const modificator = getModifier(processedDice);
 
 	// Extract compare BEFORE rolling, but NOT for curly bulk rolls
-	if (compareRegex && !isCurlyBulk) {
-		const compareResult = getCompare(dice, compareRegex, engine, pity);
-		dice = compareResult.dice;
+	const compareRegex = processedDice.match(SIGN_REGEX_SPACE);
+	let compare: ComparedValue | undefined;
+	if (compareRegex && !prepared.isCurlyBulk) {
+		const compareResult = getCompare(processedDice, compareRegex, engine, pity);
+		processedDice = compareResult.dice;
 		compare = compareResult.compare;
 	}
 
-	// Handle bulk rolls (both with and without curly braces)
-	const bulkProcessContent = isCurlyBulk ? bulkContent : dice;
+	// Handle bulk rolls
+	const bulkProcessContent = prepared.isCurlyBulk ? prepared.bulkContent : processedDice;
 	if (bulkProcessContent.match(/\d+?#(.*)/)) {
-		const diceArray = bulkProcessContent.split("#");
-		const numberOfDice = Number.parseInt(diceArray[0], 10);
-		let diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
-		const commentsMatch = diceArray[1].match(COMMENT_REGEX);
-		const comments = commentsMatch ? commentsMatch[2] : undefined;
-
-		// For curly bulk, extract comparison from diceToRoll
-		let curlyCompare: Compare | undefined;
-		if (isCurlyBulk) {
-			const curlyCompareRegex = diceToRoll.match(SIGN_REGEX_SPACE);
-			if (curlyCompareRegex) {
-				const compareSign = curlyCompareRegex[0].match(SIGN_REGEX)?.[0];
-				const compareValue = curlyCompareRegex[2];
-				if (compareSign && compareValue) {
-					curlyCompare = {
-						sign: compareSign as "<" | ">" | ">=" | "<=" | "=" | "!=" | "==",
-						value: Number.parseInt(compareValue, 10),
-					};
-					diceToRoll = diceToRoll.replace(SIGN_REGEX_SPACE, "");
-				}
-			}
-		}
-
-		if (sort) diceToRoll = `${diceToRoll}${sort}`;
-		// When there's a comparison, handle each roll individually
-		const activeCompare: Compare | undefined =
-			compare ||
-			curlyCompare ||
-			(explodingSuccess
-				? ({ sign: explodingSuccess.sign, value: explodingSuccess.value } as Compare)
-				: undefined);
-		let trivialComparisonDetected = false;
-		if (activeCompare) {
-			const results: string[] = [];
-			let successCount = 0;
-			const roller = new DiceRoller();
-			NumberGenerator.generator.engine = engine;
-
-			// Helper to format output with comparison notation for curly bulk
-			const formatOutput = (output: string, addStar: boolean) => {
-				// Only add * for curly bulk rolls
-				const formatted =
-					addStar && isCurlyBulk
-						? output.replace(
-								/\[([^\]]+)\]/,
-								(_m, content) =>
-									`[${content
-										.split(",")
-										.map((d: string) => `${d.trim()}*`)
-										.join(", ")}]`
-							)
-						: output;
-				return curlyCompare
-					? formatted.replace(/^([^:]+):/, `$1${curlyCompare.sign}${curlyCompare.value}:`)
-					: formatted;
-			};
-
-			for (let i = 0; i < numberOfDice; i++) {
-				try {
-					const individualRoll = roller.roll(diceToRoll);
-					const rollInstance = Array.isArray(individualRoll)
-						? individualRoll[0]
-						: individualRoll;
-					if (!trivialComparisonDetected && activeCompare) {
-						const { maxTotal, minTotal } = rollInstance;
-						trivialComparisonDetected = isTrivialComparison(
-							maxTotal,
-							minTotal,
-							activeCompare
-						);
-					}
-					const rollOutput = rollInstance.output;
-
-					if (explodingSuccess) {
-						const successesForRoll = countExplodingSuccesses(
-							rollInstance,
-							explodingSuccess.sign,
-							explodingSuccess.value
-						);
-						successCount += successesForRoll;
-
-						let formattedRollOutput = rollOutput
-							.replace(
-								explodingSuccess.normalizedSegment,
-								explodingSuccess.originalSegment
-							)
-							.replace(/=\s*-?\d+(?:\.\d+)?$/, `= ${successesForRoll}`);
-						// For exploding success counting, keep output consistent across bulk and curly bulk
-						// and avoid adding stars (which are only meant for classic comparison highlighting).
-						formattedRollOutput = formatOutput(formattedRollOutput, false);
-
-						results.push(formattedRollOutput);
-					} else {
-						const rollTotal = rollInstance.total;
-						const isSuccess = evaluate(
-							`${rollTotal}${activeCompare.sign}${activeCompare.value}`
-						);
-
-						if (isSuccess) successCount++;
-						results.push(formatOutput(rollOutput, isSuccess));
-					}
-				} catch (error) {
-					throw new DiceTypeError(diceToRoll, "roll", error);
-				}
-			}
-
-			const signSource = explodingSuccess?.originalDice ?? diceDisplay ?? dice;
-			const explodingMatch = signSource.match(EXPLODING_SUCCESS_REGEX);
-			if (explodingMatch) {
-				const [, doubledSignRaw, valueStr] = explodingMatch;
-				let doubledSign: string;
-				if (doubledSignRaw === "!!==") doubledSign = "==";
-				else if (doubledSignRaw === "!==") doubledSign = "!==";
-				else doubledSign = doubledSignRaw.replace(/^!/, "");
-				const signMap: Record<string, Compare["sign"]> = {
-					">>": ">",
-					"<<": "<",
-					">>=": ">=",
-					"<<=": "<=",
-					"==": "=",
-					"!==": "!=",
-					"!!==": "=",
-				};
-				const mappedSign = signMap[doubledSign];
-				const mappedValue = Number.parseFloat(valueStr);
-				if (mappedSign && !Number.isNaN(mappedValue)) {
-					const resultsString = replaceUnwantedText(results.join("; "));
-					const flatValues = resultsString
-						.split(";")
-						.flatMap((segment) => extractValuesFromOutput(segment));
-					if (mappedSign === "!=") {
-						const equalsCount = flatValues.filter((val) => val === mappedValue).length;
-						successCount = flatValues.length - equalsCount;
-					} else {
-						successCount = flatValues.filter((val) =>
-							matchComparison(mappedSign, val, mappedValue)
-						).length;
-					}
-				}
-			}
-
-			if (compare && trivialComparisonDetected) compare.trivial = true;
-
-			const finalDice = isCurlyBulk
-				? `{${diceToRoll}${curlyCompare?.sign}${curlyCompare?.value}}`
-				: diceToRoll;
-
-			const resultOutput = replaceUnwantedText(results.join("; "));
-			const finalTotal = explodingSuccess
-				? resultOutput
-						.split(";")
-						.flatMap((segment) => extractValuesFromOutput(segment))
-						.filter((val) =>
-							matchComparison(explodingSuccess.sign, val, explodingSuccess.value)
-						).length
-				: successCount;
-
-			return {
-				dice: explodingSuccess ? diceDisplay : finalDice,
-				result: resultOutput,
-				comment: comments,
-				compare: isCurlyBulk ? undefined : compare,
-				modifier: modificator,
-				total: finalTotal,
-				trivial: trivialComparisonDetected ? true : undefined,
-			};
-		}
-
-		// Original behavior when there's no comparison
-		const roller = new DiceRoller();
-		NumberGenerator.generator.engine = engine;
-		//remove comments if any
-		for (let i = 0; i < numberOfDice; i++) {
-			try {
-				roller.roll(diceToRoll);
-			} catch (error) {
-				throw new DiceTypeError(diceToRoll, "roll", error);
-			}
-		}
-
-		// For curly bulk without comparison, keep curly braces in dice
-		const finalDice = isCurlyBulk ? `{${diceToRoll}}` : diceToRoll;
-
-		return {
-			dice: finalDice,
-			result: replaceUnwantedText(roller.output),
-			comment: comments,
-			compare: compare ? compare : undefined,
-			modifier: modificator,
-			total: roller.total,
-		};
+		return handleBulkRolls(
+			processedDice,
+			prepared.isCurlyBulk,
+			prepared.bulkContent,
+			compare,
+			prepared.explodingSuccess,
+			prepared.diceDisplay,
+			engine,
+			sort
+		);
 	}
+
+	// Standard roll
 	const roller = new DiceRoller();
 	NumberGenerator.generator.engine = engine;
-	let diceWithoutComment = dice.replace(COMMENT_REGEX, "").trimEnd();
-	if (sort) diceWithoutComment = `${diceWithoutComment}${sort}`;
+	let diceWithoutComment = processedDice.replace(COMMENT_REGEX, "").trimEnd();
+	diceWithoutComment = setSortOrder(diceWithoutComment, sort);
+
 	let diceRoll: DiceRoll | DiceRoll[];
 	try {
 		diceRoll = roller.roll(diceWithoutComment);
@@ -317,69 +103,64 @@ export function roll(
 		throw new DiceTypeError(diceWithoutComment, "roll", error);
 	}
 
-	// Update compare.trivial after rolling to get access to diceRoll for trivial detection
+	// Update compare.trivial after rolling
 	if (compare && diceRoll) {
 		const currentRoll = Array.isArray(diceRoll) ? diceRoll[0] : diceRoll;
-		const maxDiceValue = currentRoll.maxTotal;
-		const minDiceValue = currentRoll.minTotal;
-		const trivial = isTrivialComparison(maxDiceValue, minDiceValue, compare);
+		const trivial = isTrivialComparison(
+			currentRoll.maxTotal,
+			currentRoll.minTotal,
+			compare
+		);
 		compare.trivial = trivial ? true : undefined;
 	}
 
-	const commentMatch = dice.match(COMMENT_REGEX);
+	const commentMatch = processedDice.match(COMMENT_REGEX);
 	const comment = commentMatch ? commentMatch[2] : undefined;
-	let rerollCount = 0;
-	let res: Resultat | undefined;
-	if (pity && compare) {
-		// Vérifier si la comparaison est théoriquement possible
-		const currentRoll = Array.isArray(diceRoll) ? diceRoll[0] : diceRoll;
-		const maxPossible = currentRoll ? currentRoll.maxTotal : null;
-		const isComparisonPossible =
-			maxPossible === null || canComparisonSucceed(maxPossible, compare);
 
-		if (isComparisonPossible) {
-			let isFail = evaluate(`${roller.total}${compare.sign}${compare.value}`);
-			if (!isFail) {
-				//reroll until success
-				const maxReroll = 100;
-				while (!isFail && rerollCount < maxReroll) {
-					try {
-						res = roll(diceWithoutComment, engine, false); // désactiver pity pour éviter la récursion infinie
-					} catch (error) {
-						throw new DiceTypeError(diceWithoutComment, "roll", error);
-					}
-					rerollCount++;
-					if (res && res.total !== undefined)
-						isFail = evaluate(`${res.total}${compare.sign}${compare.value}`);
-				}
-				if (res) {
-					return {
-						...res,
-						dice,
-						comment,
-						compare: compare,
-						modifier: modificator,
-						pityLogs: rerollCount,
-						trivial: res.trivial ?? (compare?.trivial ? true : undefined),
-					};
-				}
-			}
+	// Handle pity system
+	let rerollCount = 0;
+	let pityResult: Resultat | undefined;
+	if (pity && compare) {
+		const pityData = handlePitySystem(
+			diceWithoutComment,
+			compare,
+			diceRoll,
+			roller,
+			engine
+		);
+		rerollCount = pityData.rerollCount;
+		pityResult = pityData.result;
+		if (pityResult) {
+			return {
+				...pityResult,
+				dice: processedDice,
+				comment,
+				compare,
+				modifier: modificator,
+				pityLogs: rerollCount,
+				trivial: pityResult.trivial ?? (compare?.trivial ? true : undefined),
+			};
 		}
 	}
+
 	let resultOutput = replaceUnwantedText(roller.output);
 
-	if (explodingSuccess) {
+	// Handle exploding success
+	if (prepared.explodingSuccess) {
 		const successes = countExplodingSuccesses(
 			diceRoll,
-			explodingSuccess.sign,
-			explodingSuccess.value
+			prepared.explodingSuccess.sign,
+			prepared.explodingSuccess.value
 		);
 		resultOutput = resultOutput
 			.replace(/=\s*-?\d+(?:\.\d+)?$/, `= ${successes}`)
-			.replace(explodingSuccess.normalizedSegment, explodingSuccess.originalSegment);
+			.replace(
+				prepared.explodingSuccess.normalizedSegment,
+				prepared.explodingSuccess.originalSegment
+			);
 
 		return {
-			dice: diceDisplay,
+			dice: prepared.diceDisplay,
 			result: resultOutput,
 			comment,
 			compare: compare ? compare : undefined,
@@ -391,7 +172,7 @@ export function roll(
 	}
 
 	return {
-		dice,
+		dice: processedDice,
 		result: resultOutput,
 		comment,
 		compare: compare ? compare : undefined,
@@ -604,31 +385,4 @@ export function replaceInFormula(
 
 		return `${validSign} ${diceAll}: ${formule} = ${evaluateRoll}${invertedSign}${compareResult.compare?.value}`;
 	}
-}
-
-export function rollCompare(
-	value: unknown,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
-	pity?: boolean
-) {
-	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
-	// Handle empty value or string - return 0 as default
-	if (!value || (typeof value === "string" && value.trim() === "")) {
-		return { value: 0, diceResult: value as string };
-	}
-	const rollComp = roll(value as string, engine, pity);
-	if (!rollComp?.total) {
-		//not a dice throw
-		try {
-			return { value: evaluate(value as string), diceResult: value as string };
-		} catch (error) {
-			// If evaluate fails, return 0
-			return { value: 0, diceResult: value as string };
-		}
-	}
-	return {
-		dice: value as string,
-		value: rollComp.total,
-		diceResult: rollComp?.result,
-	};
 }

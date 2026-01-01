@@ -1,4 +1,3 @@
-export * from "./dice";
 export * from "./engine";
 export * from "./errors";
 export * from "./interfaces";

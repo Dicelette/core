@@ -1,7 +1,10 @@
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
-import type { Modifier, Sign } from "../interfaces";
+import type { Modifier, Sign, SortOrder } from "../interfaces";
+import { DETECT_CRITICAL } from "../interfaces/constant";
+import { replaceFormulaInDice, standardizeDice } from "../utils";
 import { calculator } from "./calculator";
+import { type ExplodingSuccess, normalizeExplodingSuccess } from "./exploding";
 
 export function getModifier(dice: string) {
 	const modifier = dice.matchAll(/(\+|-|%|\/|\^|\*|\*{2})(\d+)/gi);
@@ -56,4 +59,68 @@ export function getRollBounds(
 		// Ignore bounds computation errors; trivial detection will simply be skipped
 	}
 	return undefined;
+}
+
+export function setSortOrder(toRoll: string, sort?: SortOrder): string {
+	//First check if the diceToRoll contains already a sort order
+	const sortRegex = /(sa|sd|s)/i;
+	if (sort && !toRoll.match(sortRegex)) toRoll = `${toRoll}${sort}`;
+	return toRoll;
+}
+
+interface PreparedDice {
+	dice: string;
+	diceDisplay: string;
+	explodingSuccess?: ExplodingSuccess;
+	isSharedRoll: boolean;
+	isSharedCurly: boolean;
+	isCurlyBulk: boolean;
+	bulkContent: string;
+}
+
+/**
+ * Prépare la chaîne de dés pour le traitement
+ */
+export function prepareDice(diceInput: string): PreparedDice {
+	let dice = standardizeDice(replaceFormulaInDice(diceInput))
+		.replace(/^\+/, "")
+		.replaceAll("=>", ">=")
+		.replaceAll("=<", "<=")
+		.trimStart();
+
+	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
+
+	const explodingSuccess = normalizeExplodingSuccess(dice);
+	if (explodingSuccess) dice = explodingSuccess.dice;
+
+	let diceDisplay: string;
+	if (dice.includes(";")) {
+		const mainDice = dice.split(";")[0];
+		diceDisplay = explodingSuccess?.originalDice ?? mainDice;
+	} else {
+		diceDisplay = explodingSuccess?.originalDice ?? dice;
+	}
+
+	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
+	const isCurlyBulk = !!curlyBulkMatch;
+	const bulkContent = isCurlyBulk ? curlyBulkMatch![1] : "";
+
+	const isSharedRoll = dice.includes(";");
+	let isSharedCurly = false;
+
+	if (isSharedRoll && dice.match(/^\{.*;\s*.*\}$/)) {
+		dice = dice.slice(1, -1);
+		isSharedCurly = true;
+		diceDisplay = diceDisplay.slice(1);
+	}
+
+	return {
+		dice,
+		diceDisplay,
+		explodingSuccess,
+		isSharedRoll,
+		isSharedCurly,
+		isCurlyBulk,
+		bulkContent,
+	};
 }
