@@ -80,8 +80,26 @@ export function roll(
 
 	const compareRegex = dice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
-	if (dice.includes(";"))
-		return sharedRolls(dice, engine, pity, explodingSuccess, diceDisplay);
+	if (dice.includes(";")) {
+		// Detect curly braces around the entire shared roll
+		// e.g., {1d20;&>20} -> 1d20;&>20
+		let sharedDice = dice;
+		let isSharedCurly = false;
+		if (dice.match(/^\{.*;\s*.*\}$/)) {
+			sharedDice = dice.slice(1, -1); // Remove outer curly braces
+			isSharedCurly = true;
+			// Also remove curly braces from diceDisplay
+			diceDisplay = diceDisplay.slice(1);
+		}
+		return sharedRolls(
+			sharedDice,
+			engine,
+			pity,
+			explodingSuccess,
+			diceDisplay,
+			isSharedCurly
+		);
+	}
 
 	dice = fixParenthesis(dice);
 	const modificator = getModifier(dice);
@@ -389,12 +407,13 @@ function sharedRolls(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
 	pity?: boolean,
 	explodingSuccessMain?: ExplodingSuccess,
-	diceDisplay?: string
+	diceDisplay?: string,
+	isSharedCurly?: boolean
 ): Resultat | undefined {
 	// If not provided (call from elsewhere), try to detect
-	if (!explodingSuccessMain) {
+	if (!explodingSuccessMain)
 		explodingSuccessMain = normalizeExplodingSuccess(dice.split(";")[0] ?? dice);
-	}
+
 	if (explodingSuccessMain) {
 		// Use normalized dice for internal processing but keep original for display
 		dice = dice.replace(explodingSuccessMain.originalSegment, "!");
@@ -472,20 +491,49 @@ function sharedRolls(
 		//remove comments
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
-			const compareResult = compareSignFormule(
-				toRoll,
-				compareRegex,
-				element,
-				diceResult,
-				engine,
-				pity,
-				rollBounds
-			);
-			toRoll = compareResult.dice;
-			results.push(compareResult.results);
-			if (!aggregatedCompare && compareResult.compare)
-				aggregatedCompare = compareResult.compare;
-			if (compareResult.trivial) hasTrivialComparison = true;
+			if (isSharedCurly) {
+				// For curly braces shared rolls, display success count instead of comparison details
+				const compareResult = compareSignFormule(
+					toRoll,
+					compareRegex,
+					element,
+					diceResult,
+					engine,
+					pity,
+					rollBounds
+				);
+				// Count success: 1 if comparison is true, 0 if false
+				const { diceAll } = replaceText(element, diceResult.total, diceResult.dice);
+				let successCount = 0;
+				try {
+					const evaluated = evaluate(toRoll);
+					successCount = evaluated ? 1 : 0;
+				} catch (error) {
+					// If evaluation fails, try with roll
+					const evaluated = roll(toRoll, engine, pity) as Resultat | undefined;
+					successCount = (evaluated?.total ?? 0) ? 1 : 0;
+				}
+				results.push(`※ ${comment}${diceAll}: ${successCount}`);
+				total += successCount;
+				if (!aggregatedCompare && compareResult.compare)
+					aggregatedCompare = compareResult.compare;
+				if (compareResult.trivial) hasTrivialComparison = true;
+			} else {
+				const compareResult = compareSignFormule(
+					toRoll,
+					compareRegex,
+					element,
+					diceResult,
+					engine,
+					pity,
+					rollBounds
+				);
+				toRoll = compareResult.dice;
+				results.push(compareResult.results);
+				if (!aggregatedCompare && compareResult.compare)
+					aggregatedCompare = compareResult.compare;
+				if (compareResult.trivial) hasTrivialComparison = true;
+			}
 		} else {
 			const { formule, diceAll } = replaceText(
 				element,
