@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.24.2](https://github.com/Dicelette/core/compare/v1.24.1...v1.24.2) (2026-02-01)
+
+
+### Bug Fixes
+
+* more stricter `$` value replacement (should not match `$value`) anymore ([6825a67](https://github.com/Dicelette/core/commit/6825a67b63841f0d9eca715ceaafb087b19e9b41))
+
 ## [1.24.1](https://github.com/Dicelette/core/compare/v1.24.0...v1.24.1) (2026-01-01)
 
 
