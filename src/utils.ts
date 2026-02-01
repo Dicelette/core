@@ -59,7 +59,7 @@ export function generateStatsDice(
 			if (!outsideText) {
 				continue;
 			}
-			const tokenRegex = /([\p{L}\p{N}_]+)/gu;
+			const tokenRegex = /(\$?[\p{L}\p{N}_]+)/gu;
 			let lastIndex = 0;
 			let tokenMatch: RegExpExecArray | null;
 			// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
@@ -115,7 +115,7 @@ export function generateStatsDice(
 		}
 		dice = result;
 	}
-	if (dollarValue) dice = dice.replaceAll("$", dollarValue);
+	if (dollarValue) dice = dice.replaceAll(/\$\B/g, dollarValue);
 	return replaceFormulaInDice(dice);
 }
 
