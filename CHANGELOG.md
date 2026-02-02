@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.25.1](https://github.com/Dicelette/core/compare/v1.25.0...v1.25.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* getSortOrder should return `undefined` for unrecognized input ([8062a90](https://github.com/Dicelette/core/commit/8062a901599d8bad248908296359e1b189836b66))
+* word boundary prevent to use `$d` ([cbdde6e](https://github.com/Dicelette/core/commit/cbdde6e0200bf3425191469dfeb85c472c0f7b82))
+
 ## [1.25.0](https://github.com/Dicelette/core/compare/v1.24.2...v1.25.0) (2026-02-02)
 
 
