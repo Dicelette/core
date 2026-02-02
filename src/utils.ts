@@ -67,7 +67,9 @@ export function generateStatsDice(
 			while ((tokenMatch = tokenRegex.exec(outsideText)) !== null) {
 				result += outsideText.slice(lastIndex, tokenMatch.index);
 				const token = tokenMatch[0];
-				const tokenStd = token.standardize();
+				const tokenHasDollar = token.startsWith("$");
+				const tokenForCompare = tokenHasDollar ? token.slice(1) : token;
+				const tokenStd = tokenForCompare.standardize();
 
 				// Check for dice notation patterns like "1dstat1" or "dstat1"
 				const diceMatch = /^(\d*)d(.+)$/i.exec(tokenStd);
@@ -116,7 +118,7 @@ export function generateStatsDice(
 		}
 		dice = result;
 	}
-	if (dollarValue) dice = dice.replaceAll(/\$\B/g, dollarValue);
+	if (dollarValue) dice = dice.replaceAll("$", dollarValue);
 	return replaceFormulaInDice(dice);
 }
 
