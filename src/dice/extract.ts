@@ -157,8 +157,8 @@ export function prepareDice(diceInput: string): PreparedDice {
 	};
 }
 
-export function getSortOrder(dice: string): SortOrder {
+export function getSortOrder(dice: string): SortOrder | undefined {
 	if (dice.startsWith("sa") || dice.endsWith("sa")) return SortOrder.Ascending;
 	if (dice.startsWith("sd") || dice.endsWith("sd")) return SortOrder.Descending;
-	return SortOrder.None;
+	return undefined;
 }
