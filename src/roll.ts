@@ -12,6 +12,7 @@ import {
 	getCompare,
 	getModifier,
 	getRollBounds,
+	getSortOrder,
 	handleBulkRolls,
 	handlePitySystem,
 	inverseSign,
@@ -59,7 +60,8 @@ export function roll(
 			pity,
 			prepared.explodingSuccess,
 			prepared.diceDisplay,
-			prepared.isSharedCurly
+			prepared.isSharedCurly,
+			sort
 		);
 	}
 
@@ -149,7 +151,7 @@ export function roll(
 		}
 	}
 
-	let resultOutput = replaceUnwantedText(roller.output);
+	let resultOutput = replaceUnwantedText(roller.output, sort);
 
 	// Handle exploding success
 	if (prepared.explodingSuccess) {
@@ -195,7 +197,8 @@ function sharedRolls(
 	pity?: boolean,
 	explodingSuccessMain?: ExplodingSuccess,
 	diceDisplay?: string,
-	isSharedCurly?: boolean
+	isSharedCurly?: boolean,
+	sort?: SortOrder
 ): Resultat | undefined {
 	// If not provided (call from elsewhere), try to detect
 	if (!explodingSuccessMain)
@@ -235,11 +238,13 @@ function sharedRolls(
 		// No hidden dice, use the dice without comments
 		diceMain = diceMainWithoutComments;
 	}
+	//diceMain allow to set the sortorder for the entire shared roll
+	const sortFromMain = getSortOrder(diceMain);
 	const rollBounds = getRollBounds(diceMain, engine);
-	let diceResult = roll(diceMain, engine, pity);
+	let diceResult = roll(diceMain, engine, pity, sort);
 	if (!diceResult || !diceResult.total) {
 		if (hidden) {
-			diceResult = roll(fixParenthesis(split[0]), engine, pity);
+			diceResult = roll(fixParenthesis(split[0]), engine, pity, sort);
 			hidden = false;
 		} else return undefined;
 	}
@@ -260,7 +265,7 @@ function sharedRolls(
 	if (!total) {
 		return {
 			dice: displayDice,
-			result: results.join(";"),
+			result: replaceUnwantedText(results.join(";"), sortFromMain),
 			comment: mainComment,
 			compare: aggregatedCompare,
 			modifier: diceResult.modifier,
@@ -351,7 +356,7 @@ function sharedRolls(
 		results.shift();
 	return {
 		dice: displayDice,
-		result: results.join(";"),
+		result: replaceUnwantedText(results.join(";"), sortFromMain),
 		comment: mainComment,
 		compare:
 			hasTrivialComparison && aggregatedCompare

@@ -10,7 +10,12 @@ import {
 	EXPLODING_SUCCESS_REGEX,
 	type ExplodingSuccess,
 } from "./exploding";
-import { extractValuesFromOutput, getModifier, setSortOrder } from "./extract";
+import {
+	extractValuesFromOutput,
+	getModifier,
+	getSortOrder,
+	setSortOrder,
+} from "./extract";
 import { replaceUnwantedText } from "./replace";
 import { matchComparison } from "./signs";
 
@@ -50,6 +55,7 @@ export function handleBulkRolls(
 		}
 	}
 
+	sort = sort ?? getSortOrder(diceToRoll);
 	diceToRoll = setSortOrder(diceToRoll, sort);
 
 	const activeCompare: Compare | undefined =
@@ -70,7 +76,8 @@ export function handleBulkRolls(
 			isCurlyBulk,
 			curlyCompare,
 			compare,
-			engine
+			engine,
+			sort
 		);
 	}
 
@@ -90,7 +97,7 @@ export function handleBulkRolls(
 
 	return {
 		dice: finalDice,
-		result: replaceUnwantedText(roller.output),
+		result: replaceUnwantedText(roller.output, sort),
 		comment: comments,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
@@ -111,7 +118,8 @@ function handleBulkRollsWithComparison(
 	isCurlyBulk: boolean,
 	curlyCompare: Compare | undefined,
 	compare: ComparedValue | undefined,
-	engine: Engine | null
+	engine: Engine | null,
+	sort: SortOrder | undefined
 ): Resultat {
 	const results: string[] = [];
 	let successCount = 0;
@@ -227,7 +235,7 @@ function handleBulkRollsWithComparison(
 		? `{${diceToRoll}${curlyCompare?.sign}${curlyCompare?.value}}`
 		: diceToRoll;
 
-	const resultOutput = replaceUnwantedText(results.join("; "));
+	const resultOutput = replaceUnwantedText(results.join("; "), sort);
 	const finalTotal = explodingSuccess
 		? resultOutput
 				.split(";")

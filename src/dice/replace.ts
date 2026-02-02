@@ -1,7 +1,36 @@
+import { SortOrder } from "../interfaces";
 import { COMMENT_REGEX, SYMBOL_DICE } from "../interfaces/constant";
 
-export function replaceUnwantedText(dice: string) {
-	return dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
+export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
+	const d = dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
+	if (sortOrder) return sortDice(d, sortOrder);
+	return d;
+}
+
+/**
+ * Sort the output of the dice
+ * Split by ;
+ * Then sort each part based on the total `= Y`
+ * @param dice
+ * @param sortOrder
+ */
+function sortDice(dice: string, sortOrder: SortOrder) {
+	if (sortOrder === SortOrder.None) return dice;
+	const dices = dice.split(/; ?/);
+	if (sortOrder === SortOrder.Ascending) {
+		dices.sort((a, b) => {
+			const totalA = Number.parseInt(a.split("= ")[1], 10) || 0;
+			const totalB = Number.parseInt(b.split("= ")[1], 10) || 0;
+			return totalB - totalA;
+		});
+	} else if (sortOrder === SortOrder.Descending) {
+		dices.sort((a, b) => {
+			const totalA = Number.parseInt(a.split("= ")[1], 10) || 0;
+			const totalB = Number.parseInt(b.split("= ")[1], 10) || 0;
+			return totalA - totalB;
+		});
+	}
+	return dices.join("; ");
 }
 
 export function fixParenthesis(dice: string) {

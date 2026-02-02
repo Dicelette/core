@@ -8,6 +8,7 @@ import {
 	diceTypeRandomParse,
 	FormulaError,
 	SIGN_REGEX_SPACE,
+	SortOrder,
 	type StatisticalTemplate,
 } from ".";
 
