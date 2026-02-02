@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.25.0](https://github.com/Dicelette/core/compare/v1.24.2...v1.25.0) (2026-02-02)
+
+
+### Features
+
+* **sort:** allow to sort order the results from bulk & sharedRolls ([28408ac](https://github.com/Dicelette/core/commit/28408acddf0e321bfc991104550365fe38b8b3a3))
+
 ## [1.24.2](https://github.com/Dicelette/core/compare/v1.24.1...v1.24.2) (2026-02-01)
 
 
