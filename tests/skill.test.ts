@@ -66,3 +66,58 @@ it("creating complicated roll with multiple stats", () => {
 	const expectedFormula = "1d10+5d6";
 	expect(formula).toEqual(expectedFormula);
 });
+it("Should handle stats with d in name", () => {
+	let dice = "2dstatd+1d4";
+	const userStat = {
+		statd: 6,
+		other: 10,
+	};
+	dice = core.generateStatsDice(dice, userStat);
+	const formula = dice;
+	const expectedFormula = "2d6+1d4";
+	expect(formula).toEqual(expectedFormula);
+});
+it("Should handle stats with $ before", () => {
+	let dice = "1d$stat1+2";
+	const userStat = {
+		stat1: 8,
+		other: 10,
+	};
+	dice = core.generateStatsDice(dice, userStat, 0.5, "5");
+	const formula = dice;
+	const expectedFormula = "1d8+2";
+	expect(formula).toEqual(expectedFormula);
+});
+it("Should not replace stat if below threshold", () => {
+	let dice = "1dstrange+2";
+	const userStat = {
+		str: 8,
+		dex: 10,
+	};
+	dice = core.generateStatsDice(dice, userStat, 0.7);
+	const formula = dice;
+	const expectedFormula = "1dstrange+2";
+	expect(formula).toEqual(expectedFormula);
+});
+it("Should handle with $ and $stat in dice", () => {
+	let dice = "1d$stat+2-$";
+	const userStat = {
+		stat: 12,
+		other: 10,
+	};
+	dice = core.generateStatsDice(dice, userStat, 0.5, "5");
+	const formula = dice;
+	const expectedFormula = "1d12+2-5";
+	expect(formula).toEqual(expectedFormula);
+});
+it("Should replace even outside of a dice", () => {
+	let dice = "stat + 2d6 >= stat2";
+	const userStat = {
+		stat: 15,
+		stat2: 10,
+	};
+	dice = core.generateStatsDice(dice, userStat, 0.5);
+	const formula = dice;
+	const expectedFormula = "15 + 2d6 >= 10";
+	expect(formula).toEqual(expectedFormula);
+});

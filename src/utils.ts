@@ -34,16 +34,14 @@ export function standardizeDice(dice: string): string {
 // Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
 function handleDiceAfterD(
 	tokenStd: string,
-	normalizedStats: Map<string, [string, number]>,
-	minThreshold: number
+	normalizedStats: Map<string, [string, number]>
 ): string | null {
 	const diceMatch = /^(\d*)d(.+)$/i.exec(tokenStd);
 	if (!diceMatch) return null;
 	const diceCount = diceMatch[1] || "";
 	const afterD = diceMatch[2];
-	const bestMatch = findBestStatMatch(afterD, normalizedStats, minThreshold);
+	const bestMatch = findBestStatMatch(afterD, normalizedStats, 1, false);
 	if (bestMatch) {
-		console.log("Best match for dice-after-d ", tokenStd, "is", bestMatch);
 		const [, value] = bestMatch;
 		return `${diceCount}d${value.toString()}`;
 	}
@@ -57,9 +55,8 @@ function handleSimpleToken(
 	normalizedStats: Map<string, [string, number]>,
 	minThreshold: number
 ): string {
-	const bestMatch = findBestStatMatch(tokenStd, normalizedStats, minThreshold);
+	const bestMatch = findBestStatMatch(tokenStd, normalizedStats, minThreshold, false);
 	if (bestMatch) {
-		console.log("Best match for ", tokenStd, "is", bestMatch);
 		const [, value] = bestMatch;
 		return value.toString();
 	}
@@ -71,14 +68,14 @@ function handleSimpleToken(
  * and after evaluate any formula using `replaceFormulaInDice`
  * @param {string} originalDice
  * @param {Record<string,number>|undefined} stats
+ * @param {number} minThreshold Minimum similarity threshold to consider a stat name match
  * @param {string|undefined} dollarValue
- * @param minThreshold
  */
 export function generateStatsDice(
 	originalDice: string,
 	stats?: Record<string, number>,
-	dollarValue?: string,
-	minThreshold = 0.6
+	minThreshold = 0.6,
+	dollarValue?: string
 ) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
@@ -101,7 +98,7 @@ export function generateStatsDice(
 			if (!outsideText) {
 				continue;
 			}
-			const tokenRegex = /(\$?[\p{L}\p{N}_.-]+)/gu;
+			const tokenRegex = /(\$?[\p{L}\p{N}_.]+)/gu;
 			let lastIndex = 0;
 			let tokenMatch: RegExpExecArray | null;
 			// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
@@ -113,7 +110,7 @@ export function generateStatsDice(
 				const tokenStd = tokenForCompare.standardize();
 
 				// First try dice-after-d pattern using helper
-				const diceReplacement = handleDiceAfterD(tokenStd, normalizedStats, minThreshold);
+				const diceReplacement = handleDiceAfterD(tokenStd, normalizedStats);
 				if (diceReplacement) {
 					result += diceReplacement;
 					lastIndex = tokenRegex.lastIndex;

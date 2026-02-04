@@ -5,5 +5,6 @@ export * from "./interfaces/constant";
 export * from "./interfaces/toJsonSchema";
 export * from "./interfaces/zod";
 export * from "./roll";
+export * from "./similarity";
 export * from "./utils";
 export * from "./verify_template";

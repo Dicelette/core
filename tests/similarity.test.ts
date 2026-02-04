@@ -55,13 +55,15 @@ describe("calculateSimilarity", () => {
 		expect(calculateSimilarity("test", "wxyz")).toBe(0);
 	});
 
-	it("should calculate similarity between 0 and 1", () => {
+	it("should calculate similarity between 0 and 1 for similar string", () => {
 		const similarity1 = calculateSimilarity("cat", "bat");
 		expect(similarity1).toBeGreaterThan(0);
 		expect(similarity1).toBeLessThan(1);
+		const cutTo4Digits = Number.parseFloat(similarity1.toFixed(4));
 		//cut to 4 digit
-		expect(similarity1.toFixed(4)).toBeCloseTo(0.6667, 4);
-
+		expect(cutTo4Digits).toBeCloseTo(0.6667, 4);
+	});
+	it("should calculate similarity between 0 and 1 for more different strings", () => {
 		const similarity2 = calculateSimilarity("kitten", "sitting");
 		expect(similarity2).toBeGreaterThan(0);
 		expect(similarity2).toBeLessThan(1);
