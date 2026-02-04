@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.26.0](https://github.com/Dicelette/core/compare/v1.25.1...v1.26.0) (2026-02-04)
+
+
+### Features
+
+* add similarity calculation functions and enhance findBestRecord logic ([5c7ceee](https://github.com/Dicelette/core/commit/5c7ceeeeb64ef14af699fff090a612726b3506ed))
+* enhance similarity matching with partial search option ([beaf9f1](https://github.com/Dicelette/core/commit/beaf9f122a8a752c37079b6dbcff70f2838fbfe6))
+
 ## [1.25.1](https://github.com/Dicelette/core/compare/v1.25.0...v1.25.1) (2026-02-02)
 
 
