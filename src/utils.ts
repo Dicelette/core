@@ -8,9 +8,9 @@ import {
 	diceTypeRandomParse,
 	FormulaError,
 	SIGN_REGEX_SPACE,
-	SortOrder,
 	type StatisticalTemplate,
 } from ".";
+import { findBestStatMatch } from "./similarity";
 
 /**
  * Escape regex string
@@ -31,21 +31,62 @@ export function standardizeDice(dice: string): string {
 	);
 }
 
+// Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
+function handleDiceAfterD(
+	tokenStd: string,
+	normalizedStats: Map<string, [string, number]>,
+	minThreshold: number
+): string | null {
+	const diceMatch = /^(\d*)d(.+)$/i.exec(tokenStd);
+	if (!diceMatch) return null;
+	const diceCount = diceMatch[1] || "";
+	const afterD = diceMatch[2];
+	const bestMatch = findBestStatMatch(afterD, normalizedStats, minThreshold);
+	if (bestMatch) {
+		console.log("Best match for dice-after-d ", tokenStd, "is", bestMatch);
+		const [, value] = bestMatch;
+		return `${diceCount}d${value.toString()}`;
+	}
+	return null;
+}
+
+// Helper to handle simple tokens (stat names). Returns the replacement (numeric string) or the original token if no match.
+function handleSimpleToken(
+	tokenStd: string,
+	token: string,
+	normalizedStats: Map<string, [string, number]>,
+	minThreshold: number
+): string {
+	const bestMatch = findBestStatMatch(tokenStd, normalizedStats, minThreshold);
+	if (bestMatch) {
+		console.log("Best match for ", tokenStd, "is", bestMatch);
+		const [, value] = bestMatch;
+		return value.toString();
+	}
+	return token;
+}
+
 /**
  * Replace the stat name by their value using stat
  * and after evaluate any formula using `replaceFormulaInDice`
  * @param {string} originalDice
  * @param {Record<string,number>|undefined} stats
  * @param {string|undefined} dollarValue
+ * @param minThreshold
  */
 export function generateStatsDice(
 	originalDice: string,
 	stats?: Record<string, number>,
-	dollarValue?: string
+	dollarValue?: string,
+	minThreshold = 0.6
 ) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
-		const statKeys = Object.keys(stats);
+		const normalizedStats = new Map<string, [string, number]>();
+		for (const [key, value] of Object.entries(stats)) {
+			const normalized = key.standardize();
+			normalizedStats.set(normalized, [key, value]);
+		}
 		const partsRegex = /(\[[^\]]+])|([^[]+)/g;
 		let result = "";
 		let match: RegExpExecArray | null;
@@ -60,7 +101,7 @@ export function generateStatsDice(
 			if (!outsideText) {
 				continue;
 			}
-			const tokenRegex = /(\$?[\p{L}\p{N}_]+)/gu;
+			const tokenRegex = /(\$?[\p{L}\p{N}_.-]+)/gu;
 			let lastIndex = 0;
 			let tokenMatch: RegExpExecArray | null;
 			// biome-ignore lint/suspicious/noAssignInExpressions: best way to regex in a loop
@@ -71,47 +112,16 @@ export function generateStatsDice(
 				const tokenForCompare = tokenHasDollar ? token.slice(1) : token;
 				const tokenStd = tokenForCompare.standardize();
 
-				// Check for dice notation patterns like "1dstat1" or "dstat1"
-				const diceMatch = /^(\d*)d(.+)$/i.exec(tokenStd);
-				if (diceMatch) {
-					const diceCount = diceMatch[1] || "";
-					const afterD = diceMatch[2];
-					let foundStatAfterD = false;
-					for (const key of statKeys) {
-						const keyStd = key.standardize();
-						if (afterD === keyStd) {
-							result += `${diceCount}d${stats[key].toString()}`;
-							foundStatAfterD = true;
-							break;
-						}
-					}
-					if (foundStatAfterD) {
-						lastIndex = tokenRegex.lastIndex;
-						continue;
-					}
+				// First try dice-after-d pattern using helper
+				const diceReplacement = handleDiceAfterD(tokenStd, normalizedStats, minThreshold);
+				if (diceReplacement) {
+					result += diceReplacement;
+					lastIndex = tokenRegex.lastIndex;
+					continue;
 				}
 
-				let bestKey: string | null = null;
-				let bestScore = 0;
-				for (const key of statKeys) {
-					const keyStd = key.standardize();
-					if (tokenStd === keyStd) {
-						bestKey = key;
-						bestScore = 1;
-						break;
-					}
-					const score = similarityScore(tokenStd, keyStd);
-					if (score > bestScore) {
-						bestScore = score;
-						bestKey = key;
-					}
-				}
-				if (bestKey && bestScore >= 0.6) {
-					const statValue = stats[bestKey];
-					result += statValue.toString();
-				} else {
-					result += token;
-				}
+				// Otherwise handle as simple token (stat name or leave as is)
+				result += handleSimpleToken(tokenStd, token, normalizedStats, minThreshold);
 				lastIndex = tokenRegex.lastIndex;
 			}
 			result += outsideText.slice(lastIndex);
@@ -213,41 +223,6 @@ export function randomInt(
 ): number {
 	if (!rng) rng = new Random(engine || undefined);
 	return rng.integer(min, max);
-}
-
-/**
- * Calcule la distance de Levenshtein entre deux chaînes
- */
-function levenshteinDistance(a: string, b: string): number {
-	if (a === b) return 0;
-	const al = a.length;
-	const bl = b.length;
-	if (al === 0) return bl;
-	if (bl === 0) return al;
-	const v0 = new Array<number>(bl + 1);
-	const v1 = new Array<number>(bl + 1);
-	for (let i = 0; i <= bl; i++) v0[i] = i;
-	for (let i = 0; i < al; i++) {
-		v1[0] = i + 1;
-		for (let j = 0; j < bl; j++) {
-			const cost = a[i] === b[j] ? 0 : 1;
-			v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
-		}
-		for (let j = 0; j <= bl; j++) v0[j] = v1[j];
-	}
-	return v1[bl];
-}
-
-/**
- * Score de similarité normalisé entre 0 et 1 (1 = identique)
- */
-function similarityScore(a: string, b: string): number {
-	const la = a.length;
-	const lb = b.length;
-	if (la === 0 && lb === 0) return 1;
-	const dist = levenshteinDistance(a, b);
-	const max = Math.max(la, lb);
-	return 1 - dist / max;
 }
 
 /**
