@@ -85,20 +85,21 @@ export function findBestStatMatch<T>(
  * Tie-breaker: first encountered best similarity (deterministic).
  */
 export function findBestRecord(
-	snippets: Record<string, string>,
-	macroName: string,
+	record: Record<string, string>,
+	searchTerm: string,
 	similarityThreshold = MIN_THRESHOLD_MATCH
 ): string | null {
-	let bestMatch: string | null = null;
-	let bestSimilarity = -1; // so even 0 similarity is considered when snippets non-empty
-
-	for (const name of Object.keys(snippets)) {
-		const similarity = calculateSimilarity(macroName.normalize(), name.normalize());
-		if (similarity === 1) return name;
-		if (similarity > bestSimilarity) {
-			bestSimilarity = similarity;
-			bestMatch = name;
-		}
+	const normalizeRecord: Map<string, string> = new Map();
+	for (const key of Object.keys(record)) {
+		normalizeRecord.set(key.standardize(), key);
 	}
-	return bestMatch && bestSimilarity >= similarityThreshold ? bestMatch : null;
+
+	return (
+		findBestStatMatch<string>(
+			searchTerm.standardize(),
+			normalizeRecord,
+			similarityThreshold,
+			false
+		) || null
+	);
 }

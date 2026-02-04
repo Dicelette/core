@@ -152,6 +152,25 @@ Note: when a parameter `engine` is shown it usually defaults to the `NumberGener
 #### Function: getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto"): Engine
 - Returns the engine instance (from `NumberGenerator.engines`) matching the provided name.
 
+### Similarity (`src/similarity.ts`)
+#### Function: calculateSimilarity(str1: string, str2: string): number
+- Calculate and return a similarity score between two strings using the levenshtein distance (value between 0 and 1).
+
+#### Function: levenshteinDistance(str1: string, str2: string): number
+- Calculate and return the Levenshtein distance between two strings.
+- Used internally by `calculateSimilarity`.
+- Returns an integer distance value.
+
+#### Function : findBestStatMatch<T>(searchTerm: string, normalizedStat: Map<string, T>, similarityThreshold: number = 0.5, partialSearch: boolean = true): T | undefined`
+- Find and return the best matching statistic from `normalizedStat` based on `searchTerm`.
+- Normalized stat is a map of lowercased stat names to their original entries
+- `partialSearch` allow to check if `normalizedStat` have a key that starts, ends or contains the `searchTerm` and return it directly.
+- `similarityThreshold` is the minimum similarity score to consider a match. By default, it's set to 0.5.
+
+#### Function: `findBestRecord(snippets: Record<string, string>, searchTerm: string, similarityThreshold: number = 0.5): string | undefined`
+- Find and return the best matching string from `snippets` based on `searchTerm`.
+- Just an alias for `findBestStatMatch` specialized for `Record<string, string>` and without partial search.
+
 ### Dice functions (`src/dice.ts`)
 
 #### Function: roll(dice: string, engine?: Engine | null, pity?: boolean): Resultat | undefined
