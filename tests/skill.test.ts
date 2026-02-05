@@ -1,4 +1,4 @@
-import { expect, it } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import * as core from "../src";
 
 it("creating roll dice with face formula", () => {
@@ -120,4 +120,76 @@ it("Should replace even outside of a dice", () => {
 	const formula = dice;
 	const expectedFormula = "15 + 2d6 >= 10";
 	expect(formula).toEqual(expectedFormula);
+});
+describe("Space in stat names", () => {
+	it("Should find stat that contains spaces", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "1d$space_stat+2";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "1d7+2";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should find stat that contains spaces with partial match", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "1d$space+2";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "1d7+2";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should find when the space is replaced by .", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "1d$space.stat+2";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "1d7+2";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should NOT works when the space is replaced by -", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "1d$space-stat+2";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "1d7-stat+2";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should works even outside of a dice", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "$space_stat + 2 >= $space_stat";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "7 + 2 >= 7";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should works without $ and outside of a dice", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "space_stat + 2 >= space_stat";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "7 + 2 >= 7";
+		expect(formula).toEqual(expectedFormula);
+	});
+	it("Should works with partial match even with space", () => {
+		const userStats = {
+			"Space Stat": 7,
+		};
+		let dice = "space+2";
+		dice = core.generateStatsDice(dice, userStats, 0.5, "5");
+		const formula = dice;
+		const expectedFormula = "7+2";
+		expect(formula).toEqual(expectedFormula);
+	});
 });
