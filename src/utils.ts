@@ -40,7 +40,7 @@ function handleDiceAfterD(
 	if (!diceMatch) return null;
 	const diceCount = diceMatch[1] || "";
 	const afterD = diceMatch[2];
-	const bestMatch = findBestStatMatch(afterD, normalizedStats, 1, false);
+	const bestMatch = findBestStatMatch(afterD, normalizedStats, 1);
 	if (bestMatch) {
 		const [, value] = bestMatch;
 		return `${diceCount}d${value.toString()}`;
@@ -55,7 +55,7 @@ function handleSimpleToken(
 	normalizedStats: Map<string, [string, number]>,
 	minThreshold: number
 ): string {
-	const bestMatch = findBestStatMatch(tokenStd, normalizedStats, minThreshold, false);
+	const bestMatch = findBestStatMatch(tokenStd, normalizedStats, minThreshold);
 	if (bestMatch) {
 		const [, value] = bestMatch;
 		return value.toString();

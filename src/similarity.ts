@@ -41,29 +41,25 @@ export function levenshteinDistance(str1: string, str2: string): number {
 export function findBestStatMatch<T>(
 	searchTerm: string,
 	normalizedStats: Map<string, T>,
-	similarityThreshold = MIN_THRESHOLD_MATCH,
-	partialSearch = true
+	similarityThreshold = MIN_THRESHOLD_MATCH
 ): T | undefined {
 	// recherche exacte
 	const exact = normalizedStats.get(searchTerm);
 	if (exact) return exact;
 
 	// recherche partielle (startsWith, endsWith, includes) et choix du stat le plus court
-	if (partialSearch) {
-		const candidates: Array<[T, number]> = [];
-		for (const [normalizedKey, original] of normalizedStats) {
-			if (normalizedKey.startsWith(searchTerm))
-				candidates.push([original, normalizedKey.length]);
-			else if (normalizedKey.endsWith(searchTerm))
-				candidates.push([original, normalizedKey.length]);
-			else if (normalizedKey.includes(searchTerm))
-				candidates.push([original, normalizedKey.length]);
-		}
-		if (candidates.length > 0) {
-			candidates.sort((a, b) => a[1] - b[1]);
-			return candidates[0][0];
-		}
+
+	const candidates: Array<[T, number]> = [];
+	for (const [normalizedKey, original] of normalizedStats) {
+		if (normalizedKey.startsWith(searchTerm))
+			candidates.push([original, calculateSimilarity(searchTerm, normalizedKey)]);
 	}
+	if (candidates.length === 1) return candidates[0][0];
+	if (candidates.length > 0) {
+		candidates.sort((a, b) => b[1] - a[1]); // trier par similarité décroissante
+		if (candidates[0][1] >= similarityThreshold) return candidates[0][0];
+	}
+
 	// fallback: recherche par similarité si aucune correspondance partielle trouvée
 	let bestMatch: T | undefined;
 	let bestSimilarity = 0;
@@ -98,8 +94,7 @@ export function findBestRecord(
 		findBestStatMatch<string>(
 			searchTerm.standardize(),
 			normalizeRecord,
-			similarityThreshold,
-			false
+			similarityThreshold
 		) || null
 	);
 }

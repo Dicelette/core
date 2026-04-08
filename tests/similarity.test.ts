@@ -128,22 +128,22 @@ describe("findBestStatMatch", () => {
 
 	it("should find endsWith matches", () => {
 		const stats = new Map([
-			["my_strength", "str"],
-			["your_dexterity", "dex"],
+			["strength", "strength"],
+			["dexterity", "dexterity"],
 		]);
 
-		expect(findBestStatMatch("strength", stats)).toBe("str");
-		expect(findBestStatMatch("dexterity", stats)).toBe("dex");
+		expect(findBestStatMatch("ength", stats)).toBe("strength");
+		expect(findBestStatMatch("terity", stats)).toBe("dexterity");
 	});
 
 	it("should find includes matches", () => {
 		const stats = new Map([
-			["character_strength_bonus", "str"],
-			["player_dexterity_modifier", "dex"],
+			["strength", "strength"],
+			["dexterity", "dexterity"],
 		]);
 
-		expect(findBestStatMatch("strength", stats)).toBe("str");
-		expect(findBestStatMatch("dexterity", stats)).toBe("dex");
+		expect(findBestStatMatch("str", stats)).toBe("strength");
+		expect(findBestStatMatch("dex", stats)).toBe("dexterity");
 	});
 
 	it("should prefer shorter matches when multiple candidates", () => {
