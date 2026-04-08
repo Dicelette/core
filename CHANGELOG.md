@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.27.0](https://github.com/Dicelette/core/compare/v1.26.0...v1.27.0) (2026-04-08)
+
+
+### Features
+
+* simplify findBestStatMatch by removing partialSearch parameter and enhancing similarity calculation ([843cb1f](https://github.com/Dicelette/core/commit/843cb1f6c016f51bf84f29c3cfbc7e332ff01857))
+
 ## [1.26.0](https://github.com/Dicelette/core/compare/v1.25.1...v1.26.0) (2026-02-04)
 
 
