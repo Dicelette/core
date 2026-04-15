@@ -2,7 +2,7 @@
  * Utility functions for string similarity and distance calculations.
  */
 
-const MIN_THRESHOLD_MATCH = 0.5;
+export const MIN_THRESHOLD_MATCH = 0.5;
 
 /**
  * Calculates the similarity between two strings as a value between 0 and 1.

@@ -10,6 +10,12 @@ import {
 	SIGN_REGEX_SPACE,
 	type StatisticalTemplate,
 } from ".";
+import {
+	EXP_REMOVER,
+	NORMALIZE_SINGLE_DICE,
+	SIGN_REGEX,
+	SIGN_REMOVER,
+} from "./interfaces/constant";
 import { findBestStatMatch } from "./similarity";
 
 /**
@@ -64,6 +70,21 @@ function handleSimpleToken(
 }
 
 /**
+ * Build a normalized stats map from a stats record.
+ * Maps each stat name (standardized) to its [originalName, value] tuple.
+ * Useful for efficient stat lookups by normalized key.
+ * @param {Record<string, number>} stats
+ * @returns {Map<string, [string, number]>}
+ */
+export function normalizeStatsMap(stats: Record<string, number>): Map<string, [string, number]> {
+	const map = new Map<string, [string, number]>();
+	for (const [key, value] of Object.entries(stats)) {
+		map.set(key.standardize(), [key, value]);
+	}
+	return map;
+}
+
+/**
  * Replace the stat name by their value using stat
  * and after evaluate any formula using `replaceFormulaInDice`
  * @param {string} originalDice
@@ -79,11 +100,7 @@ export function generateStatsDice(
 ) {
 	let dice = originalDice.standardize();
 	if (stats && Object.keys(stats).length > 0) {
-		const normalizedStats = new Map<string, [string, number]>();
-		for (const [key, value] of Object.entries(stats)) {
-			const normalized = key.standardize();
-			normalizedStats.set(normalized, [key, value]);
-		}
+		const normalizedStats = normalizeStatsMap(stats);
 		const partsRegex = /(\[[^\]]+])|([^[]+)/g;
 		let result = "";
 		let match: RegExpExecArray | null;
@@ -134,7 +151,7 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
+	const formula = /(?<formula>\{{2}(.+?)}\{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: needed for regex loop
 	let match;
 	let modifiedDice = dice;
@@ -245,4 +262,34 @@ export function createCriticalCustom(
 	if (compareRegex) customDice = customDice.replace(SIGN_REGEX_SPACE, comparaison);
 	else customDice += comparaison;
 	return diceTypeRandomParse(customDice, template, engine);
+}
+
+/**
+ * Check whether a dice expression matches the given template dice type.
+ * Normalizes implicit leading `1d` (treating `1d100` and `d100` as equivalent),
+ * strips comparison operators and `{exp}` placeholders before comparing.
+ * When `userStats` is true and the dice type contains `$`, replaces `$` with
+ * a wildcard pattern so stat-dependent dice types match any stat value.
+ * @param {string} dice The dice expression to test
+ * @param {string|undefined} diceType The template dice type to match against
+ * @param {boolean|undefined} userStats Whether the user has stats (enables $ wildcard)
+ * @returns {boolean}
+ */
+export function includeDiceType(dice: string, diceType?: string, userStats?: boolean): boolean {
+	if (!diceType) return false;
+	diceType = NORMALIZE_SINGLE_DICE(diceType);
+	dice = NORMALIZE_SINGLE_DICE(dice);
+	if (userStats && diceType.includes("$")) {
+		diceType = diceType.replace("$", ".+?");
+	}
+	if (SIGN_REGEX.test(diceType)) {
+		diceType = diceType.replace(SIGN_REMOVER, "").trim();
+		dice = dice.replace(SIGN_REMOVER, "").trim();
+	}
+	if (diceType.includes("{exp")) {
+		diceType = diceType.replace(EXP_REMOVER, "").trim();
+		dice = dice.replace(EXP_REMOVER, "").trim();
+	}
+	const detectDiceType = new RegExp(`\\b${diceType}\\b`, "i");
+	return detectDiceType.test(dice);
 }
