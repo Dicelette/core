@@ -151,7 +151,7 @@ export function generateStatsDice(
  * @param dice {string}
  */
 export function replaceFormulaInDice(dice: string) {
-	const formula = /(?<formula>\{{2}(.+?)}\{2})/gim;
+	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: needed for regex loop
 	let match;
 	let modifiedDice = dice;
