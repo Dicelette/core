@@ -121,7 +121,7 @@ export function verifyStatMatcherPattern(dice: string, replaceUnknow?: string) {
 					.map((s) => `\`${s}\``)
 					.join(", ")
 			: "unknown";
-		throw new DiceTypeError("error.invalidDice.stats");
+		throw new DiceTypeError(stats, "unknown_stats");
 	}
 	return dice.replaceAll("+0", "").replaceAll("-0", "");
 }
