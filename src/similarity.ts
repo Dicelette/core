@@ -2,7 +2,9 @@
  * Utility functions for string similarity and distance calculations.
  */
 
-const MIN_THRESHOLD_MATCH = 0.5;
+import { DiceTypeError } from "./errors";
+import { MIN_THRESHOLD_MATCH } from "./interfaces";
+import { REMOVER_PATTERN } from "./regex";
 
 /**
  * Calculates the similarity between two strings as a value between 0 and 1.
@@ -97,4 +99,29 @@ export function findBestRecord(
 			similarityThreshold
 		) || null
 	);
+}
+
+export function replaceUnknown(dice: string, replacer: string) {
+	return dice
+		.replaceAll(REMOVER_PATTERN.STAT_MATCHER, replacer)
+		.replaceAll("+0", "")
+		.replaceAll("-0", "");
+}
+
+export function verifyStatMatcherPattern(dice: string, replaceUnknow?: string) {
+	if (REMOVER_PATTERN.STAT_MATCHER.test(dice)) {
+		if (replaceUnknow)
+			//remove ALL unknow value
+			return replaceUnknown(dice, replaceUnknow);
+
+		//find which one is not replaced
+		const matched = dice.matchAll(new RegExp(REMOVER_PATTERN.STAT_MATCHER));
+		const stats = matched
+			? Array.from(matched, (m) => m?.[0])
+					.map((s) => `\`${s}\``)
+					.join(", ")
+			: "unknown";
+		throw new DiceTypeError("error.invalidDice.stats");
+	}
+	return dice.replaceAll("+0", "").replaceAll("-0", "");
 }

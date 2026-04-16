@@ -11,3 +11,5 @@ export const SYMBOL_DICE = "&";
 
 export const DETECT_CRITICAL = /\{\*?c[fs]:([<>=]|!=)+(.+?)}/gim;
 export const OPTIONAL_COMMENT = /\s+(#|\/{2}|\[|\/\*)?(?<comment>.*)/gi;
+
+export const MIN_THRESHOLD_MATCH = 0.5;

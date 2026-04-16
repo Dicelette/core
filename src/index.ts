@@ -4,6 +4,7 @@ export * from "./interfaces";
 export * from "./interfaces/constant";
 export * from "./interfaces/toJsonSchema";
 export * from "./interfaces/zod";
+export * from "./regex";
 export * from "./roll";
 export * from "./similarity";
 export * from "./utils";
