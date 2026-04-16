@@ -242,13 +242,13 @@ function sharedRolls(
 	const sortFromMain = getSortOrder(diceMain);
 	const rollBounds = getRollBounds(diceMain, engine);
 	let diceResult = roll(diceMain, engine, pity, sort);
-	if (!diceResult || !diceResult.total) {
+	if (!diceResult?.total) {
 		if (hidden) {
 			diceResult = roll(fixParenthesis(split[0]), engine, pity, sort);
 			hidden = false;
 		} else return undefined;
 	}
-	if (!diceResult || !diceResult.total) return undefined;
+	if (!diceResult?.total) return undefined;
 
 	// If we had a double-sign exploding, recompute successes from the first segment output
 	if (explodingSuccessMain && diceResult.result) {

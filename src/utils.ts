@@ -7,7 +7,6 @@ import {
 	DiceTypeError,
 	diceTypeRandomParse,
 	FormulaError,
-	NORMALIZE_SINGLE_DICE,
 	SIGN_REGEX_SPACE,
 	type StatisticalTemplate,
 } from ".";
