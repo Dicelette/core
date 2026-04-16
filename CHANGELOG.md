@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.28.0](https://github.com/Dicelette/core/compare/v1.27.1...v1.28.0) (2026-04-16)
+
+
+### Features
+
+* add MIN_THRESHOLD_MATCH constant and implement regex utilities for dice type handling ([4219ef1](https://github.com/Dicelette/core/commit/4219ef1b10ac66a0e90b6d5df153f243e2af6365))
+
 ## [1.27.1](https://github.com/Dicelette/core/compare/v1.27.0...v1.27.1) (2026-04-16)
 
 ## [1.27.0](https://github.com/Dicelette/core/compare/v1.26.0...v1.27.0) (2026-04-08)
