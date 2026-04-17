@@ -1,9 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import {
 	calculateSimilarity,
+	DiceTypeError,
 	findBestStatMatch,
 	levenshteinDistance,
-} from "../src/similarity";
+	verifyStatMatcherPattern,
+} from "../src";
 
 describe("levenshteinDistance", () => {
 	it("should return 0 for identical strings", () => {
@@ -184,5 +186,88 @@ describe("findBestStatMatch", () => {
 
 		expect(findBestStatMatch("vitesse_de_déplacement", stats)).toBe("speed");
 		expect(findBestStatMatch("points_de_vie_maximum", stats)).toBe("hp_max");
+	});
+});
+describe("verifyStatMatcherPattern", () => {
+	it("should throw error when unknown stat remains and no replaceUnknown value", () => {
+		const dice = "1d20+$unknown";
+
+		expect(() => verifyStatMatcherPattern(dice)).toThrow(DiceTypeError);
+	});
+
+	it("should throw error with default message when no translation provided", () => {
+		const dice = "1d20+$unknown+$other";
+
+		expect(() => verifyStatMatcherPattern(dice)).toThrow(DiceTypeError);
+	});
+
+	it("should throw error with specific unknown stats listed", () => {
+		const dice = "1d20+$mystat";
+
+		try {
+			verifyStatMatcherPattern(dice);
+		} catch (error) {
+			const botError = error as DiceTypeError;
+			expect(botError.message).toBeDefined();
+		}
+	});
+
+	it("should replace unknown stats with replaceUnknown value", () => {
+		const dice = "1d20+$unknown+5";
+		const replaceValue = "0";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("1d20+5");
+	});
+
+	it("should replace multiple unknown stats with replaceUnknown value", () => {
+		const dice = "1d20+$stat1+$stat2+10";
+		const replaceValue = "5";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("1d20+5+5+10");
+	});
+
+	it("should remove +0 and -0 when replacing with 0", () => {
+		const dice = "1d20+$unknown+5";
+		const replaceValue = "0";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("1d20+5");
+	});
+
+	it("should remove multiple +0 and -0 patterns", () => {
+		const dice = "1d20-$stat1+$stat2+10";
+		const replaceValue = "0";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("1d20+10");
+	});
+
+	it("should handle parentheses in stat patterns", () => {
+		const dice = "1d20+($unknown)";
+		const replaceValue = "5";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("1d20+5");
+	});
+
+	it("should return original dice when no unknown stats present", () => {
+		const dice = "1d20+5";
+
+		const result = verifyStatMatcherPattern(dice);
+
+		expect(result).toBe("1d20+5");
+	});
+
+	it("should not replace when no unknow parameter provided but stats present", () => {
+		const dice = "1d20+$unknown";
+
+		expect(() => verifyStatMatcherPattern(dice, undefined)).toThrow();
 	});
 });
