@@ -3,6 +3,7 @@ import {
 	calculateSimilarity,
 	DiceTypeError,
 	findBestStatMatch,
+	getCachedRegex,
 	levenshteinDistance,
 	verifyStatMatcherPattern,
 } from "../src";
@@ -269,5 +270,58 @@ describe("verifyStatMatcherPattern", () => {
 		const dice = "1d20+$unknown";
 
 		expect(() => verifyStatMatcherPattern(dice, undefined)).toThrow();
+	});
+});
+
+describe("getCachedRegex", () => {
+	it("should create and cache a regex pattern", () => {
+		const pattern = "test\\d+";
+		const flags = "gi";
+
+		const regex1 = getCachedRegex(pattern, flags);
+		const regex2 = getCachedRegex(pattern, flags);
+
+		expect(regex1).toBe(regex2); // Same instance from cache
+		expect(regex1).toBeInstanceOf(RegExp);
+		expect(regex1.source).toBe(pattern);
+		expect(regex1.flags).toBe(flags);
+	});
+
+	it("should create different regex for different patterns", () => {
+		const regex1 = getCachedRegex("pattern1", "i");
+		const regex2 = getCachedRegex("pattern2", "i");
+
+		expect(regex1).not.toBe(regex2);
+		expect(regex1.source).toBe("pattern1");
+		expect(regex2.source).toBe("pattern2");
+	});
+
+	it("should create different regex for different flags", () => {
+		const pattern = "test";
+		const regex1 = getCachedRegex(pattern, "i");
+		const regex2 = getCachedRegex(pattern, "g");
+
+		expect(regex1).not.toBe(regex2);
+		expect(regex1.flags).toBe("i");
+		expect(regex2.flags).toBe("g");
+	});
+
+	it("should handle patterns without flags", () => {
+		const pattern = "simple";
+		const regex = getCachedRegex(pattern);
+
+		expect(regex).toBeInstanceOf(RegExp);
+		expect(regex.source).toBe(pattern);
+		expect(regex.flags).toBe("");
+	});
+
+	it("should work correctly with cached regex", () => {
+		const pattern = "\\d+";
+		const regex = getCachedRegex(pattern, "g");
+
+		const text = "abc123def456";
+		const matches = text.match(regex);
+
+		expect(matches).toEqual(["123", "456"]);
 	});
 });
