@@ -6,6 +6,6 @@ export * from "./interfaces/toJsonSchema";
 export * from "./interfaces/zod";
 export * from "./regex";
 export * from "./roll";
-export * from "./similarity";
+export * from "./similarities";
 export * from "./utils";
 export * from "./verify_template";

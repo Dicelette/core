@@ -2,7 +2,8 @@ import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 import { type Modifier, type Sign, SortOrder } from "../interfaces";
 import { DETECT_CRITICAL } from "../interfaces/constant";
-import { replaceFormulaInDice, standardizeDice } from "../utils";
+import { replaceFormulaInDice } from "../similarities";
+import { standardizeDice } from "../utils";
 import { calculator } from "./calculator";
 import { type ExplodingSuccess, normalizeExplodingSuccess } from "./exploding";
 

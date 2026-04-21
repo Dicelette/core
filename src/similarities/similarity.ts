@@ -2,9 +2,9 @@
  * Utility functions for string similarity and distance calculations.
  */
 
-import { DiceTypeError } from "./errors";
-import { MIN_THRESHOLD_MATCH } from "./interfaces";
-import { REMOVER_PATTERN } from "./regex";
+import { DiceTypeError } from "../errors";
+import { MIN_THRESHOLD_MATCH } from "../interfaces";
+import { REMOVER_PATTERN } from "../regex";
 
 /**
  * Calculates the similarity between two strings as a value between 0 and 1.
