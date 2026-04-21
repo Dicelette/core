@@ -5,6 +5,7 @@ import {
 	findBestStatMatch,
 	getCachedRegex,
 	levenshteinDistance,
+	resolveFormulaHint,
 	verifyStatMatcherPattern,
 } from "../src";
 
@@ -323,5 +324,32 @@ describe("getCachedRegex", () => {
 		const matches = text.match(regex);
 
 		expect(matches).toEqual(["123", "456"]);
+	});
+});
+describe("resolveFormulaHint (core integration)", () => {
+	it("should resolve a direct arithmetic formula", () => {
+		const result = resolveFormulaHint("strength + 2", { strength: 10 });
+		expect(result.kind).toBe("resolved");
+		if (result.kind === "resolved") expect(result.value).toBe(12);
+	});
+
+	it("should resolve formula with extra surrounding spaces", () => {
+		const result = resolveFormulaHint("  strength + 3  ", { strength: 10 });
+		expect(result.kind).toBe("resolved");
+		if (result.kind === "resolved") expect(result.value).toBe(13);
+	});
+
+	it("should resolve fuzzy prefixed names", () => {
+		const result = resolveFormulaHint("volo+hack", {
+			Volonté: 15,
+			Hacking: -10,
+		});
+		expect(result.kind).toBe("resolved");
+		if (result.kind === "resolved") expect(result.value).toBe(5);
+	});
+
+	it("should return error on invalid formula", () => {
+		const result = resolveFormulaHint("strength ++ invalid", { strength: 10 });
+		expect(result.kind).toBe("error");
 	});
 });

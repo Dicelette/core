@@ -1,5 +1,5 @@
 import { expect, it } from "bun:test";
-import { replaceFormulaInDice } from "../src/generateStatsDice";
+import { replaceFormulaInDice } from "../src";
 
 it("simple roll", () => {
 	const dice = "1d20+$>20";

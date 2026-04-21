@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { generateStatsDice } from "../src/generateStatsDice";
+import { generateStatsDice } from "../src";
 
 it("creating roll dice with face formula", () => {
 	let dice = "1dstat1>20";

@@ -1,13 +1,10 @@
 import "uniformize";
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { type Engine, Random } from "random-js";
-import {
-	type CustomCritical,
-	DiceTypeError,
-	diceTypeRandomParse,
-	SIGN_REGEX_SPACE,
-	type StatisticalTemplate,
-} from ".";
+import { DiceTypeError } from "./errors";
+import type { CustomCritical, StatisticalTemplate } from "./interfaces";
+import { SIGN_REGEX_SPACE } from "./interfaces/constant";
+import { diceTypeRandomParse } from "./verify_template";
 
 /**
  * Escape regex string

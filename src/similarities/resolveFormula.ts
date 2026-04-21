@@ -18,7 +18,7 @@ function substituteFormulaTokens(
 	resolvedStats: Map<string, number>,
 	similarityThreshold = MIN_THRESHOLD_MATCH
 ): string {
-	return expr.replace(/([\p{L}\p{M}._-]+)*/gu, (token) => {
+	return expr.replace(/([\p{L}\p{M}._-]+)/gu, (token) => {
 		const match = findBestStatMatch<number>(token, resolvedStats, similarityThreshold);
 		return match !== undefined ? match.toString() : token;
 	});
