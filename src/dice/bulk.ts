@@ -3,7 +3,8 @@ import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
 import { DiceTypeError } from "../errors";
 import type { Compare, ComparedValue, Resultat, SortOrder } from "../interfaces";
-import { COMMENT_REGEX, SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
+import { SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
+import { splitDiceComment } from "../utils";
 import { isTrivialComparison } from "./compare";
 import {
 	countExplodingSuccesses,
@@ -35,9 +36,8 @@ export function handleBulkRolls(
 	const bulkProcessContent = isCurlyBulk ? bulkContent : dice;
 	const diceArray = bulkProcessContent.split("#");
 	const numberOfDice = Number.parseInt(diceArray[0], 10);
-	let diceToRoll = diceArray[1].replace(COMMENT_REGEX, "");
-	const commentsMatch = diceArray[1].match(COMMENT_REGEX);
-	const comments = commentsMatch ? commentsMatch[2] : undefined;
+	const { dice: diceToRollBase, comment: comments } = splitDiceComment(diceArray[1]);
+	let diceToRoll = diceToRollBase;
 
 	let curlyCompare: Compare | undefined;
 	if (isCurlyBulk) {
