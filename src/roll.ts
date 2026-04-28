@@ -32,6 +32,7 @@ import {
 	SIGN_REGEX_SPACE,
 	SYMBOL_DICE,
 } from "./interfaces/constant";
+import { splitDiceComment } from "./utils";
 
 /**
  * Parse the string provided and turn it as a readable dice for dice parser
@@ -39,13 +40,15 @@ import {
  * @param {Engine|null} engine The random engine to use, default to nodeCrypto
  * @param {boolean} pity Whether to enable pity system (reroll on failure) or not
  * @param {boolean} sort Whether to sort the dice results or not
+ * @param {string} comment Optional comment to attach to the result. If provided, skips extracting the comment from the dice string (assumes dice is already clean).
  * @returns {Resultat|undefined} The result of the roll
  */
 export function roll(
 	dice: string,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
 	pity?: boolean,
-	sort?: SortOrder
+	sort?: SortOrder,
+	comment?: string
 ): Resultat | undefined {
 	if (sort === SortOrder.None) sort = undefined;
 
@@ -101,8 +104,10 @@ export function roll(
 	// Standard roll
 	const roller = new DiceRoller();
 	NumberGenerator.generator.engine = engine;
-	let diceWithoutComment = processedDice.replace(COMMENT_REGEX, "").trimEnd();
-	diceWithoutComment = setSortOrder(diceWithoutComment, sort);
+	const splitResult = splitDiceComment(processedDice);
+	const diceBase = comment !== undefined ? processedDice.trimEnd() : splitResult.dice;
+	const resolvedComment = comment ?? splitResult.comment;
+	const diceWithoutComment = setSortOrder(diceBase, sort);
 
 	let diceRoll: DiceRoll | DiceRoll[];
 	try {
@@ -122,9 +127,6 @@ export function roll(
 		compare.trivial = trivial ? true : undefined;
 	}
 
-	const commentMatch = processedDice.match(COMMENT_REGEX);
-	const comment = commentMatch ? commentMatch[2] : undefined;
-
 	// Handle pity system
 	let rerollCount = 0;
 	let pityResult: Resultat | undefined;
@@ -142,7 +144,7 @@ export function roll(
 			return {
 				...pityResult,
 				dice: prepared.isSimpleCurly ? finalDiceDisplay : processedDice,
-				comment,
+				comment: resolvedComment,
 				compare,
 				modifier: modificator,
 				pityLogs: rerollCount,
@@ -170,7 +172,7 @@ export function roll(
 		return {
 			dice: prepared.isSimpleCurly ? finalDiceDisplay : prepared.diceDisplay,
 			result: resultOutput,
-			comment,
+			comment: resolvedComment,
 			compare: compare ? compare : undefined,
 			modifier: modificator,
 			total: successes,
@@ -182,7 +184,7 @@ export function roll(
 	return {
 		dice: prepared.isSimpleCurly ? finalDiceDisplay : processedDice,
 		result: resultOutput,
-		comment,
+		comment: resolvedComment,
 		compare: compare ? compare : undefined,
 		modifier: modificator,
 		total: roller.total,

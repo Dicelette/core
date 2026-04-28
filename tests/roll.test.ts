@@ -109,3 +109,11 @@ describe("Shared results", () => {
 		});
 	});
 });
+
+describe("Comments", () => {
+	it("simple", () => {
+		const result = core.roll("2d6 # hello world");
+		expect(result).not.toBeUndefined();
+		expect(result?.comment).toEqual("hello world");
+	});
+});

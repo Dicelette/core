@@ -2,6 +2,7 @@ import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 import { type Modifier, type Sign, SortOrder } from "../interfaces";
 import { DETECT_CRITICAL } from "../interfaces/constant";
+import { REMOVER_PATTERN } from "../regex";
 import { replaceFormulaInDice } from "../similarities";
 import { standardizeDice } from "../utils";
 import { calculator } from "./calculator";
@@ -102,7 +103,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 		.replaceAll("=<", "<=")
 		.trimStart();
 
-	dice = dice.replaceAll(DETECT_CRITICAL, "").trimEnd();
+	dice = dice.replaceAll(REMOVER_PATTERN.CRITICAL_BLOCK, "").trimEnd();
 
 	const explodingSuccess = normalizeExplodingSuccess(dice);
 	if (explodingSuccess) dice = explodingSuccess.dice;
