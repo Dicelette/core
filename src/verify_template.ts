@@ -10,6 +10,7 @@ import {
 	EmptyObjectError,
 	escapeRegex,
 	FormulaError,
+	getCachedRegex,
 	NoStatisticsError,
 	replaceExpByRandom,
 	replaceFormulaInDice,
@@ -37,7 +38,7 @@ export function evalStatsDice(
 	if (allStats && Object.keys(allStats).length > 0) {
 		const names = Object.keys(allStats);
 		for (const name of names) {
-			const regex = new RegExp(escapeRegex(name.standardize()), "gi");
+			const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
 			if (dice.standardize().match(regex)) {
 				const statValue = allStats[name];
 				dice = dice.standardize().replace(regex, statValue.toString()).trimEnd();
@@ -71,7 +72,7 @@ export function diceRandomParse(
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
 	for (const name of statNames) {
-		const regex = new RegExp(escapeRegex(name.standardize()), "gi");
+		const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
 		if (value.match(regex)) {
 			let max: undefined | number;
 			let min: undefined | number;
@@ -126,7 +127,7 @@ export function evalCombinaison(
 		//replace the stats in formula
 		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
-			const regex = new RegExp(statName.standardize(), "gi");
+			const regex = getCachedRegex(statName.standardize(), "gi");
 			formula = formula.replace(regex, value.toString());
 		}
 		try {
@@ -149,7 +150,7 @@ export function evalOneCombinaison(
 ) {
 	let formula = combinaison.standardize();
 	for (const [statName, value] of Object.entries(stats)) {
-		const regex = new RegExp(statName.standardize(), "gi");
+		const regex = getCachedRegex(statName.standardize(), "gi");
 		formula = formula.replace(regex, value.toString());
 	}
 	try {
@@ -293,7 +294,7 @@ export function testStatCombinaison(
 			const { max, min } = data;
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min, engine);
-			const regex = new RegExp(other, "gi");
+			const regex = getCachedRegex(other, "gi");
 			formula = formula.replace(regex, randomStatValue.toString());
 		}
 		try {
@@ -320,13 +321,9 @@ export function generateRandomStat(
 	min?: number,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
-	let randomStatValue = total + 1;
 	const random = new Random(engine || NumberGenerator.engines.nodeCrypto);
-	while (randomStatValue >= total || randomStatValue === 0) {
-		if (max && min) randomStatValue = randomInt(min, max, engine, random);
-		else if (max) randomStatValue = randomInt(1, max, engine, random);
-		else if (min) randomStatValue = randomInt(min, total, engine, random);
-		else randomStatValue = randomInt(1, total, engine, random);
-	}
-	return randomStatValue;
+	const effectiveMin = Math.max(min ?? 1, 1);
+	const effectiveMax = Math.min(max ?? (total - 1), total - 1);
+	if (effectiveMin > effectiveMax) return effectiveMin;
+	return randomInt(effectiveMin, effectiveMax, engine, random);
 }
