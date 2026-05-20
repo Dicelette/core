@@ -51,7 +51,7 @@ describe("passing", () => {
 		expect(result!.total).toBeLessThanOrEqual(100);
 		expect(result!.compare).toEqual({ sign: ">=", value: 80 });
 	});
-	it("Simple with inverted inferior sign (2d6=<5)", () => {
+	it("Simple with inverted inferior sign (1d100=<80)", () => {
 		const result = core.roll("1d100=<80");
 		expect(result).not.toBeUndefined();
 		expect(result!.dice).toEqual("1d100");

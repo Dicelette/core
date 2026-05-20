@@ -19,10 +19,38 @@ export function splitDiceComment(dice: string): {
 	dice: string;
 	comment: string | undefined;
 } {
-	const match = /\s+(#|\/{2}|\[|\/\*)(?<comment>.*)/i.exec(dice);
-	if (!match?.groups) return { dice: dice.trimEnd(), comment: undefined };
-	const comment = match.groups.comment.trim() || undefined;
-	return { dice: dice.slice(0, match.index).trimEnd(), comment };
+	for (let index = 0; index < dice.length; index++) {
+		if (!isWhitespace(dice[index])) continue;
+		let markerIndex = index;
+		while (markerIndex < dice.length && isWhitespace(dice[markerIndex])) markerIndex++;
+		const marker = getCommentMarker(dice, markerIndex);
+		if (!marker) {
+			index = markerIndex;
+			continue;
+		}
+		const comment = dice.slice(markerIndex + marker.length).trim() || undefined;
+		return { dice: dice.slice(0, index).trimEnd(), comment };
+	}
+	return { dice: dice.trimEnd(), comment: undefined };
+}
+
+function isWhitespace(character: string | undefined) {
+	return (
+		character === " " ||
+		character === "\t" ||
+		character === "\n" ||
+		character === "\r" ||
+		character === "\f" ||
+		character === "\v"
+	);
+}
+
+function getCommentMarker(dice: string, index: number): string | undefined {
+	if (dice.startsWith("//", index)) return "//";
+	if (dice.startsWith("/*", index)) return "/*";
+	const character = dice[index];
+	if (character === "#" || character === "[") return character;
+	return undefined;
 }
 
 /**
