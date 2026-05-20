@@ -1,6 +1,7 @@
 // Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
 import { evaluate } from "mathjs";
 import { FormulaError } from "../errors";
+import { normalizeComparisonAliases } from "../regex";
 import { findBestStatMatch } from "./similarity";
 
 function handleDiceAfterD(
@@ -133,11 +134,7 @@ export function replaceFormulaInDice(dice: string) {
  * @param dice {string}
  */
 function cleanedDice(dice: string) {
-	return dice
-		.replaceAll("+-", "-")
-		.replaceAll("--", "+")
-		.replaceAll("++", "+")
-		.replaceAll("=>", ">=")
-		.replaceAll("=<", "<=")
-		.trimEnd();
+	return normalizeComparisonAliases(
+		dice.replaceAll("+-", "-").replaceAll("--", "+").replaceAll("++", "+").trimEnd()
+	);
 }

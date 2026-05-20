@@ -48,6 +48,25 @@ it("should validate even if the stats are used multiple time", () => {
 	const expected = "1d20+0>5";
 	expect(result).toEqual(expected);
 });
+it("should replace aliased comparison signs in custom critical dice", () => {
+	const customCritical: CustomCritical = {
+		sign: ">",
+		value: "{{round($/2)}}",
+	};
+	const template: StatisticalTemplate = {
+		statistics: { stat1: { max: 10, min: 10 } },
+		diceType: "1d20=<20",
+		damage: {
+			piercing: "1d6+2",
+		},
+		customCritical: {
+			hardSuccess: customCritical,
+		},
+	};
+	const result = createCriticalCustom("1d20=<20", customCritical, template);
+	const expected = "1d20>5";
+	expect(result).toEqual(expected);
+});
 it("Testing with a simple diceType", () => {
 	const customCritical: CustomCritical = {
 		sign: "==",

@@ -1,8 +1,7 @@
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 import { type Modifier, type Sign, SortOrder } from "../interfaces";
-import { DETECT_CRITICAL } from "../interfaces/constant";
-import { REMOVER_PATTERN } from "../regex";
+import { normalizeComparisonAliases, REMOVER_PATTERN } from "../regex";
 import { replaceFormulaInDice } from "../similarities";
 import { standardizeDice } from "../utils";
 import { calculator } from "./calculator";
@@ -97,10 +96,8 @@ interface PreparedDice {
  * Prépare la chaîne de dés pour le traitement
  */
 export function prepareDice(diceInput: string): PreparedDice {
-	let dice = standardizeDice(replaceFormulaInDice(diceInput))
+	let dice = normalizeComparisonAliases(standardizeDice(replaceFormulaInDice(diceInput)))
 		.replace(/^\+/, "")
-		.replaceAll("=>", ">=")
-		.replaceAll("=<", "<=")
 		.trimStart();
 
 	dice = dice.replaceAll(REMOVER_PATTERN.CRITICAL_BLOCK, "").trimEnd();
@@ -108,19 +105,16 @@ export function prepareDice(diceInput: string): PreparedDice {
 	const explodingSuccess = normalizeExplodingSuccess(dice);
 	if (explodingSuccess) dice = explodingSuccess.dice;
 
-	let diceDisplay: string;
-	if (dice.includes(";")) {
-		const mainDice = dice.split(";")[0];
-		diceDisplay = explodingSuccess?.originalDice ?? mainDice;
-	} else {
-		diceDisplay = explodingSuccess?.originalDice ?? dice;
-	}
+	const sharedSeparatorIndex = dice.indexOf(";");
+	const isSharedRoll = sharedSeparatorIndex !== -1;
+	let diceDisplay =
+		explodingSuccess?.originalDice ??
+		(isSharedRoll ? dice.slice(0, sharedSeparatorIndex) : dice);
 
 	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
 	const isCurlyBulk = !!curlyBulkMatch;
 	const bulkContent = isCurlyBulk ? curlyBulkMatch![1] : "";
 
-	const isSharedRoll = dice.includes(";");
 	let isSharedCurly = false;
 
 	if (isSharedRoll && dice.match(/^\{.*;\s*.*\}$/)) {

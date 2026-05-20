@@ -26,12 +26,7 @@ import {
 } from "./dice";
 import { DiceTypeError } from "./errors";
 import { type Compare, type ComparedValue, type Resultat, SortOrder } from "./interfaces";
-import {
-	COMMENT_REGEX,
-	OPTIONAL_COMMENT,
-	SIGN_REGEX_SPACE,
-	SYMBOL_DICE,
-} from "./interfaces/constant";
+import { OPTIONAL_COMMENT, SIGN_REGEX_SPACE, SYMBOL_DICE } from "./interfaces/constant";
 import { splitDiceComment } from "./utils";
 
 /**

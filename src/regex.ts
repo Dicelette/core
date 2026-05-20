@@ -4,6 +4,7 @@ import { SIGN_REGEX } from "./interfaces/constant";
  * Get or create a cached regex pattern
  */
 const regexCache = new Map<string, RegExp>();
+const COMPARISON_ALIAS_REGEX = /=>|=</g;
 export const NORMALIZE_SINGLE_DICE = (str: string) => str.replace(/\b1d(\d+)/gi, "d$1");
 export const REMOVER_PATTERN = {
 	ASTERISK_ESCAPE: /\*/g,
@@ -13,6 +14,11 @@ export const REMOVER_PATTERN = {
 	STAT_COMMENTS_REMOVER: /%%.*%%/,
 	STAT_MATCHER: /\(?\$([\p{L}\p{M}_.][\p{L}\p{M}0-9_.]*)\)?/giu,
 } as const;
+
+export function normalizeComparisonAliases(dice: string): string {
+	if (!dice.includes("=>") && !dice.includes("=<")) return dice;
+	return dice.replace(COMPARISON_ALIAS_REGEX, (match) => (match === "=>" ? ">=" : "<="));
+}
 
 export function getCachedRegex(pattern: string, flags = ""): RegExp {
 	const key = `${pattern}|${flags}`;
@@ -26,8 +32,8 @@ export function getCachedRegex(pattern: string, flags = ""): RegExp {
 export function includeDiceType(dice: string, diceType?: string, userStats?: boolean) {
 	if (!diceType) return false;
 	// Normalize leading implicit single dice: treat `1d100` and `d100` as equivalent
-	diceType = NORMALIZE_SINGLE_DICE(diceType);
-	dice = NORMALIZE_SINGLE_DICE(dice);
+	diceType = normalizeComparisonAliases(NORMALIZE_SINGLE_DICE(diceType));
+	dice = normalizeComparisonAliases(NORMALIZE_SINGLE_DICE(dice));
 	if (userStats && diceType.includes("$")) {
 		//replace the $ in the diceType by a regex (like .+?)
 		diceType = diceType.replace("$", ".+?");

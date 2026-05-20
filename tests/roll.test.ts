@@ -51,6 +51,14 @@ describe("passing", () => {
 		expect(result!.total).toBeLessThanOrEqual(100);
 		expect(result!.compare).toEqual({ sign: ">=", value: 80 });
 	});
+	it("Simple with inverted inferior sign (2d6=<5)", () => {
+		const result = core.roll("1d100=<80");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("1d100");
+		expect(result!.total).toBeGreaterThanOrEqual(1);
+		expect(result!.total).toBeLessThanOrEqual(100);
+		expect(result!.compare).toEqual({ sign: "<=", value: 80 });
+	});
 	it("multiple dice", () => {
 		const result = core.roll("2#2d6");
 		expect(result).not.toBeUndefined();
