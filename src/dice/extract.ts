@@ -106,10 +106,10 @@ export function prepareDice(diceInput: string): PreparedDice {
 	if (explodingSuccess) dice = explodingSuccess.dice;
 
 	const sharedSeparatorIndex = dice.indexOf(";");
-	const isSharedRoll = sharedSeparatorIndex !== -1;
+	const hasSharedSeparator = sharedSeparatorIndex !== -1;
 	let diceDisplay =
 		explodingSuccess?.originalDice ??
-		(isSharedRoll ? dice.slice(0, sharedSeparatorIndex) : dice);
+		(hasSharedSeparator ? dice.slice(0, sharedSeparatorIndex) : dice);
 
 	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
 	const isCurlyBulk = !!curlyBulkMatch;
@@ -117,7 +117,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 
 	let isSharedCurly = false;
 
-	if (isSharedRoll && dice.match(/^\{.*;\s*.*\}$/)) {
+	if (hasSharedSeparator && dice.match(/^\{.*;\s*.*\}$/)) {
 		dice = dice.slice(1, -1);
 		isSharedCurly = true;
 		diceDisplay = diceDisplay.slice(1);
@@ -126,7 +126,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 	// Handle simple curly braces like {1d20+5} or {1d20+5>10}
 	// But NOT dice pool notation like {2d6>4} where the comparison is inside the braces WITHOUT modifiers
 	let isSimpleCurly = false;
-	if (!isCurlyBulk && !isSharedRoll && dice.match(/^\{.*\}$/)) {
+	if (!isCurlyBulk && !hasSharedSeparator && dice.match(/^\{.*\}$/)) {
 		// Check if this is a dice pool (comparison inside the braces WITHOUT modifiers)
 		const innerContent = dice.slice(1, -1); // Remove outer braces
 		const hasModifiers = innerContent.match(/[+\-*/%^]/);
@@ -145,7 +145,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 		dice,
 		diceDisplay,
 		explodingSuccess,
-		isSharedRoll,
+		isSharedRoll: hasSharedSeparator,
 		isSharedCurly,
 		isCurlyBulk,
 		bulkContent,

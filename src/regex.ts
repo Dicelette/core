@@ -16,7 +16,6 @@ export const REMOVER_PATTERN = {
 } as const;
 
 export function normalizeComparisonAliases(dice: string): string {
-	if (!dice.includes("=>") && !dice.includes("=<")) return dice;
 	return dice.replace(COMPARISON_ALIAS_REGEX, (match) => (match === "=>" ? ">=" : "<="));
 }
 
