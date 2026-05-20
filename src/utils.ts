@@ -34,22 +34,22 @@ export function splitDiceComment(dice: string): {
 	return { dice: dice.trimEnd(), comment: undefined };
 }
 
-function isWhitespace(character: string | undefined) {
+function isWhitespace(char: string | undefined) {
 	return (
-		character === " " ||
-		character === "\t" ||
-		character === "\n" ||
-		character === "\r" ||
-		character === "\f" ||
-		character === "\v"
+		char === " " ||
+		char === "\t" ||
+		char === "\n" ||
+		char === "\r" ||
+		char === "\f" ||
+		char === "\v"
 	);
 }
 
-function getCommentMarker(dice: string, index: number): string | undefined {
-	if (dice.startsWith("//", index)) return "//";
-	if (dice.startsWith("/*", index)) return "/*";
-	const character = dice[index];
-	if (character === "#" || character === "[") return character;
+function getCommentMarker(text: string, index: number): string | undefined {
+	if (text.startsWith("//", index)) return "//";
+	if (text.startsWith("/*", index)) return "/*";
+	const char = text[index];
+	if (char === "#" || char === "[") return char;
 	return undefined;
 }
 
