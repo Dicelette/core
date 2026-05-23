@@ -124,4 +124,9 @@ describe("Comments", () => {
 		expect(result).not.toBeUndefined();
 		expect(result?.comment).toEqual("hello world");
 	});
+	it("unicode spaces", () => {
+		const result = core.roll("2d6\u00A0# hello world");
+		expect(result).not.toBeUndefined();
+		expect(result?.comment).toEqual("hello world");
+	});
 });
