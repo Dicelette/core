@@ -4,7 +4,6 @@ import { type Engine, Random } from "random-js";
 import { DiceTypeError } from "./errors";
 import type { CustomCritical, StatisticalTemplate } from "./interfaces";
 import { SIGN_REGEX_SPACE } from "./interfaces/constant";
-import { normalizeComparisonAliases } from "./regex";
 import { diceTypeRandomParse } from "./verify_template";
 
 /**
@@ -15,36 +14,11 @@ import { diceTypeRandomParse } from "./verify_template";
  * splitDiceComment("1d6 # attack") // => { dice: "1d6", comment: "attack" }
  * splitDiceComment("2d8+3") // => { dice: "2d8+3", comment: undefined }
  */
-export function splitDiceComment(dice: string): {
-	dice: string;
-	comment: string | undefined;
-} {
-	for (let index = 0; index < dice.length; index++) {
-		if (!isWhitespace(dice[index])) continue;
-		let markerIndex = index;
-		while (markerIndex < dice.length && isWhitespace(dice[markerIndex])) markerIndex++;
-		const marker = getCommentMarker(dice, markerIndex);
-		if (!marker) {
-			index = markerIndex;
-			continue;
-		}
-		const comment = dice.slice(markerIndex + marker.length).trim() || undefined;
-		return { dice: dice.slice(0, index).trimEnd(), comment };
-	}
-	return { dice: dice.trimEnd(), comment: undefined };
-}
-
-const WHITESPACE_REGEX = /\s/u;
-function isWhitespace(char: string | undefined) {
-	return !!char && WHITESPACE_REGEX.test(char);
-}
-
-function getCommentMarker(text: string, index: number): string | undefined {
-	if (text.startsWith("//", index)) return "//";
-	if (text.startsWith("/*", index)) return "/*";
-	const char = text[index];
-	if (char === "#" || char === "[") return char;
-	return undefined;
+export function splitDiceComment(dice: string): { dice: string; comment: string | undefined } {
+	const match = /\s+(#|\/{2}|\[|\/\*)(?<comment>.*)/i.exec(dice);
+	if (!match?.groups) return { dice: dice.trimEnd(), comment: undefined };
+	const comment = match.groups.comment.trim() || undefined;
+	return { dice: dice.slice(0, match.index).trimEnd(), comment };
 }
 
 /**
@@ -131,9 +105,8 @@ export function createCriticalCustom(
 	template: StatisticalTemplate,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
-	const normalizedDice = normalizeComparisonAliases(dice);
-	const compareRegex = normalizedDice.match(SIGN_REGEX_SPACE);
-	let customDice = normalizedDice;
+	const compareRegex = dice.match(SIGN_REGEX_SPACE);
+	let customDice = dice;
 	const compareValue = diceTypeRandomParse(customCritical.value, template, engine);
 	if (compareValue.includes("$"))
 		throw new DiceTypeError(compareValue, "createCriticalCustom");

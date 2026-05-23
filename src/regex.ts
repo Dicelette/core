@@ -1,10 +1,16 @@
 import { SIGN_REGEX } from "./interfaces/constant";
 
 /**
+ * Maximum number of compiled patterns kept in the regex cache.
+ * Prevents unbounded growth on long-running processes that see many unique
+ * stat names (each escaped name produces a distinct cache key).
+ */
+const REGEX_CACHE_MAX = 500;
+
+/**
  * Get or create a cached regex pattern
  */
 const regexCache = new Map<string, RegExp>();
-const COMPARISON_ALIAS_REGEX = /=>|=</g;
 export const NORMALIZE_SINGLE_DICE = (str: string) => str.replace(/\b1d(\d+)/gi, "d$1");
 export const REMOVER_PATTERN = {
 	ASTERISK_ESCAPE: /\*/g,
@@ -15,14 +21,15 @@ export const REMOVER_PATTERN = {
 	STAT_MATCHER: /\(?\$([\p{L}\p{M}_.][\p{L}\p{M}0-9_.]*)\)?/giu,
 } as const;
 
-export function normalizeComparisonAliases(dice: string): string {
-	return dice.replace(COMPARISON_ALIAS_REGEX, (match) => (match === "=>" ? ">=" : "<="));
-}
-
 export function getCachedRegex(pattern: string, flags = ""): RegExp {
 	const key = `${pattern}|${flags}`;
 	let regex = regexCache.get(key);
 	if (!regex) {
+		if (regexCache.size >= REGEX_CACHE_MAX) {
+			// Map preserves insertion order — evict the oldest entry (FIFO).
+			const oldest = regexCache.keys().next().value;
+			if (oldest !== undefined) regexCache.delete(oldest);
+		}
 		regex = new RegExp(pattern, flags);
 		regexCache.set(key, regex);
 	}
@@ -31,8 +38,8 @@ export function getCachedRegex(pattern: string, flags = ""): RegExp {
 export function includeDiceType(dice: string, diceType?: string, userStats?: boolean) {
 	if (!diceType) return false;
 	// Normalize leading implicit single dice: treat `1d100` and `d100` as equivalent
-	diceType = normalizeComparisonAliases(NORMALIZE_SINGLE_DICE(diceType));
-	dice = normalizeComparisonAliases(NORMALIZE_SINGLE_DICE(dice));
+	diceType = NORMALIZE_SINGLE_DICE(diceType);
+	dice = NORMALIZE_SINGLE_DICE(dice);
 	if (userStats && diceType.includes("$")) {
 		//replace the $ in the diceType by a regex (like .+?)
 		diceType = diceType.replace("$", ".+?");

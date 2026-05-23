@@ -98,6 +98,8 @@ interface PreparedDice {
 export function prepareDice(diceInput: string): PreparedDice {
 	let dice = standardizeDice(replaceFormulaInDice(diceInput))
 		.replace(/^\+/, "")
+		.replaceAll("=>", ">=")
+		.replaceAll("=<", "<=")
 		.trimStart();
 
 	dice = dice.replaceAll(REMOVER_PATTERN.CRITICAL_BLOCK, "").trimEnd();

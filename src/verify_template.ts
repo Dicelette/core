@@ -10,6 +10,7 @@ import {
 	EmptyObjectError,
 	escapeRegex,
 	FormulaError,
+	getCachedRegex,
 	NoStatisticsError,
 	replaceExpByRandom,
 	replaceFormulaInDice,
@@ -35,12 +36,12 @@ export function evalStatsDice(
 ) {
 	let dice = testDice.trimEnd();
 	if (allStats && Object.keys(allStats).length > 0) {
+		dice = dice.standardize();
 		const names = Object.keys(allStats);
 		for (const name of names) {
-			const regex = new RegExp(escapeRegex(name.standardize()), "gi");
-			if (dice.standardize().match(regex)) {
-				const statValue = allStats[name];
-				dice = dice.standardize().replace(regex, statValue.toString()).trimEnd();
+			const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
+			if (dice.match(regex)) {
+				dice = dice.replace(regex, allStats[name].toString()).trimEnd();
 			}
 		}
 	}
@@ -71,8 +72,10 @@ export function diceRandomParse(
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
 	for (const name of statNames) {
-		const regex = new RegExp(escapeRegex(name.standardize()), "gi");
-		if (value.match(regex)) {
+		const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
+		// Match and replace against the accumulated `newDice`, not the original `value`,
+		// otherwise multi-stat formulas lose all but the last substitution.
+		if (newDice.match(regex)) {
 			let max: undefined | number;
 			let min: undefined | number;
 			const foundStat = template.statistics?.[name];
@@ -82,7 +85,7 @@ export function diceRandomParse(
 			}
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min, engine);
-			newDice = value.replace(regex, randomStatValue.toString());
+			newDice = newDice.replace(regex, randomStatValue.toString());
 		}
 	}
 	return replaceFormulaInDice(newDice);
@@ -126,7 +129,7 @@ export function evalCombinaison(
 		//replace the stats in formula
 		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
-			const regex = new RegExp(statName.standardize(), "gi");
+			const regex = getCachedRegex(statName.standardize(), "gi");
 			formula = formula.replace(regex, value.toString());
 		}
 		try {
@@ -149,7 +152,7 @@ export function evalOneCombinaison(
 ) {
 	let formula = combinaison.standardize();
 	for (const [statName, value] of Object.entries(stats)) {
-		const regex = new RegExp(statName.standardize(), "gi");
+		const regex = getCachedRegex(statName.standardize(), "gi");
 		formula = formula.replace(regex, value.toString());
 	}
 	try {
@@ -247,9 +250,10 @@ export function testDiceRegistered(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	if (!template.damage) return;
-	if (Object.keys(template.damage).length === 0) throw new EmptyObjectError();
-	if (Object.keys(template.damage).length > 25) throw new TooManyDice();
-	for (const [name, dice] of Object.entries(template.damage)) {
+	const damageEntries = Object.entries(template.damage);
+	if (damageEntries.length === 0) throw new EmptyObjectError();
+	if (damageEntries.length > 25) throw new TooManyDice();
+	for (const [name, dice] of damageEntries) {
 		if (!dice) continue;
 		const diceReplaced = replaceExpByRandom(dice);
 		const randomDiceParsed = diceRandomParse(diceReplaced, template, engine);
@@ -273,19 +277,15 @@ export function testStatCombinaison(
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
 	if (!template.statistics) return;
-	const onlycombinaisonStats = Object.fromEntries(
-		Object.entries(template.statistics).filter(
-			([_, value]) => value.combinaison !== undefined
-		)
-	);
-	const allOtherStats = Object.fromEntries(
-		Object.entries(template.statistics).filter(([_, value]) => !value.combinaison)
-	);
+	// Single pass: partition stats into combinaison vs other in one iteration.
+	const onlycombinaisonStats: typeof template.statistics = {};
+	const allOtherStats: typeof template.statistics = {};
+	for (const [k, v] of Object.entries(template.statistics)) {
+		if (v.combinaison !== undefined) onlycombinaisonStats[k] = v;
+		else allOtherStats[k] = v;
+	}
 	if (Object.keys(onlycombinaisonStats).length === 0) return;
-	const allStats = Object.keys(template.statistics).filter(
-		(stat) => !template.statistics![stat].combinaison
-	);
-	if (allStats.length === 0) throw new NoStatisticsError();
+	if (Object.keys(allOtherStats).length === 0) throw new NoStatisticsError();
 	const error = [];
 	for (const [stat, value] of Object.entries(onlycombinaisonStats)) {
 		let formula = value.combinaison as string;
@@ -293,7 +293,7 @@ export function testStatCombinaison(
 			const { max, min } = data;
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min, engine);
-			const regex = new RegExp(other, "gi");
+			const regex = getCachedRegex(other, "gi");
 			formula = formula.replace(regex, randomStatValue.toString());
 		}
 		try {
@@ -320,13 +320,9 @@ export function generateRandomStat(
 	min?: number,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
-	let randomStatValue = total + 1;
 	const random = new Random(engine || NumberGenerator.engines.nodeCrypto);
-	while (randomStatValue >= total || randomStatValue === 0) {
-		if (max && min) randomStatValue = randomInt(min, max, engine, random);
-		else if (max) randomStatValue = randomInt(1, max, engine, random);
-		else if (min) randomStatValue = randomInt(min, total, engine, random);
-		else randomStatValue = randomInt(1, total, engine, random);
-	}
-	return randomStatValue;
+	const effectiveMin = Math.max(min ?? 1, 1);
+	const effectiveMax = Math.min(max ?? (total - 1), total - 1);
+	if (effectiveMin > effectiveMax) return effectiveMin;
+	return randomInt(effectiveMin, effectiveMax, engine, random);
 }

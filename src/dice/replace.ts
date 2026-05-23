@@ -1,6 +1,10 @@
 import { SortOrder } from "../interfaces";
 import { COMMENT_REGEX, SYMBOL_DICE } from "../interfaces/constant";
 
+const PARENTHESIS_REGEX = /d\((\d+)\)/g;
+const BRACKET_COMMENT_REGEX = /\[(?<comments>.*?)\]/;
+const OPTIONAL_COMMENT_REGEX = /\s+(#|\/\/)(?<comment>.*)/;
+
 export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
 	const d = dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
 	if (sortOrder) return sortDice(d, sortOrder);
@@ -17,27 +21,23 @@ export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
 function sortDice(dice: string, sortOrder: SortOrder) {
 	if (sortOrder === SortOrder.None) return dice;
 	const dices = dice.split(/; ?/);
+	// Pre-parse totals once; avoids parseInt inside the O(n log n) comparator
+	const decorated = dices.map((d) => ({
+		d,
+		v: Number.parseInt(d.split("= ")[1], 10) || 0,
+	}));
 	if (sortOrder === SortOrder.Ascending) {
-		dices.sort((a, b) => {
-			const totalA = Number.parseInt(a.split("= ")[1], 10) || 0;
-			const totalB = Number.parseInt(b.split("= ")[1], 10) || 0;
-			return totalB - totalA;
-		});
+		decorated.sort((a, b) => b.v - a.v);
 	} else if (sortOrder === SortOrder.Descending) {
-		dices.sort((a, b) => {
-			const totalA = Number.parseInt(a.split("= ")[1], 10) || 0;
-			const totalB = Number.parseInt(b.split("= ")[1], 10) || 0;
-			return totalA - totalB;
-		});
+		decorated.sort((a, b) => a.v - b.v);
 	}
-	return dices.join("; ");
+	return decorated.map((x) => x.d).join("; ");
 }
 
 export function fixParenthesis(dice: string) {
 	//dice with like 1d(20) are not valid, we need to remove the parenthesis
 	//warning: the 1d(20+5) is valid and should not be changed
-	const parenthesisRegex = /d\((\d+)\)/g;
-	return dice.replaceAll(parenthesisRegex, (_match, p1) => `d${p1}`);
+	return dice.replaceAll(PARENTHESIS_REGEX, (_match, p1) => `d${p1}`);
 }
 
 export function replaceText(element: string, total: number, dice: string) {
@@ -51,17 +51,15 @@ export function replaceText(element: string, total: number, dice: string) {
 }
 
 export function formatComment(dice: string) {
-	const commentsRegex = /\[(?<comments>.*?)\]/;
-	const commentsMatch = commentsRegex.exec(dice);
+	const commentsMatch = BRACKET_COMMENT_REGEX.exec(dice);
 	const comments = commentsMatch?.groups?.comments
 		? `${commentsMatch.groups.comments}`
 		: "";
 
 	// Search for optional comments (# or // style) only AFTER removing bracket comments
 	// to avoid conflicts with parentheses inside bracket comments
-	const diceWithoutBrackets = dice.replace(commentsRegex, "");
-	const optionalCommentsRegex = /\s+(#|\/\/)(?<comment>.*)/;
-	const optionalComments = optionalCommentsRegex.exec(diceWithoutBrackets);
+	const diceWithoutBrackets = dice.replace(BRACKET_COMMENT_REGEX, "");
+	const optionalComments = OPTIONAL_COMMENT_REGEX.exec(diceWithoutBrackets);
 	const optional = optionalComments?.groups?.comment
 		? `${optionalComments.groups.comment.trim()}`
 		: "";
