@@ -15,7 +15,7 @@ import { diceTypeRandomParse } from "./verify_template";
  * splitDiceComment("2d8+3") // => { dice: "2d8+3", comment: undefined }
  */
 export function splitDiceComment(dice: string): { dice: string; comment: string | undefined } {
-	const match = /\s+(#|\/{2}|\[|\/\*)(?<comment>.*)/i.exec(dice);
+	const match = /\s(#|\/{2}|\[|\/\*)(?<comment>.*)/i.exec(dice);
 	if (!match?.groups) return { dice: dice.trimEnd(), comment: undefined };
 	const comment = match.groups.comment.trim() || undefined;
 	return { dice: dice.slice(0, match.index).trimEnd(), comment };
