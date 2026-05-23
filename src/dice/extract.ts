@@ -1,7 +1,7 @@
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 import { type Modifier, type Sign, SortOrder } from "../interfaces";
-import { normalizeComparisonAliases, REMOVER_PATTERN } from "../regex";
+import { REMOVER_PATTERN } from "../regex";
 import { replaceFormulaInDice } from "../similarities";
 import { standardizeDice } from "../utils";
 import { calculator } from "./calculator";
@@ -96,7 +96,7 @@ interface PreparedDice {
  * Prépare la chaîne de dés pour le traitement
  */
 export function prepareDice(diceInput: string): PreparedDice {
-	let dice = normalizeComparisonAliases(standardizeDice(replaceFormulaInDice(diceInput)))
+	let dice = standardizeDice(replaceFormulaInDice(diceInput))
 		.replace(/^\+/, "")
 		.trimStart();
 
