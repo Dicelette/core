@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - esbuild
+
+overrides:
+  mathjs@>=13.1.0 <15.2.0: '>=15.2.0'
+  mathjs@>=13.1.1 <15.2.0: '>=15.2.0'

@@ -1,6 +1,13 @@
 import { SIGN_REGEX } from "./interfaces/constant";
 
 /**
+ * Maximum number of compiled patterns kept in the regex cache.
+ * Prevents unbounded growth on long-running processes that see many unique
+ * stat names (each escaped name produces a distinct cache key).
+ */
+const REGEX_CACHE_MAX = 500;
+
+/**
  * Get or create a cached regex pattern
  */
 const regexCache = new Map<string, RegExp>();
@@ -18,6 +25,11 @@ export function getCachedRegex(pattern: string, flags = ""): RegExp {
 	const key = `${pattern}|${flags}`;
 	let regex = regexCache.get(key);
 	if (!regex) {
+		if (regexCache.size >= REGEX_CACHE_MAX) {
+			// Map preserves insertion order — evict the oldest entry (FIFO).
+			const oldest = regexCache.keys().next().value;
+			if (oldest !== undefined) regexCache.delete(oldest);
+		}
 		regex = new RegExp(pattern, flags);
 		regexCache.set(key, regex);
 	}

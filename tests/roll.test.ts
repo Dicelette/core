@@ -51,6 +51,14 @@ describe("passing", () => {
 		expect(result!.total).toBeLessThanOrEqual(100);
 		expect(result!.compare).toEqual({ sign: ">=", value: 80 });
 	});
+	it("Simple with inverted inferior sign (1d100=<80)", () => {
+		const result = core.roll("1d100=<80");
+		expect(result).not.toBeUndefined();
+		expect(result!.dice).toEqual("1d100");
+		expect(result!.total).toBeGreaterThanOrEqual(1);
+		expect(result!.total).toBeLessThanOrEqual(100);
+		expect(result!.compare).toEqual({ sign: "<=", value: 80 });
+	});
 	it("multiple dice", () => {
 		const result = core.roll("2#2d6");
 		expect(result).not.toBeUndefined();
@@ -113,6 +121,11 @@ describe("Shared results", () => {
 describe("Comments", () => {
 	it("simple", () => {
 		const result = core.roll("2d6 # hello world");
+		expect(result).not.toBeUndefined();
+		expect(result?.comment).toEqual("hello world");
+	});
+	it("unicode spaces", () => {
+		const result = core.roll("2d6\u00A0# hello world");
 		expect(result).not.toBeUndefined();
 		expect(result?.comment).toEqual("hello world");
 	});

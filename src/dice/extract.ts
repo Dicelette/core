@@ -1,7 +1,6 @@
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 import { type Modifier, type Sign, SortOrder } from "../interfaces";
-import { DETECT_CRITICAL } from "../interfaces/constant";
 import { REMOVER_PATTERN } from "../regex";
 import { replaceFormulaInDice } from "../similarities";
 import { standardizeDice } from "../utils";
@@ -108,22 +107,19 @@ export function prepareDice(diceInput: string): PreparedDice {
 	const explodingSuccess = normalizeExplodingSuccess(dice);
 	if (explodingSuccess) dice = explodingSuccess.dice;
 
-	let diceDisplay: string;
-	if (dice.includes(";")) {
-		const mainDice = dice.split(";")[0];
-		diceDisplay = explodingSuccess?.originalDice ?? mainDice;
-	} else {
-		diceDisplay = explodingSuccess?.originalDice ?? dice;
-	}
+	const sharedSeparatorIndex = dice.indexOf(";");
+	const hasSharedSeparator = sharedSeparatorIndex !== -1;
+	let diceDisplay =
+		explodingSuccess?.originalDice ??
+		(hasSharedSeparator ? dice.slice(0, sharedSeparatorIndex) : dice);
 
 	const curlyBulkMatch = dice.match(/^\{(\d+#.*)\}$/);
 	const isCurlyBulk = !!curlyBulkMatch;
 	const bulkContent = isCurlyBulk ? curlyBulkMatch![1] : "";
 
-	const isSharedRoll = dice.includes(";");
 	let isSharedCurly = false;
 
-	if (isSharedRoll && dice.match(/^\{.*;\s*.*\}$/)) {
+	if (hasSharedSeparator && dice.match(/^\{.*;\s*.*\}$/)) {
 		dice = dice.slice(1, -1);
 		isSharedCurly = true;
 		diceDisplay = diceDisplay.slice(1);
@@ -132,7 +128,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 	// Handle simple curly braces like {1d20+5} or {1d20+5>10}
 	// But NOT dice pool notation like {2d6>4} where the comparison is inside the braces WITHOUT modifiers
 	let isSimpleCurly = false;
-	if (!isCurlyBulk && !isSharedRoll && dice.match(/^\{.*\}$/)) {
+	if (!isCurlyBulk && !hasSharedSeparator && dice.match(/^\{.*\}$/)) {
 		// Check if this is a dice pool (comparison inside the braces WITHOUT modifiers)
 		const innerContent = dice.slice(1, -1); // Remove outer braces
 		const hasModifiers = innerContent.match(/[+\-*/%^]/);
@@ -151,7 +147,7 @@ export function prepareDice(diceInput: string): PreparedDice {
 		dice,
 		diceDisplay,
 		explodingSuccess,
-		isSharedRoll,
+		isSharedRoll: hasSharedSeparator,
 		isSharedCurly,
 		isCurlyBulk,
 		bulkContent,

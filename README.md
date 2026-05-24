@@ -123,9 +123,6 @@ Note: when a parameter `engine` is shown it usually defaults to the `NumberGener
 
 ### Utility functions (`src/utils.ts`)
 
-#### Function: escapeRegex(string: string): string
-- Escape input string to be used in a RegExp.
-
 #### Function: standardizeDice(dice: string): string
 - Standardizes dice notation while preserving bracketed text.
 
