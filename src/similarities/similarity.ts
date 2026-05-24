@@ -22,6 +22,9 @@ export function calculateSimilarity(str1: string, str2: string): number {
  * Uses two rolling rows instead of a full matrix: O(min(m,n)) space instead of O(m×n).
  */
 export function levenshteinDistance(str1: string, str2: string): number {
+	if (str1.length > str2.length) {
+		[str1, str2] = [str2, str1];
+	}
 	let prev = Array.from({ length: str1.length + 1 }, (_, i) => i);
 	let curr = new Array<number>(str1.length + 1);
 	for (let j = 1; j <= str2.length; j++) {
