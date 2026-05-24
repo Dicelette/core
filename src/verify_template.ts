@@ -10,6 +10,7 @@ import {
 	EmptyObjectError,
 	FormulaError,
 	getCachedRegex,
+	MaxGreater,
 	NoStatisticsError,
 	replaceExpByRandom,
 	replaceFormulaInDice,
@@ -319,9 +320,10 @@ export function generateRandomStat(
 	min?: number,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
 ) {
+	if (total <= 1) throw new RangeError(`total must be greater than 1, got ${total}`);
 	const random = new Random(engine || NumberGenerator.engines.nodeCrypto);
 	const effectiveMin = Math.max(min ?? 1, 1);
 	const effectiveMax = Math.min(max ?? total - 1, total - 1);
-	if (effectiveMin > effectiveMax) return effectiveMin;
+	if (effectiveMin > effectiveMax) throw new MaxGreater(effectiveMin, effectiveMax);
 	return randomInt(effectiveMin, effectiveMax, engine, random);
 }
