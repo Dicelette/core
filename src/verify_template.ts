@@ -8,7 +8,6 @@ import {
 	DETECT_CRITICAL,
 	DiceTypeError,
 	EmptyObjectError,
-	escapeRegex,
 	FormulaError,
 	getCachedRegex,
 	NoStatisticsError,
@@ -39,7 +38,7 @@ export function evalStatsDice(
 		dice = dice.standardize();
 		const names = Object.keys(allStats);
 		for (const name of names) {
-			const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
+			const regex = getCachedRegex(name.standardize().escapeRegex(), "gi");
 			if (dice.match(regex)) {
 				dice = dice.replace(regex, allStats[name].toString()).trimEnd();
 			}
@@ -72,7 +71,7 @@ export function diceRandomParse(
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
 	for (const name of statNames) {
-		const regex = getCachedRegex(escapeRegex(name.standardize()), "gi");
+		const regex = getCachedRegex(name.standardize().escapeRegex(), "gi");
 		// Match and replace against the accumulated `newDice`, not the original `value`,
 		// otherwise multi-stat formulas lose all but the last substitution.
 		if (newDice.match(regex)) {
@@ -129,7 +128,7 @@ export function evalCombinaison(
 		//replace the stats in formula
 		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
-			const regex = getCachedRegex(statName.standardize(), "gi");
+			const regex = getCachedRegex(statName.standardize().escapeRegex(), "gi");
 			formula = formula.replace(regex, value.toString());
 		}
 		try {
@@ -152,7 +151,7 @@ export function evalOneCombinaison(
 ) {
 	let formula = combinaison.standardize();
 	for (const [statName, value] of Object.entries(stats)) {
-		const regex = getCachedRegex(statName.standardize(), "gi");
+		const regex = getCachedRegex(statName.standardize().escapeRegex(), "gi");
 		formula = formula.replace(regex, value.toString());
 	}
 	try {
@@ -322,7 +321,7 @@ export function generateRandomStat(
 ) {
 	const random = new Random(engine || NumberGenerator.engines.nodeCrypto);
 	const effectiveMin = Math.max(min ?? 1, 1);
-	const effectiveMax = Math.min(max ?? (total - 1), total - 1);
+	const effectiveMax = Math.min(max ?? total - 1, total - 1);
 	if (effectiveMin > effectiveMax) return effectiveMin;
 	return randomInt(effectiveMin, effectiveMax, engine, random);
 }

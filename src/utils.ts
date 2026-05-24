@@ -14,19 +14,14 @@ import { diceTypeRandomParse } from "./verify_template";
  * splitDiceComment("1d6 # attack") // => { dice: "1d6", comment: "attack" }
  * splitDiceComment("2d8+3") // => { dice: "2d8+3", comment: undefined }
  */
-export function splitDiceComment(dice: string): { dice: string; comment: string | undefined } {
+export function splitDiceComment(dice: string): {
+	dice: string;
+	comment: string | undefined;
+} {
 	const match = /\s(#|\/{2}|\[|\/\*)(?<comment>.*)/i.exec(dice);
 	if (!match?.groups) return { dice: dice.trimEnd(), comment: undefined };
 	const comment = match.groups.comment.trim() || undefined;
 	return { dice: dice.slice(0, match.index).trimEnd(), comment };
-}
-
-/**
- * Escape regex string
- * @param string {string}
- */
-export function escapeRegex(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
