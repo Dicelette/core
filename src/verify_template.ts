@@ -175,7 +175,7 @@ function convertNumber(number: string | number | undefined) {
 /**
  * Parse the provided JSON and verify each field to check if everything could work when rolling
  * @param {unknown} template
- * @param {boolean} verify - If true, will roll the dices to check if everything is valid
+ * @param verify - If true, will roll the dices to check if everything is valid
  * @param engine
  * @returns {StatisticalTemplate}
  */
