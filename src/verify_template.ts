@@ -292,7 +292,7 @@ export function testStatCombinaison(
 			const { max, min } = data;
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min, engine);
-			const regex = getCachedRegex(other, "gi");
+			const regex = getCachedRegex(other.escapeRegex(), "gi");
 			formula = formula.replace(regex, randomStatValue.toString());
 		}
 		try {
