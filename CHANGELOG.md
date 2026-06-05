@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.28.4](https://github.com/Dicelette/core/compare/v1.28.2...v1.28.4) (2026-06-05)
+
+
+### Bug Fixes
+
+* **bulk:** add validation for bulk dice input ([119535f](https://github.com/Dicelette/core/commit/119535f90bcabd271e340ef425d1cc70de8d2ced))
+
 ## [1.28.3](https://github.com/Dicelette/core/compare/v1.28.2...v1.28.3) (2026-04-28)
 
 
