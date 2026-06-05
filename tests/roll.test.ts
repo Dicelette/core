@@ -130,3 +130,15 @@ describe("Comments", () => {
 		expect(result?.comment).toEqual("hello world");
 	});
 });
+
+describe("Invalid rolls", () => {
+	it("simple", () => {
+		expect(() => core.roll("2d")).toThrow();
+	});
+	it("With text", () => {
+		expect(() => core.roll("coucou 2#d6")).toThrow();
+	});
+	it("With text, shared", () => {
+		expect(() => core.roll("coucou d6")).toThrow();
+	});
+});

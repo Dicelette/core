@@ -1,3 +1,4 @@
+import { DiceTypeError } from "../errors";
 import { SortOrder } from "../interfaces";
 import { COMMENT_REGEX, SYMBOL_DICE } from "../interfaces/constant";
 
@@ -6,8 +7,9 @@ const BRACKET_COMMENT_REGEX = /\[(?<comments>.*?)\]/;
 const OPTIONAL_COMMENT_REGEX = /\s+(#|\/\/)(?<comment>.*)/;
 
 export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
-	const d = dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
-	if (sortOrder) return sortDice(d, sortOrder);
+	let d = dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
+	if (sortOrder) d = sortDice(d, sortOrder);
+	if (!d.length) throw new DiceTypeError(dice, "no_roll_result");
 	return d;
 }
 
