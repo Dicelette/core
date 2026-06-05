@@ -216,7 +216,7 @@ export function verifyTemplateValue(
 			engine
 		);
 		const rolled = roll(cleanedDice, engine);
-		if (!rolled) throw new DiceTypeError(cleanedDice, "no_roll_result", "no roll result");
+		if (!rolled) throw new DiceTypeError(cleanedDice, "roll");
 	}
 	if (statistiqueTemplate.customCritical) {
 		if (!statistiqueTemplate.diceType) {
@@ -259,7 +259,7 @@ export function testDiceRegistered(
 		const randomDiceParsed = diceRandomParse(diceReplaced, template, engine);
 		try {
 			const rolled = roll(randomDiceParsed, engine);
-			if (!rolled) throw new DiceTypeError(name, "no_roll_result", dice);
+			if (!rolled) throw new DiceTypeError(name, "testDiceRegistered", dice);
 		} catch (error) {
 			console.error(error);
 			throw new DiceTypeError(name, "testDiceRegistered", error);
