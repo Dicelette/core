@@ -139,6 +139,6 @@ describe("Invalid rolls", () => {
 		expect(() => core.roll("coucou 2#d6")).toThrow();
 	});
 	it("With text, shared", () => {
-		expect(() => core.roll("coucou d6")).toThrow();
+		expect(() => core.roll("coucou d6;&+5")).toThrow();
 	});
 });
