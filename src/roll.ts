@@ -166,6 +166,8 @@ export function roll(
 				prepared.explodingSuccess.normalizedSegment,
 				prepared.explodingSuccess.originalSegment
 			);
+		
+		if (!resultOutput.length) throw new DiceTypeError(dice, "no_roll_result", "no roll result")
 
 		return {
 			dice: prepared.isSimpleCurly ? finalDiceDisplay : prepared.diceDisplay,

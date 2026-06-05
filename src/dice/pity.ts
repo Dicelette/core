@@ -45,6 +45,7 @@ export function handlePitySystem(
 			isFail = evaluate(`${res.total}${compare.sign}${compare.value}`);
 		}
 	}
+	if (!res?.result.length) throw new DiceTypeError(dice, "no_roll_result", "no roll result");
 
 	return { rerollCount, result: res };
 }

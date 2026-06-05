@@ -94,7 +94,7 @@ export function handleBulkRolls(
 
 	const finalDice = isCurlyBulk ? `{${diceToRoll}}` : diceToRoll;
 	const modificator = getModifier(dice);
-
+	
 	return {
 		dice: finalDice,
 		result: replaceUnwantedText(roller.output, sort),
@@ -247,6 +247,8 @@ function handleBulkRollsWithComparison(
 
 	const modificator = getModifier(diceDisplay);
 
+	if (!resultOutput.length) throw new DiceTypeError(diceToRoll, "no_roll_result", "no roll result");
+	
 	return {
 		dice: explodingSuccess ? diceDisplay : finalDice,
 		result: resultOutput,
