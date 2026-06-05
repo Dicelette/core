@@ -46,7 +46,7 @@ export function handlePitySystem(
 		}
 	}
 
-	if (!res?.result.length) throw new DiceTypeError(dice, "roll", "no_roll_result");
+	if (!res?.result.length) throw new DiceTypeError(dice, "empty_dice");
 
 	return { rerollCount, result: res };
 }

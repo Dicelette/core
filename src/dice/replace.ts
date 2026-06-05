@@ -9,7 +9,7 @@ const OPTIONAL_COMMENT_REGEX = /\s+(#|\/\/)(?<comment>.*)/;
 export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
 	let d = dice.replaceAll(/[{}]/g, "").replaceAll(/s[ad]/gi, "");
 	if (sortOrder) d = sortDice(d, sortOrder);
-	if (!d.length) throw new DiceTypeError(dice, "no_roll_result");
+	if (!d.length) throw new DiceTypeError(dice, "empty_dice");
 	return d;
 }
 
