@@ -4,7 +4,7 @@ import type { Engine } from "random-js";
 import { DiceTypeError } from "../errors";
 import type { Compare, ComparedValue, Resultat, SortOrder } from "../interfaces";
 import { SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
-import { splitDiceComment } from "../utils";
+import { isNumber, splitDiceComment } from "../utils";
 import { isTrivialComparison } from "./compare";
 import {
 	countExplodingSuccesses,
@@ -35,7 +35,13 @@ export function handleBulkRolls(
 ): Resultat {
 	const bulkProcessContent = isCurlyBulk ? bulkContent : dice;
 	const diceArray = bulkProcessContent.split("#");
+	if (!isNumber(diceArray[0])) {
+		throw new DiceTypeError(dice, "bulk_number");
+	}
 	const numberOfDice = Number.parseInt(diceArray[0], 10);
+	if (numberOfDice <= 0) {
+		throw new DiceTypeError(dice, "bulk_zero");
+	}
 	const { dice: diceToRollBase, comment: comments } = splitDiceComment(diceArray[1]);
 	let diceToRoll = diceToRollBase;
 
