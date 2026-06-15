@@ -1,6 +1,14 @@
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - esbuild@0.28.1
+
 onlyBuiltDependencies:
   - esbuild
 
 overrides:
+  esbuild@>=0.17.0 <0.28.1: ^0.28.1
+  esbuild@>=0.27.3 <0.28.1: ^0.28.1
   mathjs@>=13.1.0 <15.2.0: '>=15.2.0'
   mathjs@>=13.1.1 <15.2.0: '>=15.2.0'
