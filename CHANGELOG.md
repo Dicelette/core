@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.0](https://github.com/Dicelette/core/compare/v1.28.5...v1.29.0) (2026-06-20)
+
+
+### Features
+
+* add custom formula validation function ([a30933c](https://github.com/Dicelette/core/commit/a30933cb2f13a22912a39c7c1c8224210e5c3911))
+
 ## [1.28.5](https://github.com/Dicelette/core/compare/v1.28.4...v1.28.5) (2026-06-15)
 
 ## [1.28.4](https://github.com/Dicelette/core/compare/v1.28.2...v1.28.4) (2026-06-05)
