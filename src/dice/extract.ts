@@ -1,7 +1,6 @@
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
-import { type Modifier, type Sign, SortOrder } from "../interfaces";
-import { REMOVER_PATTERN } from "../regex";
+import { type Modifier, REMOVER_PATTERN, type Sign, SortOrder } from "../interfaces";
 import { replaceFormulaInDice } from "../similarities";
 import { standardizeDice } from "../utils";
 import { calculator } from "./calculator";
