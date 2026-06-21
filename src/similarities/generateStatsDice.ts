@@ -1,9 +1,8 @@
 // Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
-import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import { FormulaError } from "../errors";
+import { roll } from "../roll";
 import { findBestStatMatch } from "./similarity";
-import {roll} from "../roll";
 
 function handleDiceAfterD(
 	tokenStd: string,
@@ -115,9 +114,8 @@ function rollDiceInFormula(formulae: string): string {
 	return formulae.replace(diceNotation, (match) => {
 		const key = match.toLowerCase();
 		if (!diceMap.has(key)) {
-			const rollResult = roll(match)
-			if (rollResult?.total)
-			diceMap.set(key, rollResult.total.toString());
+			const rollResult = roll(match);
+			if (rollResult?.total) diceMap.set(key, rollResult.total.toString());
 		}
 		return diceMap.get(key)!;
 	});
