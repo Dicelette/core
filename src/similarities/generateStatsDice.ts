@@ -1,7 +1,9 @@
 // Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
+import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import { FormulaError } from "../errors";
 import { findBestStatMatch } from "./similarity";
+import {roll} from "../roll";
 
 function handleDiceAfterD(
 	tokenStd: string,
@@ -101,6 +103,27 @@ export function generateStatsDice(
 }
 
 /**
+ * Rolls any dice notation (e.g. `1d6`, `2d10`, `d20`) found in a formula string and
+ * replaces each unique dice expression with its numeric result before mathjs evaluation.
+ * Each distinct dice type is rolled once; repeated occurrences reuse the same value.
+ */
+function rollDiceInFormula(formulae: string): string {
+	const diceNotation = /\b\d*d\d+\b/gi;
+	if (!diceNotation.test(formulae)) return formulae;
+	diceNotation.lastIndex = 0;
+	const diceMap = new Map<string, string>();
+	return formulae.replace(diceNotation, (match) => {
+		const key = match.toLowerCase();
+		if (!diceMap.has(key)) {
+			const rollResult = roll(match)
+			if (rollResult?.total)
+			diceMap.set(key, rollResult.total.toString());
+		}
+		return diceMap.get(key)!;
+	});
+}
+
+/**
  * Replace the {{}} in the dice string and evaluate the interior if any
  * @param dice {string}
  */
@@ -114,7 +137,8 @@ export function replaceFormulaInDice(dice: string) {
 		if (match.groups?.formula) {
 			const formulae = match.groups.formula.replaceAll("{{", "").replaceAll("}}", "");
 			try {
-				const result = evaluate(formulae);
+				const formulaeWithRolls = rollDiceInFormula(formulae);
+				const result = evaluate(formulaeWithRolls);
 				modifiedDice = modifiedDice.replace(match.groups.formula, result.toString());
 			} catch (error) {
 				throw new FormulaError(match.groups.formula, "replaceFormulasInDice", error);
