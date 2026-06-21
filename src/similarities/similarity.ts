@@ -3,8 +3,7 @@
  */
 
 import { DiceTypeError } from "../errors";
-import { MIN_THRESHOLD_MATCH } from "../interfaces";
-import { REMOVER_PATTERN } from "../regex";
+import { MIN_THRESHOLD_MATCH, REMOVER_PATTERN } from "../interfaces";
 
 /**
  * Calculates the similarity between two strings as a value between 0 and 1.

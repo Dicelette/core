@@ -1,5 +1,5 @@
 import { evaluate } from "mathjs";
-import {REMOVER_PATTERN} from "./regex";
+import { REMOVER_PATTERN } from "./interfaces";
 
 export type FormulaValidationResult = { ok: true } | { ok: false; error: string };
 
