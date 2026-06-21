@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.1](https://github.com/Dicelette/core/compare/v1.29.0...v1.29.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* enhance dice notation handling in formulas with new evaluation tests ([0d2c1ff](https://github.com/Dicelette/core/commit/0d2c1ffd2c10c65b7c1be120ab32c981c8a0f7ad))
+
 ## [1.29.0](https://github.com/Dicelette/core/compare/v1.28.5...v1.29.0) (2026-06-20)
 
 
