@@ -43,7 +43,7 @@ export function handleBulkRolls(
 		throw new DiceTypeError(dice, "bulk_zero");
 	}
 	if (numberOfDice > MAX_BULK_DICE) {
-		throw new DiceTypeError(dice, "bulk_max");
+		throw new DiceTypeError(dice, "bulk_max", { max: MAX_BULK_DICE });
 	}
 	const { dice: diceToRollBase, comment: comments } = splitDiceComment(diceArray[1]);
 	let diceToRoll = diceToRollBase;
