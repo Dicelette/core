@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import * as core from "../src";
 
 const dices = ["2d6!>4", "2d6!<5", "2d6!>=4", "2d6!<=4", "2d6!<>4"];

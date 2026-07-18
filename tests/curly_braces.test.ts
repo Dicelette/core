@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import * as core from "../src";
 
 describe("Simple dice with curly braces", () => {
