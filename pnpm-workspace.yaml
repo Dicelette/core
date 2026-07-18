@@ -6,7 +6,8 @@ minimumReleaseAgeExclude:
 
 onlyBuiltDependencies:
   - esbuild
-
+enablePrePostScripts: true
+minimumReleaseAge: 0
 overrides:
   esbuild@>=0.17.0 <0.28.1: ^0.28.1
   esbuild@>=0.27.3 <0.28.1: ^0.28.1

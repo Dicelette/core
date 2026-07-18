@@ -1,5 +1,6 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import * as core from "../src";
+import { DiceTypeError } from "../src/errors";
 
 describe("bulk rolls", () => {
 	it("simple bulk roll", () => {
@@ -86,5 +87,22 @@ describe("bulk rolls", () => {
 		expect(result?.result).toMatch(
 			/1d6: \[\d+\] = \d+; 1d6: \[\d+\] = \d+; 1d6: \[\d+\] = \d+/
 		);
+	});
+
+	it("Bulk roll at the max allowed count should still work", () => {
+		const result = core.roll(`${core.MAX_BULK_DICE}#1d6`);
+		expect(result).not.toBeUndefined();
+	});
+
+	it("Bulk roll above the max allowed count should throw", () => {
+		expect(() => core.roll(`${core.MAX_BULK_DICE + 1}#1d6`)).toThrow(DiceTypeError);
+	});
+
+	it("Absurdly large bulk roll count should throw instead of hanging", () => {
+		expect(() => core.roll("999999999#1d6")).toThrow(DiceTypeError);
+	});
+
+	it("Bulk roll above the max allowed count in brackets should throw", () => {
+		expect(() => core.roll(`{${core.MAX_BULK_DICE + 1}#1d6}`)).toThrow(DiceTypeError);
 	});
 });

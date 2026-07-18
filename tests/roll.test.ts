@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { DiceRoller, NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { isArray } from "mathjs";
 import * as core from "../src";

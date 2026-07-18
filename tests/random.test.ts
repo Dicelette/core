@@ -1,4 +1,4 @@
-import { expect, it } from "bun:test";
+import { expect, it } from "vitest";
 import * as core from "../src";
 
 // Add more tests for different scenarios

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { generateStatsDice } from "../src";
 
 it("creating roll dice with face formula", () => {
