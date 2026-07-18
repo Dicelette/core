@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.4](https://github.com/Dicelette/core/compare/v1.29.3...v1.29.4) (2026-07-18)
+
+### Bug Fixes
+
+* **bulk:** can leads to some infinite because of a too big number of roll ([658c149](https://github.com/Dicelette/core/commit/658c149b6a87f90bfc348fbbd03659c1d0f43e47))
+* **regex:** sometimes, text was not sanitized that leads to some ReDoS and CPU spikes ([629a128](https://github.com/Dicelette/core/commit/629a1287703a6aa40e8b345f997c9ec9fb99dc29))
 ## [1.29.3](https://github.com/Dicelette/core/compare/v1.29.2...v1.29.3) (2026-06-21)
 
 ## [1.29.2](https://github.com/Dicelette/core/compare/v1.29.1...v1.29.2) (2026-06-21)
