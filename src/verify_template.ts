@@ -4,20 +4,20 @@ import "uniformize";
 
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import {
-	createCriticalCustom,
-	DETECT_CRITICAL,
-	DiceTypeError,
-	EmptyObjectError,
-	FormulaError,
-	getCachedRegex,
-	MaxGreater,
-	NoStatisticsError,
-	replaceExpByRandom,
-	replaceFormulaInDice,
-	roll,
-	type StatisticalTemplate,
-	TooManyDice,
-	templateSchema,
+    createCriticalCustom,
+    DETECT_CRITICAL,
+    DiceTypeError,
+    EmptyObjectError,
+    FormulaError,
+    getCachedRegex,
+    MaxGreater,
+    NoStatisticsError,
+    replaceExpByRandom,
+    replaceFormulaInDice,
+    roll,
+    type StatisticalTemplate,
+    TooManyDice,
+    templateSchema,
 } from ".";
 import { isNumber, randomInt } from "./utils";
 
@@ -39,7 +39,7 @@ export function evalStatsDice(
 		dice = dice.standardize();
 		const names = Object.keys(allStats);
 		for (const name of names) {
-			const regex = getCachedRegex(name.standardize().escapeRegex(), "gi");
+			const regex = getCachedRegex(RegExp.escape(name.standardize()), "gi");
 			if (dice.match(regex)) {
 				dice = dice.replace(regex, allStats[name].toString()).trimEnd();
 			}
@@ -72,7 +72,7 @@ export function diceRandomParse(
 	const statNames = Object.keys(template.statistics);
 	let newDice = value;
 	for (const name of statNames) {
-		const regex = getCachedRegex(name.standardize().escapeRegex(), "gi");
+		const regex = getCachedRegex(RegExp.escape(name.standardize()), "gi");
 		// Match and replace against the accumulated `newDice`, not the original `value`,
 		// otherwise multi-stat formulas lose all but the last substitution.
 		if (newDice.match(regex)) {
@@ -129,7 +129,7 @@ export function evalCombinaison(
 		//replace the stats in formula
 		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
-			const regex = getCachedRegex(statName.standardize().escapeRegex(), "gi");
+			const regex = getCachedRegex(RegExp.escape(statName.standardize()), "gi");
 			formula = formula.replace(regex, value.toString());
 		}
 		try {
@@ -152,7 +152,7 @@ export function evalOneCombinaison(
 ) {
 	let formula = combinaison.standardize();
 	for (const [statName, value] of Object.entries(stats)) {
-		const regex = getCachedRegex(statName.standardize().escapeRegex(), "gi");
+		const regex = getCachedRegex(RegExp.escape(statName.standardize()), "gi");
 		formula = formula.replace(regex, value.toString());
 	}
 	try {
@@ -293,7 +293,7 @@ export function testStatCombinaison(
 			const { max, min } = data;
 			const total = template.total || 100;
 			const randomStatValue = generateRandomStat(total, max, min, engine);
-			const regex = getCachedRegex(other.escapeRegex(), "gi");
+			const regex = getCachedRegex(RegExp.escape(other), "gi");
 			formula = formula.replace(regex, randomStatValue.toString());
 		}
 		try {
