@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.5](https://github.com/Dicelette/core/compare/v1.29.4...v1.29.5) (2026-07-18)
+
+### Bug Fixes
+
+* **compare:** ReDoS on some condition in comparison ([a4b822c](https://github.com/Dicelette/core/commit/a4b822c1980070902c290be0a5135c2c5fa782b1))
 ## [1.29.4](https://github.com/Dicelette/core/compare/v1.29.3...v1.29.4) (2026-07-18)
 
 ### Bug Fixes
