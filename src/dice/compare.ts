@@ -1,8 +1,7 @@
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
-import type { ComparedValue } from "../interfaces";
-import { SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
+import { type ComparedValue,  SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces";
 import { roll } from "../roll";
 import { isNumber } from "../utils";
 
@@ -86,15 +85,7 @@ export function rollCompare(
 		diceResult: rollComp?.result,
 	};
 }
-
-export function getCompare(
-	dice: string,
-	compareRegex: RegExpMatchArray,
-	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
-	pity?: boolean
-): { dice: string; compare: ComparedValue | undefined } {
 	/**
-	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
 	 * Some system count the number of a dice that are greater than or equal to a target, and not the "total" of rolled dice.
 	 * We "count" the number of dice that meet a criterion, and not the total of the dice.
 	 * To support this, we use the group notation. It a little different than the notation of dice-roller, but it a sacrifice to not break the current notation.
@@ -102,9 +93,19 @@ export function getCompare(
 	 * - `{2d3}>=4` will be the same as `2d3>=4` and thus keep the comparaison.
 	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
 	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
+	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
 	 */
+export function getCompare(
+	dice: string,
+	compareRegex: RegExpMatchArray,
+	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
+	pity?: boolean
+): { dice: string; compare: ComparedValue | undefined } {
+
 	if (
-		dice.match(/((\{.*,(.*)+\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{(.*)(([><=]|!=)+).*\}/)
+		dice.match(
+			/((\{[^}]*,[^}]*\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{[^}]*(([><=]|!=)+)[^}]*\}/
+		)
 	)
 		return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
