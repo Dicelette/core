@@ -3,7 +3,7 @@ import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
 import { DiceTypeError } from "../errors";
 import type { Compare, ComparedValue, Resultat, SortOrder } from "../interfaces";
-import { SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
+import { MAX_BULK_DICE, SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces/constant";
 import { isNumber, splitDiceComment } from "../utils";
 import { isTrivialComparison } from "./compare";
 import {
@@ -41,6 +41,9 @@ export function handleBulkRolls(
 	const numberOfDice = Number.parseInt(diceArray[0], 10);
 	if (numberOfDice <= 0) {
 		throw new DiceTypeError(dice, "bulk_zero");
+	}
+	if (numberOfDice > MAX_BULK_DICE) {
+		throw new DiceTypeError(dice, "bulk_max", { max: MAX_BULK_DICE });
 	}
 	const { dice: diceToRollBase, comment: comments } = splitDiceComment(diceArray[1]);
 	let diceToRoll = diceToRollBase;

@@ -14,6 +14,8 @@ export const DETECT_CRITICAL = /\{\*?c[fs]:([<>=]|!=)+(.+?)}/gim;
 export const OPTIONAL_COMMENT = /\s+(#|\/{2}|\[|\/\*)?(?<comment>.*)/gi;
 
 export const MIN_THRESHOLD_MATCH = 0.5;
+/** Maximum number of rolls allowed in a single bulk roll (`N#dice`), to prevent a huge N from blocking the event loop / exhausting memory. */
+export const MAX_BULK_DICE = 100;
 export const REMOVER_PATTERN = {
 	ASTERISK_ESCAPE: /\*/g,
 	CRITICAL_BLOCK: /\{\*?c[fs]:([<>=]|!=)+.+?\}/gim,
