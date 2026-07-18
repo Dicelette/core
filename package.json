@@ -1,66 +1,66 @@
 {
-  "name": "@dicelette/core",
-  "version": "1.29.4",
-  "description": "Core library for the Dicelette Discord bot",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Dicelette/core.git"
-  },
-  "type": "commonjs",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsdown",
-    "prerelease": "bun run build",
-    "lint": "biome check --write src --unsafe",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "tsc": "tsc --noEmit --skipLibCheck",
-    "release": "commit-and-tag-version",
-    "postrelease": "git push --follow-tags origin main && bun publish",
-    "dev": "tsdown --watch"
-  },
-  "keywords": [
-    "discord",
-    "roll",
-    "library",
-    "bot",
-    "typescript"
-  ],
-  "author": "Mara-Li",
-  "license": "GPL-3.0-only",
-  "dependencies": {
-    "@dice-roller/rpg-dice-roller": "^5.5.1",
-    "mathjs": "^15.2.0",
-    "moment": "^2.30.1",
-    "random-js": "^2.1.0",
-    "remove-accents": "^0.5.0",
-    "ts-dedent": "^2.3.0",
-    "uniformize": "^2.6.1",
-    "vite-tsconfig-paths": "^6.1.1",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.4",
-    "@types/node": "^26.1.1",
-    "commit-and-tag-version": "^13.0.0",
-    "tsdown": "^0.22.9",
-    "tslib": "^2.8.1",
-    "typescript": "^7.0.2",
-    "typescript-json-schema": "^0.68.0",
-    "vitest": "^4.1.10",
-    "zod-to-json-schema": "^3.25.2"
-  },
-  "trustedDependencies": [
-    "@biomejs/biome",
-    "esbuild"
-  ],
-  "overrides": {
-    "mathjs@>=13.1.0 <15.2.0": ">=15.2.0",
-    "mathjs@>=13.1.1 <15.2.0": ">=15.2.0"
-  }
+	"name": "@dicelette/core",
+	"version": "1.29.4",
+	"description": "Core library for the Dicelette Discord bot",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Dicelette/core.git"
+	},
+	"type": "commonjs",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"prerelease": "pnpm run build",
+		"lint": "biome check --write src --unsafe",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"tsc": "tsc --noEmit --skipLibCheck",
+		"release": "commit-and-tag-version",
+		"postrelease": "git push --follow-tags origin main && pnpm publish",
+		"dev": "tsdown --watch"
+	},
+	"keywords": [
+		"discord",
+		"roll",
+		"library",
+		"bot",
+		"typescript"
+	],
+	"author": "Mara-Li",
+	"license": "GPL-3.0-only",
+	"dependencies": {
+		"@dice-roller/rpg-dice-roller": "^5.5.1",
+		"mathjs": "^15.2.0",
+		"moment": "^2.30.1",
+		"random-js": "^2.1.0",
+		"remove-accents": "^0.5.0",
+		"ts-dedent": "^2.3.0",
+		"uniformize": "^2.6.1",
+		"vite-tsconfig-paths": "^6.1.1",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.4",
+		"@types/node": "^26.1.1",
+		"commit-and-tag-version": "^13.0.0",
+		"tsdown": "^0.22.9",
+		"tslib": "^2.8.1",
+		"typescript": "^7.0.2",
+		"typescript-json-schema": "^0.68.0",
+		"vitest": "^4.1.10",
+		"zod-to-json-schema": "^3.25.2"
+	},
+	"trustedDependencies": [
+		"@biomejs/biome",
+		"esbuild"
+	],
+	"overrides": {
+		"mathjs@>=13.1.0 <15.2.0": ">=15.2.0",
+		"mathjs@>=13.1.1 <15.2.0": ">=15.2.0"
+	}
 }
