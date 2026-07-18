@@ -4,8 +4,8 @@
  * I will write a function that iterates 10_000 times and export an CSV to be able to check it in Excel.
  */
 
-import { writeFileSync } from "fs";
-import { roll, type Resultat } from "./src";
+import { writeFileSync } from "node:fs";
+import { type Resultat, roll } from "./src";
 
 const args = process.argv.slice(2);
 const diceExpr = args[0] || "1d20";
@@ -25,10 +25,9 @@ let csv = "valeur;occurences;pourcentage\n";
 const sortedKeys = [...occurrences.keys()].sort((a, b) => a - b);
 for (const key of sortedKeys) {
 	const count = occurrences.get(key)!;
-	const percent = (count / totalIterations * 100).toFixed(4).replace(".", ",");
+	const percent = ((count / totalIterations) * 100).toFixed(4).replace(".", ",");
 	csv += `${key};${count};${percent}\n`;
 }
-
 
 const filename = `distribution_${diceExpr.replace(/[^a-zA-Z0-9]/g, "_")}.csv`;
 writeFileSync(filename, csv);
