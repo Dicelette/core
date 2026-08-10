@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.6](https://github.com/Dicelette/core/compare/v1.29.5...v1.29.6) (2026-08-10)
+
+### Bug Fixes
+
+* **similarity:** improve handling of unknown replacements with parentheses ([bf00d5c](https://github.com/Dicelette/core/commit/bf00d5ccf14ebcd7324f881c3565263e57a6e9a1))
+* **stats:** stop the shared STAT_MATCHER from carrying lastIndex between rolls ([52db402](https://github.com/Dicelette/core/commit/52db402eaa5d00e962493e49a174a71c4e74ef54))
 ## [1.29.5](https://github.com/Dicelette/core/compare/v1.29.4...v1.29.5) (2026-07-18)
 
 ### Bug Fixes
