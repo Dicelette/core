@@ -105,7 +105,14 @@ export function findBestRecord(
 
 export function replaceUnknown(dice: string, replacer: string) {
 	return dice
-		.replaceAll(REMOVER_PATTERN.STAT_MATCHER, replacer)
+		.replace(REMOVER_PATTERN.STAT_MATCHER, (match) => {
+			const hasOpen = match.startsWith("(");
+			const hasClose = match.endsWith(")");
+			if (hasOpen && hasClose) return replacer;
+			if (hasOpen) return `(${replacer}`;
+			if (hasClose) return `${replacer})`;
+			return replacer;
+		})
 		.replaceAll("+0", "")
 		.replaceAll("-0", "");
 }

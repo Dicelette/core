@@ -260,6 +260,24 @@ describe("verifyStatMatcherPattern", () => {
 		expect(result).toBe("1d20+5");
 	});
 
+	it("should not swallow a parenthesis that belongs to a larger group when the unknown stat is one of several terms", () => {
+		const dice = "(45+25+$unknown)>90?90:(45+25+$unknown)";
+		const replaceValue = "0";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("(45+25)>90?90:(45+25)");
+	});
+
+	it("still collapses a fully self-wrapped unknown stat even when adjacent to other groups", () => {
+		const dice = "(1)+($unknown)+(2)";
+		const replaceValue = "0";
+
+		const result = verifyStatMatcherPattern(dice, replaceValue);
+
+		expect(result).toBe("(1)+(2)");
+	});
+
 	it("should return original dice when no unknown stats present", () => {
 		const dice = "1d20+5";
 
