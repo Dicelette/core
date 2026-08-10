@@ -5,6 +5,7 @@ import {
 	findBestStatMatch,
 	getCachedRegex,
 	levenshteinDistance,
+	REMOVER_PATTERN,
 	resolveFormulaHint,
 	verifyStatMatcherPattern,
 } from "../src";
@@ -271,6 +272,22 @@ describe("verifyStatMatcherPattern", () => {
 		const dice = "1d20+$unknown";
 
 		expect(() => verifyStatMatcherPattern(dice, undefined)).toThrow();
+	});
+
+	it("stays deterministic when called repeatedly on the same dice", () => {
+		// STAT_MATCHER is global: testing it through the shared instance would advance
+		// lastIndex and make every other call report "no unresolved stat".
+		for (let i = 0; i < 4; i++)
+			expect(() => verifyStatMatcherPattern("1d20+$unknown")).toThrow(DiceTypeError);
+	});
+
+	it("does not leave the shared STAT_MATCHER dirty after throwing", () => {
+		expect(() => verifyStatMatcherPattern("1d20+$unknown")).toThrow(DiceTypeError);
+		expect(REMOVER_PATTERN.STAT_MATCHER.lastIndex).toBe(0);
+		// A dirty lastIndex would make matchAll skip the leading $stat of the next formula.
+		expect([
+			..."1d100<=($vita+$combat)".matchAll(REMOVER_PATTERN.STAT_MATCHER),
+		]).toHaveLength(2);
 	});
 });
 

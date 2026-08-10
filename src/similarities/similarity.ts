@@ -110,8 +110,16 @@ export function replaceUnknown(dice: string, replacer: string) {
 		.replaceAll("-0", "");
 }
 
+/**
+ * `STAT_MATCHER` is global, so `.test()` on the shared instance advances (and keeps) its
+ * `lastIndex`. Throwing below would leave that offset behind, and the next roll's
+ * `matchAll` — which starts from the shared `lastIndex` — would silently skip the leading
+ * `$stat` and hand an unresolved formula to the dice parser. Test on a stateless copy.
+ */
+const STAT_MATCHER_TEST = new RegExp(REMOVER_PATTERN.STAT_MATCHER.source, "iu");
+
 export function verifyStatMatcherPattern(dice: string, replaceUnknow?: string) {
-	if (REMOVER_PATTERN.STAT_MATCHER.test(dice)) {
+	if (STAT_MATCHER_TEST.test(dice)) {
 		if (replaceUnknow)
 			//remove ALL unknow value
 			return replaceUnknown(dice, replaceUnknow);
