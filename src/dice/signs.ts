@@ -75,19 +75,20 @@ export function compareSignFormule(
 		if (detectedTrivial) trivial = true;
 		results = replaceInFormula(element, diceResult, compareResult, res, engine, pity);
 	} else if (res instanceof Object) {
-		const diceResult = res as Resultat;
-		if (diceResult.compare) {
+		const rolled = res as Resultat;
+		if (rolled.compare) {
 			const toEvaluate = evaluate(
-				`${diceResult.total}${diceResult.compare.sign}${diceResult.compare.value}`
+				`${rolled.total}${rolled.compare.sign}${rolled.compare.value}`
 			);
 			const sign = toEvaluate ? "✓" : "✕";
 			const invertedSign = toEvaluate
-				? diceResult.compare.sign
-				: inverseSign(diceResult.compare.sign);
+				? rolled.compare.sign
+				: inverseSign(rolled.compare.sign);
+			// `&` stands for the shared roll: it echoes the first segment's dice, not this sub-roll's
 			const dice = replaceText(element, 0, diceResult.dice).diceAll;
 
-			results = `${sign} ${dice}: ${diceResult.result.split(":").splice(1).join(":").trim()}${invertedSign}${diceResult.compare.value}`;
-			if (diceResult.compare.trivial) trivial = true;
+			results = `${sign} ${dice}: ${rolled.result.split(":").splice(1).join(":").trim()}${invertedSign}${rolled.compare.value}`;
+			if (rolled.compare.trivial) trivial = true;
 		}
 	}
 	return { dice: compareResult.dice, results, compare: compareResult.compare, trivial };
