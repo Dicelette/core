@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.7](https://github.com/Dicelette/core/compare/v1.29.6...v1.29.7) (2026-09-24)
+
+### Bug Fixes
+
+* **shared:** shadowing var that replace the "real parameters" instead of the roll result and it brokes the shared rolls ([af6e702](https://github.com/Dicelette/core/commit/af6e702b790e6ea8b72b339a308b39ca4e7c848b))
 ## [1.29.6](https://github.com/Dicelette/core/compare/v1.29.5...v1.29.6) (2026-08-10)
 
 ### Bug Fixes
