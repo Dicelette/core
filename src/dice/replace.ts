@@ -14,6 +14,19 @@ export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
 }
 
 /**
+ * Sorts a shared roll's already-formatted segments by their total, without the `{}`/`sa`/`sd`
+ * stripping `replaceUnwantedText` does: each segment's own dice-roller output was already
+ * cleaned at its own, comment-free call site, before its `[comment]` got embedded. Re-running
+ * that strip on the joined, comment-embedded string would also eat any "sa"/"sd" substring
+ * inside a user's own comment (e.g. "Sauver").
+ */
+export function sortSharedResults(dice: string, sortOrder?: SortOrder) {
+	const d = sortOrder ? sortDice(dice, sortOrder) : dice;
+	if (!d.length) throw new DiceTypeError(dice, "empty_dice");
+	return d;
+}
+
+/**
  * Sort the output of the dice
  * Split by ;
  * Then sort each part based on the total `= Y`
