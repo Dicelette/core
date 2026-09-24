@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.9](https://github.com/Dicelette/core/compare/v1.29.7...v1.29.9) (2026-09-24)
+
+### Bug Fixes
+
+* **shared-roll:** sort the output of the dice splited by ; ([c33709e](https://github.com/Dicelette/core/commit/c33709ec5bbe14530bc887ef22ad65bb472a022d))
+
 ## [1.29.8](https://github.com/Dicelette/core/compare/v1.29.7...v1.29.8) (2026-09-24)
 
 ### Bug Fixes
