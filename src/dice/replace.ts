@@ -13,6 +13,12 @@ export function replaceUnwantedText(dice: string, sortOrder?: SortOrder) {
 	return d;
 }
 
+export function sortSharedResults(dice: string, sortOrder?: SortOrder) {
+	const d = sortOrder ? sortDice(dice, sortOrder) : dice;
+	if (!d.length) throw new DiceTypeError(dice, "empty_dice");
+	return d;
+}
+
 /**
  * Sort the output of the dice
  * Split by ;
