@@ -23,10 +23,18 @@ import {
 	replaceText,
 	replaceUnwantedText,
 	setSortOrder,
+	sortSharedResults,
 } from "./dice";
 import { DiceTypeError } from "./errors";
-import { type Compare, type ComparedValue, type Resultat, SortOrder } from "./interfaces";
-import { OPTIONAL_COMMENT, SIGN_REGEX_SPACE, SYMBOL_DICE } from "./interfaces/constant";
+import {
+	type Compare,
+	type ComparedValue,
+	OPTIONAL_COMMENT,
+	type Resultat,
+	SIGN_REGEX_SPACE,
+	SortOrder,
+	SYMBOL_DICE,
+} from "./interfaces";
 import { splitDiceComment } from "./utils";
 
 /**
@@ -264,7 +272,7 @@ function sharedRolls(
 	if (!total) {
 		return {
 			dice: displayDice,
-			result: replaceUnwantedText(results.join(";"), sortFromMain),
+			result: sortSharedResults(results.join(";"), sortFromMain),
 			comment: mainComment,
 			compare: aggregatedCompare,
 			modifier: diceResult.modifier,
@@ -355,7 +363,7 @@ function sharedRolls(
 		results.shift();
 	return {
 		dice: displayDice,
-		result: replaceUnwantedText(results.join(";"), sortFromMain),
+		result: sortSharedResults(results.join(";"), sortFromMain),
 		comment: mainComment,
 		compare:
 			hasTrivialComparison && aggregatedCompare
