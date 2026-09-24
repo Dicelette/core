@@ -130,5 +130,4 @@ dist
 .pnp.*
 .idea
 scratchPad.ts
-/pnpm-lock.yaml
 /.vscode/settings.json
