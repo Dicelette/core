@@ -21,7 +21,7 @@
 		"test:watch": "vitest",
 		"tsc": "tsc --noEmit --skipLibCheck",
 		"release": "commit-and-tag-version",
-		"postrelease": "git push --follow-tags origin main && pnpm publish",
+		"postrelease": "git push --follow-tags origin main",
 		"dev": "tsdown --watch"
 	},
 	"keywords": [
