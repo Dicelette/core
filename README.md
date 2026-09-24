@@ -1,8 +1,10 @@
 # @Core
 
-The core module for Dicelette — public API reference
+Core module for [Dicelette](https://github.com/Dicelette/discord-dicelette), a Discord dice bot that supports a lot of notation and character sheet, inspired by Rollem and other. 
 
 This README documents the public API exported by the `core` package. It lists types, constants, functions and errors that are exported by the module (via `src/index.ts`).
+
+Use node (or browser for the dashboard) crypto (by default) for better pseudo-random accuracy. 
 
 ## Overview
 
