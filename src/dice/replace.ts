@@ -19,13 +19,7 @@ export function sortSharedResults(dice: string, sortOrder?: SortOrder) {
 	return d;
 }
 
-/**
- * Sort the output of the dice
- * Split by ;
- * Then sort each part based on the total `= Y`
- * @param dice
- * @param sortOrder
- */
+/** Sorts `;`-separated dice results by their total (`= Y`). */
 function sortDice(dice: string, sortOrder: SortOrder) {
 	if (sortOrder === SortOrder.None) return dice;
 	const dices = dice.split(/; ?/);
@@ -43,8 +37,7 @@ function sortDice(dice: string, sortOrder: SortOrder) {
 }
 
 export function fixParenthesis(dice: string) {
-	//dice with like 1d(20) are not valid, we need to remove the parenthesis
-	//warning: the 1d(20+5) is valid and should not be changed
+	// `1d(20)` isn't valid and becomes `1d20`; `1d(20+5)` is valid and stays as-is
 	return dice.replaceAll(PARENTHESIS_REGEX, (_match, p1) => `d${p1}`);
 }
 
@@ -64,17 +57,14 @@ export function formatComment(dice: string) {
 		? `${commentsMatch.groups.comments}`
 		: "";
 
-	// Search for optional comments (# or // style) only AFTER removing bracket comments
-	// to avoid conflicts with parentheses inside bracket comments
+	// Search AFTER removing bracket comments, so parentheses inside them aren't matched
 	const diceWithoutBrackets = dice.replace(BRACKET_COMMENT_REGEX, "");
 	const optionalComments = OPTIONAL_COMMENT_REGEX.exec(diceWithoutBrackets);
 	const optional = optionalComments?.groups?.comment
 		? `${optionalComments.groups.comment.trim()}`
 		: "";
 
-	//fusion of both comments with a space if both exists
-	//result expected = "__comment1 comment2__ — "
-	//or "__comment1__ — " or "__comment2__ — "
+	// Merge both comment styles into one, e.g. "__comment1 comment2__ — "
 	let finalComment = "";
 	if (comments && optional) finalComment = `__${comments} ${optional}__ — `;
 	else if (comments) finalComment = `__${comments}__ — `;

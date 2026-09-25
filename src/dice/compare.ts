@@ -1,40 +1,22 @@
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import { evaluate } from "mathjs";
 import type { Engine } from "random-js";
-import { type ComparedValue,  SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces";
+import { type ComparedValue, SIGN_REGEX, SIGN_REGEX_SPACE } from "../interfaces";
 import { roll } from "../roll";
 import { isNumber } from "../utils";
 
-/**
- * Check if a comparison is trivial (always true or always false)
- * Uses the existing canComparisonSucceed logic and checks both success and failure conditions
- * @param maxValue Maximum possible value from the dice roll
- * @param minValue Minimum possible value from the dice roll
- * @param compare The comparison object
- * @returns true if the comparison is trivial (always true or always false)
- */
+/** Checks whether a comparison is trivial: always true or always false given the roll bounds. */
 export function isTrivialComparison(
 	maxValue: number,
 	minValue: number,
 	compare: ComparedValue
 ): boolean {
-	// Check if comparison can never succeed (always false)
 	const canSucceed = canComparisonSucceed(maxValue, compare, minValue);
-
-	// Check if comparison can never fail (always true) by checking the inverse with minValue
 	const canFail = canComparisonFail(maxValue, compare, minValue);
-
-	// Trivial if it can never succeed OR can never fail
 	return !canSucceed || !canFail;
 }
 
-/**
- * Check if a comparison can theoretically fail given roll bounds
- * @param maxRollValue Maximum possible roll value
- * @param compare The comparison object
- * @param minRollValue Minimum possible roll value (defaults to 1)
- * @returns true if the comparison can fail at least once
- */
+/** Checks whether a comparison can fail at least once given the roll bounds. */
 export function canComparisonFail(
 	maxRollValue: number,
 	compare: ComparedValue,
@@ -42,18 +24,18 @@ export function canComparisonFail(
 ): boolean {
 	switch (compare.sign) {
 		case ">":
-			return minRollValue <= compare.value; // failure if roll <= value
+			return minRollValue <= compare.value;
 		case ">=":
-			return minRollValue < compare.value; // failure if roll < value
+			return minRollValue < compare.value;
 		case "<":
-			return maxRollValue >= compare.value; // failure if roll >= value
+			return maxRollValue >= compare.value;
 		case "<=":
-			return maxRollValue > compare.value; // failure if roll > value
+			return maxRollValue > compare.value;
 		case "=":
 		case "==":
-			return minRollValue !== compare.value || maxRollValue !== compare.value; // can differ
+			return minRollValue !== compare.value || maxRollValue !== compare.value;
 		case "!=":
-			return minRollValue <= compare.value && compare.value <= maxRollValue; // equality possible
+			return minRollValue <= compare.value && compare.value <= maxRollValue;
 		default:
 			return true;
 	}
@@ -65,17 +47,15 @@ export function rollCompare(
 	pity?: boolean
 ) {
 	if (isNumber(value)) return { value: Number.parseInt(value as string, 10) };
-	// Handle empty value or string - return 0 as default
 	if (!value || (typeof value === "string" && value.trim() === "")) {
 		return { value: 0, diceResult: value as string };
 	}
 	const rollComp = roll(value as string, engine, pity);
 	if (!rollComp?.total) {
-		//not a dice throw
+		// Not a dice throw; try evaluating as a formula
 		try {
 			return { value: evaluate(value as string), diceResult: value as string };
 		} catch (error) {
-			// If evaluate fails, return 0
 			return { value: 0, diceResult: value as string };
 		}
 	}
@@ -85,23 +65,16 @@ export function rollCompare(
 		diceResult: rollComp?.result,
 	};
 }
-	/**
-	 * Some system count the number of a dice that are greater than or equal to a target, and not the "total" of rolled dice.
-	 * We "count" the number of dice that meet a criterion, and not the total of the dice.
-	 * To support this, we use the group notation. It a little different than the notation of dice-roller, but it a sacrifice to not break the current notation.
-	 * @note:
-	 * - `{2d3}>=4` will be the same as `2d3>=4` and thus keep the comparaison.
-	 * - `{2d3>=4}` will count the total of dice that are greater than or equal to 4, and not the total of the dice.
-	 * - `{2d3,1d4}>=4` won't use the comparison, but will count the number of dice that are greater than or equal to 4. If the total of the dice is needed, just remove the group notation and use `2d3+1d4>=4`.
-	 * @source: https://dice-roller.github.io/documentation/guide/notation/modifiers.html#target-success-dice-pool
-	 */
+/**
+ * Extracts a comparison from the dice string. `{...}` groups use "target success" counting
+ * (e.g. `{2d3>=4}` counts qualifying dice) instead of comparing the total.
+ */
 export function getCompare(
 	dice: string,
 	compareRegex: RegExpMatchArray,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
 	pity?: boolean
 ): { dice: string; compare: ComparedValue | undefined } {
-
 	if (
 		dice.match(
 			/((\{[^}]*,[^}]*\}|([><=!]+\d+f))([><=]|!=)+\d+\}?)|\{[^}]*(([><=]|!=)+)[^}]*\}/
@@ -110,8 +83,7 @@ export function getCompare(
 		return { dice, compare: undefined };
 	dice = dice.replace(SIGN_REGEX_SPACE, "");
 	let compare: ComparedValue;
-	// compareRegex comes from SIGN_REGEX_SPACE: /([><=]|!=)+(\S+)/
-	// index 1 = the comparison sign (e.g., ">", ">=", "!="); index 2 = the compared value/expression
+	// compareRegex[1] = sign (e.g. ">="), compareRegex[2] = compared value/expression
 	const calc = compareRegex[2];
 	const sign = calc.match(/[+-/*^]/)?.[0];
 	const compareSign = compareRegex[0].match(SIGN_REGEX)?.[0];
@@ -140,12 +112,7 @@ export function getCompare(
 	return { dice, compare };
 }
 
-/**
- * Check if a comparison can theoretically succeed given a maximum roll value
- * @example
- * canComparisonSucceed(10, { sign: ">=", value: 15 }) => false (impossible to roll >= 15 with 1d10)
- * canComparisonSucceed(20, { sign: ">=", value: 15 }) => true (possible to roll >= 15 with 1d20)
- */
+/** Checks whether a comparison can succeed at least once given the roll bounds. */
 export function canComparisonSucceed(
 	maxRollValue: number,
 	compare: ComparedValue,
@@ -157,9 +124,9 @@ export function canComparisonSucceed(
 		case ">=":
 			return maxRollValue >= compare.value;
 		case "<":
-			return compare.value > (minRollValue ?? 1); // Au moins minRollValue possible
+			return compare.value > (minRollValue ?? 1);
 		case "<=":
-			return compare.value >= (minRollValue ?? 1); // Au moins minRollValue possible
+			return compare.value >= (minRollValue ?? 1);
 		case "=":
 		case "==":
 			return maxRollValue >= compare.value && compare.value >= (minRollValue ?? 1);

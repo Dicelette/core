@@ -45,7 +45,7 @@ export function normalizeExplodingSuccess(dice: string): ExplodingSuccess | unde
 		}
 	}
 
-	// Remove comparison for the actual explode mechanic so it uses default explode
+	// Strip the comparison so the default explode mechanic is used
 	const normalizedSegment = "!";
 	const replacedDice = dice.replace(match[0], normalizedSegment);
 

@@ -37,15 +37,7 @@ import {
 } from "./interfaces";
 import { splitDiceComment } from "./utils";
 
-/**
- * Parse the string provided and turn it as a readable dice for dice parser
- * @param {string} dice The dice string to parse and roll
- * @param {Engine|null} engine The random engine to use, default to nodeCrypto
- * @param {boolean} pity Whether to enable pity system (reroll on failure) or not
- * @param {boolean} sort Whether to sort the dice results or not
- * @param {string} comment Optional comment to attach to the result. If provided, skips extracting the comment from the dice string (assumes dice is already clean).
- * @returns {Resultat|undefined} The result of the roll
- */
+/** Parses and rolls a dice string, handling shared rolls, bulk rolls, pity, and comparisons. */
 export function roll(
 	dice: string,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto,
@@ -58,7 +50,6 @@ export function roll(
 	const prepared = prepareDice(dice);
 	if (!prepared.dice.includes("d")) return undefined;
 
-	// Handle shared rolls
 	if (prepared.isSharedRoll) {
 		return sharedRolls(
 			prepared.dice,
@@ -74,7 +65,7 @@ export function roll(
 	let processedDice = fixParenthesis(prepared.dice);
 	const modificator = getModifier(processedDice);
 
-	// Extract compare BEFORE rolling, but NOT for curly bulk rolls
+	// Must extract compare before rolling; skip for curly bulk rolls
 	const compareRegex = processedDice.match(SIGN_REGEX_SPACE);
 	let compare: ComparedValue | undefined;
 	if (compareRegex && !prepared.isCurlyBulk) {
@@ -83,13 +74,11 @@ export function roll(
 		compare = compareResult.compare;
 	}
 
-	// For simple curly braces, wrap the diceDisplay with braces
 	let finalDiceDisplay = prepared.diceDisplay;
 	if (prepared.isSimpleCurly && !prepared.diceDisplay.startsWith("{")) {
 		finalDiceDisplay = `{${prepared.diceDisplay}}`;
 	}
 
-	// Handle bulk rolls
 	const bulkProcessContent = prepared.isCurlyBulk ? prepared.bulkContent : processedDice;
 	if (bulkProcessContent.match(/\d+?#(.*)/)) {
 		return handleBulkRolls(
@@ -119,7 +108,6 @@ export function roll(
 		throw new DiceTypeError(diceWithoutComment, "roll", error);
 	}
 
-	// Update compare.trivial after rolling
 	if (compare && diceRoll) {
 		const currentRoll = Array.isArray(diceRoll) ? diceRoll[0] : diceRoll;
 		const trivial = isTrivialComparison(
@@ -130,7 +118,6 @@ export function roll(
 		compare.trivial = trivial ? true : undefined;
 	}
 
-	// Handle pity system
 	let rerollCount = 0;
 	let pityResult: Resultat | undefined;
 	if (pity && compare) {
@@ -158,7 +145,6 @@ export function roll(
 
 	let resultOutput = replaceUnwantedText(roller.output, sort);
 
-	// Handle exploding success
 	if (prepared.explodingSuccess) {
 		const successes = countExplodingSuccesses(
 			diceRoll,
@@ -207,12 +193,12 @@ function sharedRolls(
 	isSharedCurly?: boolean,
 	sort?: SortOrder
 ): Resultat | undefined {
-	// If not provided (call from elsewhere), try to detect
+	// Detect it if the caller didn't already provide it
 	if (!explodingSuccessMain)
 		explodingSuccessMain = normalizeExplodingSuccess(dice.split(";")[0] ?? dice);
 
 	if (explodingSuccessMain) {
-		// Use normalized dice for internal processing but keep original for display
+		// Normalize for internal processing; original is kept separately for display
 		dice = dice.replace(explodingSuccessMain.originalSegment, "!");
 	}
 	if (dice.match(/\d+?#(.*?)/))
@@ -227,10 +213,10 @@ function sharedRolls(
 	const split = dice.split(";");
 	const displayDice = diceDisplay ?? explodingSuccessMain?.originalDice ?? split[0];
 	let diceMain = fixParenthesis(split[0]);
-	// Extract and save the comments first to avoid conflicts with parentheses detection
+	// Comments must be captured and stripped before hidden-dice detection below,
+	// so parentheses inside a comment aren't mistaken for a hidden roll
 	const commentsRegex = /\[(?<comments>.*?)\]/gi;
 	const comments = formatComment(diceMain);
-	// Remove comments before checking for hidden dice (parentheses)
 	const diceMainWithoutComments = diceMain.replace(commentsRegex, "").trim();
 	const toHideRegex = /\((?<dice>[^)]+)\)/;
 	const toHide = toHideRegex.exec(diceMainWithoutComments)?.groups;
@@ -242,10 +228,9 @@ function sharedRolls(
 		diceMain = "1d1";
 		hidden = true;
 	} else {
-		// No hidden dice, use the dice without comments
 		diceMain = diceMainWithoutComments;
 	}
-	//diceMain allow to set the sortorder for the entire shared roll
+	// diceMain's sort order applies to the whole shared roll
 	const sortFromMain = getSortOrder(diceMain);
 	const rollBounds = getRollBounds(diceMain, engine);
 	let diceResult = roll(diceMain, engine, pity, sort);
@@ -257,7 +242,7 @@ function sharedRolls(
 	}
 	if (!diceResult?.total) return undefined;
 
-	// If we had a double-sign exploding, recompute successes from the first segment output
+	// Double-sign exploding: recompute successes from the first segment's output
 	if (explodingSuccessMain && diceResult.result) {
 		const values = extractValuesFromOutput(diceResult.result);
 		diceResult.total = values.filter((v) =>
@@ -287,11 +272,10 @@ function sharedRolls(
 			.replaceAll(OPTIONAL_COMMENT, "")
 			.trim();
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
-		//remove comments
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
 			if (isSharedCurly) {
-				// For curly braces shared rolls, display success count instead of comparison details
+				// Curly shared rolls show a success count, not comparison details
 				const compareResult = compareSignFormule(
 					toRoll,
 					compareRegex,
@@ -301,14 +285,13 @@ function sharedRolls(
 					pity,
 					rollBounds
 				);
-				// Count success: 1 if comparison is true, 0 if false
 				const { diceAll } = replaceText(element, diceResult.total, diceResult.dice);
 				let successCount = 0;
 				try {
 					const evaluated = evaluate(toRoll);
 					successCount = evaluated ? 1 : 0;
 				} catch (error) {
-					// If evaluation fails, try with roll
+					// Fall back to roll() if evaluate() fails
 					const evaluated = roll(toRoll, engine, pity) as Resultat | undefined;
 					successCount = (evaluated?.total ?? 0) ? 1 : 0;
 				}
@@ -358,9 +341,8 @@ function sharedRolls(
 			}
 		}
 	}
-	if (hidden)
-		//remove the first in result
-		results.shift();
+	// Hidden rolls add a dummy first entry; drop it
+	if (hidden) results.shift();
 	return {
 		dice: displayDice,
 		result: sortSharedResults(results.join(";"), sortFromMain),

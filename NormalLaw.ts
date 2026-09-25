@@ -1,8 +1,4 @@
-/**
- * After a pretty strange interaction on Discord, I needed to know if my roll function follow the normal law.
- * So huh.
- * I will write a function that iterates 10_000 times and export an CSV to be able to check it in Excel.
- */
+/** Rolls a dice many times and exports the result distribution to a CSV file. */
 
 import { writeFileSync } from "node:fs";
 import { type Resultat, roll } from "./src";
@@ -20,7 +16,6 @@ for (let i = 0; i < totalIterations; i++) {
 	occurrences.set(total, (occurrences.get(total) ?? 0) + 1);
 }
 
-// Génération du CSV
 let csv = "valeur;occurences;pourcentage\n";
 const sortedKeys = [...occurrences.keys()].sort((a, b) => a - b);
 for (const key of sortedKeys) {

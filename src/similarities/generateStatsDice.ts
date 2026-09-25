@@ -1,9 +1,9 @@
-// Helper to handle tokens like "1dstat" or "dstat". Returns the replacement string (e.g. "1d6") or null if not handled.
 import { evaluate } from "mathjs";
 import { FormulaError } from "../errors";
 import { roll } from "../roll";
 import { findBestStatMatch } from "./similarity";
 
+/** Handles tokens like `1dstat`/`dstat`; returns the replacement (e.g. `1d6`) or null. */
 function handleDiceAfterD(
 	tokenStd: string,
 	normalizedStats: Map<string, [string, number]>
@@ -20,7 +20,7 @@ function handleDiceAfterD(
 	return null;
 }
 
-// Helper to handle simple tokens (stat names). Returns the replacement (numeric string) or the original token if no match.
+/** Replaces a stat-name token with its value, or returns it unchanged if no match. */
 function handleSimpleToken(
 	tokenStd: string,
 	token: string,
@@ -35,14 +35,7 @@ function handleSimpleToken(
 	return token;
 }
 
-/**
- * Replace the stat name by their value using stat
- * and after evaluate any formula using `replaceFormulaInDice`
- * @param {string} originalDice
- * @param {Record<string,number>|undefined} stats
- * @param {number} minThreshold Minimum similarity threshold to consider a stat name match
- * @param {string|undefined} dollarValue
- */
+/** Replaces stat names in the dice string with their values, then evaluates any `{{formula}}`. */
 export function generateStatsDice(
 	originalDice: string,
 	stats?: Record<string, number>,
@@ -81,7 +74,6 @@ export function generateStatsDice(
 				const tokenForCompare = tokenHasDollar ? token.slice(1) : token;
 				const tokenStd = tokenForCompare.standardize();
 
-				// First try dice-after-d pattern using helper
 				const diceReplacement = handleDiceAfterD(tokenStd, normalizedStats);
 				if (diceReplacement) {
 					result += diceReplacement;
@@ -89,7 +81,6 @@ export function generateStatsDice(
 					continue;
 				}
 
-				// Otherwise handle as simple token (stat name or leave as is)
 				result += handleSimpleToken(tokenStd, token, normalizedStats, minThreshold);
 				lastIndex = tokenRegex.lastIndex;
 			}
@@ -101,11 +92,7 @@ export function generateStatsDice(
 	return replaceFormulaInDice(dice);
 }
 
-/**
- * Rolls any dice notation (e.g. `1d6`, `2d10`, `d20`) found in a formula string and
- * replaces each unique dice expression with its numeric result before mathjs evaluation.
- * Each distinct dice type is rolled once; repeated occurrences reuse the same value.
- */
+/** Rolls each unique dice notation (e.g. `1d6`) in a formula once, reusing the value for repeats. */
 function rollDiceInFormula(formulae: string): string {
 	const diceNotation = /\b\d*d\d+\b/gi;
 	if (!diceNotation.test(formulae)) return formulae;
@@ -121,10 +108,7 @@ function rollDiceInFormula(formulae: string): string {
 	});
 }
 
-/**
- * Replace the {{}} in the dice string and evaluate the interior if any
- * @param dice {string}
- */
+/** Evaluates `{{formula}}` blocks in the dice string and replaces them with their result. */
 export function replaceFormulaInDice(dice: string) {
 	const formula = /(?<formula>\{{2}(.+?)}{2})/gim;
 	// biome-ignore lint/suspicious/noImplicitAnyLet: needed for regex loop
@@ -147,13 +131,7 @@ export function replaceFormulaInDice(dice: string) {
 	return cleanedDice(modifiedDice);
 }
 
-/**
- * Replace the ++ +- -- by their proper value:
- * - `++` = `+`
- * - `+-` = `-`
- * - `--` = `+`
- * @param dice {string}
- */
+/** Normalizes sign runs: `++`→`+`, `+-`→`-`, `--`→`+`. */
 function cleanedDice(dice: string) {
 	return dice
 		.replaceAll("+-", "-")

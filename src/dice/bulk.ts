@@ -20,9 +20,7 @@ import {
 import { replaceUnwantedText } from "./replace";
 import { matchComparison } from "./signs";
 
-/**
- * Gère les lancers en masse (bulk rolls)
- */
+/** Handles bulk rolls (`N#dice`). */
 export function handleBulkRolls(
 	dice: string,
 	isCurlyBulk: boolean,
@@ -114,9 +112,7 @@ export function handleBulkRolls(
 	};
 }
 
-/**
- * Gère les lancers en masse avec comparaison
- */
+/** Handles bulk rolls that include a comparison or exploding-success condition. */
 function handleBulkRollsWithComparison(
 	numberOfDice: number,
 	diceToRoll: string,

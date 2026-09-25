@@ -4,30 +4,24 @@ import "uniformize";
 
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import {
-    createCriticalCustom,
-    DETECT_CRITICAL,
-    DiceTypeError,
-    EmptyObjectError,
-    FormulaError,
-    getCachedRegex,
-    MaxGreater,
-    NoStatisticsError,
-    replaceExpByRandom,
-    replaceFormulaInDice,
-    roll,
-    type StatisticalTemplate,
-    TooManyDice,
-    templateSchema,
+	createCriticalCustom,
+	DETECT_CRITICAL,
+	DiceTypeError,
+	EmptyObjectError,
+	FormulaError,
+	getCachedRegex,
+	MaxGreater,
+	NoStatisticsError,
+	replaceExpByRandom,
+	replaceFormulaInDice,
+	roll,
+	type StatisticalTemplate,
+	TooManyDice,
+	templateSchema,
 } from ".";
 import { isNumber, randomInt } from "./utils";
 
-/**
- * Verify if the provided dice work with random value
- * @param testDice {string}
- * @param allStats {Record<string,number>}
- * @param engine
- * @param pity
- */
+/** Verifies that the dice roll works by substituting stats with random values. */
 export function evalStatsDice(
 	testDice: string,
 	allStats?: Record<string, number>,
@@ -54,14 +48,7 @@ export function evalStatsDice(
 	}
 }
 
-/**
- * Generate a random dice and remove the formula (+ evaluate it)
- * Used for diceDamage only
- * @param value {string}
- * @param template {StatisticalTemplate}
- * @param engine
- * @returns
- */
+/** Replaces stat names with random values in a damage dice string, then evaluates formulas. */
 export function diceRandomParse(
 	value: string,
 	template: StatisticalTemplate,
@@ -91,12 +78,7 @@ export function diceRandomParse(
 	return replaceFormulaInDice(newDice);
 }
 
-/**
- * Same as damageDice but for DiceType
- * @param dice {string}
- * @param template {StatisticalTemplate}
- * @param engine
- */
+/** Same as `diceRandomParse`, but resolves only the first non-combinaison stat (for `diceType`). */
 export function diceTypeRandomParse(
 	dice: string,
 	template: StatisticalTemplate,
@@ -115,18 +97,13 @@ export function diceTypeRandomParse(
 	return replaceFormulaInDice(dice.replaceAll("$", randomStatValue.toString()));
 }
 
-/**
- * Random the combinaison and evaluate it to check if everything is valid
- * @param combinaison {Record<string,string>}
- * @param stats {Record<string,number|number>}
- */
+/** Evaluates each combinaison formula with the given stats substituted in. */
 export function evalCombinaison(
 	combinaison: Record<string, string>,
 	stats: Record<string, number | string>
 ) {
 	const newStats: Record<string, number> = {};
 	for (const [stat, combin] of Object.entries(combinaison)) {
-		//replace the stats in formula
 		let formula = combin.standardize();
 		for (const [statName, value] of Object.entries(stats)) {
 			const regex = getCachedRegex(RegExp.escape(statName.standardize()), "gi");
@@ -141,11 +118,7 @@ export function evalCombinaison(
 	return newStats;
 }
 
-/**
- * Evaluate one selected combinaison
- * @param combinaison {string}
- * @param stats {[name: string]: string|number}
- */
+/** Evaluates a single combinaison formula with the given stats substituted in. */
 export function evalOneCombinaison(
 	combinaison: string,
 	stats: Record<string, number | string>
@@ -173,13 +146,7 @@ function convertNumber(number: string | number | undefined) {
 	return undefined;
 }
 
-/**
- * Parse the provided JSON and verify each field to check if everything could work when rolling
- * @param {unknown} template
- * @param verify - If true, will roll the dices to check if everything is valid
- * @param engine
- * @returns {StatisticalTemplate}
- */
+/** Parses and validates a raw template; optionally test-rolls every dice/critical/combinaison. */
 export function verifyTemplateValue(
 	template: unknown,
 	verify = true,
@@ -240,11 +207,7 @@ export function verifyTemplateValue(
 	return statistiqueTemplate;
 }
 
-/**
- * Test each damage roll from the template.damage
- * @param {StatisticalTemplate} template
- * @param engine
- */
+/** Test-rolls each damage entry in the template. */
 export function testDiceRegistered(
 	template: StatisticalTemplate,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
@@ -267,11 +230,7 @@ export function testDiceRegistered(
 	}
 }
 
-/**
- * Test all combinaison with generated random value
- * @param {StatisticalTemplate} template
- * @param engine
- */
+/** Test-evaluates each combinaison formula with random stat values. */
 export function testStatCombinaison(
 	template: StatisticalTemplate,
 	engine: Engine | null = NumberGenerator.engines.nodeCrypto
@@ -306,14 +265,7 @@ export function testStatCombinaison(
 	return;
 }
 
-/**
- * Generate a random stat based on the template and the statistical min and max
- * @param {number|undefined} total
- * @param {number | undefined} max
- * @param {number | undefined} min
- * @param engine
- * @returns
- */
+/** Generates a random stat value within [min, max], bounded by total. */
 export function generateRandomStat(
 	total: number | undefined = 100,
 	max?: number,
