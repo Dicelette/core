@@ -1,8 +1,6 @@
 /** biome-ignore-all lint/style/useNamingConvention: <explanation> */
 export const COMMENT_REGEX = /\s+(#|\/{2}|\[|\/\*)(?<comment>.*)/gi;
-// Match comparison operators but exclude explosive dice (!>, !<, !<=, !>=)
-// Accept != as a valid comparison, but not !> or !< (which are explosive dice)
-// Use negative lookbehind to check for ![<>] before any comparison operator
+// Matches comparison operators, excluding explosive-dice signs like !>, !<, !>=, !<= (but not !=)
 export const SIGN_REGEX =
 	/==|!=|(?<![!<>])>=|(?<![!<>])<=|(?<!!)(?<![<>])>|(?<!!)(?<![<>])<|(?<!!)(?<![<>])=/;
 export const SIGN_REGEX_SPACE =

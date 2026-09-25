@@ -1,7 +1,4 @@
-/**
- * Utility functions for string similarity and distance calculations.
- */
-
+/** String similarity and distance utilities. */
 import { DiceTypeError } from "../errors";
 import { MIN_THRESHOLD_MATCH, REMOVER_PATTERN } from "../interfaces";
 
@@ -41,18 +38,17 @@ export function levenshteinDistance(str1: string, str2: string): number {
 	return prev[str1.length];
 }
 
-// Helper: trouve la meilleure correspondance pour un token donné parmi les stats normalisées
+/** Finds the best-matching stat for a token among the normalized stats. */
 export function findBestStatMatch<T>(
 	searchTerm: string,
 	normalizedStats: Map<string, T>,
 	similarityThreshold = MIN_THRESHOLD_MATCH
 ): T | undefined {
-	// recherche exacte
+	// Exact match
 	const exact = normalizedStats.get(searchTerm);
 	if (exact) return exact;
 
-	// recherche partielle (startsWith, endsWith, includes) et choix du stat le plus court
-
+	// Partial match: prefix match, then pick the most similar
 	const candidates: Array<[T, number]> = [];
 	for (const [normalizedKey, original] of normalizedStats) {
 		if (normalizedKey.startsWith(searchTerm))
@@ -60,11 +56,11 @@ export function findBestStatMatch<T>(
 	}
 	if (candidates.length === 1) return candidates[0][0];
 	if (candidates.length > 0) {
-		candidates.sort((a, b) => b[1] - a[1]); // trier par similarité décroissante
+		candidates.sort((a, b) => b[1] - a[1]);
 		if (candidates[0][1] >= similarityThreshold) return candidates[0][0];
 	}
 
-	// fallback: recherche par similarité si aucune correspondance partielle trouvée
+	// Fallback: similarity search if no partial match was found
 	let bestMatch: T | undefined;
 	let bestSimilarity = 0;
 	for (const [normalizedKey, original] of normalizedStats) {
@@ -78,12 +74,7 @@ export function findBestStatMatch<T>(
 	return bestMatch;
 }
 
-/**
- * Find the snippet name with the highest similarity to `macroName`.
- * Single-pass O(n) algorithm: keeps the best (name, similarity) seen so far.
- * Returns `null` if no snippets or if the best similarity is < `minSimilarity`.
- * Tie-breaker: first encountered best similarity (deterministic).
- */
+/** Finds the record key with the highest similarity to `searchTerm`, or null if below `similarityThreshold`. */
 export function findBestRecord(
 	record: Record<string, string>,
 	searchTerm: string,
@@ -118,20 +109,18 @@ export function replaceUnknown(dice: string, replacer: string) {
 }
 
 /**
- * `STAT_MATCHER` is global, so `.test()` on the shared instance advances (and keeps) its
- * `lastIndex`. Throwing below would leave that offset behind, and the next roll's
- * `matchAll` — which starts from the shared `lastIndex` — would silently skip the leading
- * `$stat` and hand an unresolved formula to the dice parser. Test on a stateless copy.
+ * Stateless copy of `STAT_MATCHER`: testing the shared global instance would advance its
+ * `lastIndex` and cause the next roll's `matchAll` to silently skip a leading `$stat`.
  */
 const STAT_MATCHER_TEST = new RegExp(REMOVER_PATTERN.STAT_MATCHER.source, "iu");
 
 export function verifyStatMatcherPattern(dice: string, replaceUnknow?: string) {
 	if (STAT_MATCHER_TEST.test(dice)) {
 		if (replaceUnknow)
-			//remove ALL unknow value
+			// Remove all unresolved stat references
 			return replaceUnknown(dice, replaceUnknow);
 
-		//find which one is not replaced
+		// Collect the stat names that weren't resolved, for the error message
 		const matched = dice.matchAll(new RegExp(REMOVER_PATTERN.STAT_MATCHER));
 		const stats = matched
 			? Array.from(matched, (m) => m?.[0])

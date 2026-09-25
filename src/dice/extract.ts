@@ -10,7 +10,7 @@ export function getModifier(dice: string) {
 	const modifier = dice.matchAll(/(\+|-|%|\/|\^|\*|\*{2})(\d+)/gi);
 	let modificator: Modifier | undefined;
 	for (const mod of modifier) {
-		//calculate the modifier if multiple
+		// Combine with the previous modifier if there are several
 		if (modificator) {
 			const sign = modificator.sign;
 			let value = modificator.value;
@@ -62,18 +62,15 @@ export function getRollBounds(
 }
 
 export function setSortOrder(toRoll: string, sort?: SortOrder): string {
-	//First check if the diceToRoll contains already a sort order
 	const sortRegex = /(sa|sd|s)/i;
 	if (sort && !toRoll.match(sortRegex)) {
-		//we should insert the sort order at the end of the dice string and before the possible modifier or comparison
+		// Insert before any trailing modifier/comparison, else append at the end
 		const modifierComparisonRegex = /([+\-*/%^]\d+|([><=!]+\d+f)|([><=]|!=)+\d+)$/;
 		const match = toRoll.match(modifierComparisonRegex);
 		if (match) {
-			//Insert before the modifier or comparison
 			const index = match.index!;
 			toRoll = `${toRoll.slice(0, index)}${sort}${toRoll.slice(index)}`;
 		} else {
-			//Append at the end
 			toRoll += sort;
 		}
 	}
@@ -91,9 +88,7 @@ interface PreparedDice {
 	isSimpleCurly: boolean;
 }
 
-/**
- * Prépare la chaîne de dés pour le traitement
- */
+/** Normalizes a raw dice string and detects its shape (shared, bulk, curly, exploding). */
 export function prepareDice(diceInput: string): PreparedDice {
 	let dice = standardizeDice(replaceFormulaInDice(diceInput))
 		.replace(/^\+/, "")
@@ -124,18 +119,13 @@ export function prepareDice(diceInput: string): PreparedDice {
 		diceDisplay = diceDisplay.slice(1);
 	}
 
-	// Handle simple curly braces like {1d20+5} or {1d20+5>10}
-	// But NOT dice pool notation like {2d6>4} where the comparison is inside the braces WITHOUT modifiers
+	// Simple curly braces (e.g. {1d20+5>10}) get unwrapped; dice pool notation (e.g. {2d6>4},
+	// a comparison with no modifiers) stays wrapped for target-success counting instead.
 	let isSimpleCurly = false;
 	if (!isCurlyBulk && !hasSharedSeparator && dice.match(/^\{.*\}$/)) {
-		// Check if this is a dice pool (comparison inside the braces WITHOUT modifiers)
-		const innerContent = dice.slice(1, -1); // Remove outer braces
+		const innerContent = dice.slice(1, -1);
 		const hasModifiers = innerContent.match(/[+\-*/%^]/);
 		const hasComparison = innerContent.match(/(([><=!]+\d+f)|([><=]|!=)+\d+)/);
-
-		// Only remove braces if it's not a dice pool
-		// Dice pool: has comparison inside, NO modifiers (like {2d6>4})
-		// Simple curly: has modifiers before comparison (like {1d20+5>10}) or just plain dice (like {1d20+5})
 		if (!(hasComparison && !hasModifiers)) {
 			dice = innerContent;
 			isSimpleCurly = true;

@@ -1,18 +1,12 @@
 import { NumberGenerator } from "@dice-roller/rpg-dice-roller";
 import type { Engine } from "random-js";
 
-/**
- * Utility function that allow to get the id of an engine
- * @param engine {unknown} Engine to identify
- * @returns {string} Id of the engine or "unknown"
- * @private
- */
+/** Returns the identifier of a random engine, or "unknown" if unrecognized. */
 export function getEngineId(engine: unknown): string {
-	// Comparaisons directes avec les engines exposés par la lib
 	if (engine === NumberGenerator.engines.nodeCrypto) return "nodeCrypto";
 	if (engine === NumberGenerator.engines.nativeMath) return "nativeMath";
 	if (engine === NumberGenerator.engines.browserCrypto) return "browserCrypto";
-	// Fallback: essayer de lire un nom ou le constructeur
+	// Fallback: read a name or constructor off the object
 	try {
 		// biome-ignore lint/suspicious/noExplicitAny: needed for dynamic access
 		const e = engine as any;
@@ -26,12 +20,7 @@ export function getEngineId(engine: unknown): string {
 	return "unknown";
 }
 
-/**
- * Utility function to get the engine from its name
- * @param engine {"nativeMath" | "browserCrypto" | "nodeCrypto"} The engine name
- * @returns {Engine} The engine
- * @public
- */
+/** Returns the random engine matching the given name. */
 export function getEngine(engine: "nativeMath" | "browserCrypto" | "nodeCrypto"): Engine {
 	switch (engine) {
 		case "nativeMath":

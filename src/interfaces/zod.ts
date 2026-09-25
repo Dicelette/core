@@ -1,6 +1,4 @@
-/**
- * Definition of the Zod schema for template data
- */
+/** Zod schema for template data. */
 import { z } from "zod";
 
 const statisticValueSchema = z

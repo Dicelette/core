@@ -6,9 +6,7 @@ import type { Compare, Resultat } from "../interfaces";
 import { roll } from "../roll";
 import { canComparisonSucceed } from "./compare";
 
-/**
- * Gère le système de pity (relance en cas d'échec)
- */
+/** Handles the pity system: rerolls the dice on failure, up to a max count. */
 export function handlePitySystem(
 	dice: string,
 	compare: Compare,
