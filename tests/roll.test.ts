@@ -115,6 +115,10 @@ describe("Shared results", () => {
 				/※ __foo \(bar\)__ — 2d6: \[.*?] = \d+;◈ __toto__ — \[2d6]\+2: \[\d+]\+2 = \d+/
 			);
 		});
+		it("trims surrounding spaces", () => {
+			const result = core.roll("1d100<=40 [Résistance énergétique ! ];1d100<=80");
+			expect(result?.result).toMatch(/^※ __Résistance énergétique !__ — 1d100:/);
+		});
 	});
 });
 
