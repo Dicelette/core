@@ -269,8 +269,10 @@ function sharedRolls(
 		const comment = formatComment(element);
 		element = element
 			.replaceAll(commentsRegex, "")
+			.trim()
 			.replaceAll(OPTIONAL_COMMENT, "")
 			.trim();
+		if (!element.length) continue;
 		let toRoll = element.replace(SYMBOL_DICE, `${diceResult.total}`);
 		const compareRegex = toRoll.match(SIGN_REGEX_SPACE);
 		if (compareRegex) {
@@ -336,8 +338,8 @@ function sharedRolls(
 					if (!aggregatedCompare && evaluated.compare)
 						aggregatedCompare = evaluated.compare;
 					if (evaluated.compare?.trivial) hasTrivialComparison = true;
-				} else results.push(`◈ ${comment}${diceAll}: ${formule} = ${evaluated}`);
-				total += evaluated?.total ?? 0;
+				} else throw new DiceTypeError(element, "roll", error);
+				total += evaluated.total ?? 0;
 			}
 		}
 	}

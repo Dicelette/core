@@ -146,3 +146,17 @@ describe("Invalid rolls", () => {
 		expect(() => core.roll("coucou d6;&+5")).toThrow();
 	});
 });
+
+describe("Shared rolls with spaces after separator", () => {
+	it("rolls a dice preceded by a space", () => {
+		const result = core.roll("1d100<=70 [Gaz];1d100<=55 [T1]; 2d100kh1 [T2] #Survis");
+		expect(result?.result).toMatch(/◈ __T2 survis__ — 2d100kh1: +\[.*?] = \d+$/);
+		expect(result?.result).not.toContain("undefined");
+	});
+	it("throws on an invalid dice", () => {
+		expect(() => core.roll("1d6; 2d6zz [T2]")).toThrow(core.DiceTypeError);
+	});
+	it("ignores a trailing separator", () => {
+		expect(core.roll("1d6;")?.result).toMatch(/^※ 1d6: \[\d] = \d$/);
+	});
+});
