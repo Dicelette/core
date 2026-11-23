@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.10](https://github.com/Dicelette/core/compare/v1.29.9...v1.29.10) (2026-11-23)
+
+### Bug Fixes
+
+* trim bracket comment surrounding spaces ([#2](https://github.com/Dicelette/core/issues/2)) ([4c172e0](https://github.com/Dicelette/core/commit/4c172e0fd7d92a53a95bf251d26fbaf3dd3ccb4e))
+
 ## [1.29.9](https://github.com/Dicelette/core/compare/v1.29.7...v1.29.9) (2026-09-24)
 
 ### Bug Fixes
