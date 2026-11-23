@@ -5,7 +5,7 @@
 	},
 	"linter": {
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"complexity": {
 				"noExtraBooleanCast": "error",
 				"noAdjacentSpacesInRegex": "error",

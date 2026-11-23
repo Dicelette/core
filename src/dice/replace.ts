@@ -54,7 +54,7 @@ export function replaceText(element: string, total: number, dice: string) {
 export function formatComment(dice: string) {
 	const commentsMatch = BRACKET_COMMENT_REGEX.exec(dice);
 	const comments = commentsMatch?.groups?.comments
-		? `${commentsMatch.groups.comments}`
+		? commentsMatch.groups.comments.trim()
 		: "";
 
 	// Search AFTER removing bracket comments, so parentheses inside them aren't matched
